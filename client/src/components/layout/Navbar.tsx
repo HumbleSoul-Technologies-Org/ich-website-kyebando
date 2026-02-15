@@ -22,6 +22,7 @@ export function Navbar() {
     { href: "/communities", label: "Our Communities" },
     // { href: "/talent", label: "Talent Discovery" },
     { href: "/about", label: "About" },
+    { href: "/admin", label: "Admin", admin: true },
   ];
 
   return (
@@ -32,10 +33,10 @@ export function Navbar() {
         <Link href="/">
           <a className="flex items-center gap-2 group">
             <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-white font-bold text-xl group-hover:scale-105 transition-transform shadow-lg shadow-primary/30">
-              IC
+              ICH
             </div>
             <span className="font-display font-bold text-xl tracking-tight hidden sm:block group-hover:text-primary transition-colors">
-              Innovation<span className="text-primary">Hub</span>
+              Innovation<span className="text-primary"> Community </span>Hub
             </span>
           </a>
         </Link>

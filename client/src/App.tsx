@@ -16,6 +16,17 @@ import GetInvolved from "@/pages/GetInvolved";
 import Login from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
 
+// Admin Pages
+import Admin from "@/pages/admin";
+import AdminAnalytics from "@/pages/admin/analytics";
+import AdminCommunities from "@/pages/admin/communities";
+import AdminVisits from "@/pages/admin/visits";
+import AdminStudents from "@/pages/admin/students";
+import AdminTrainers from "@/pages/admin/trainers";
+import AdminMessages from "@/pages/admin/messages";
+import AdminNotifications from "@/pages/admin/notifications";
+import AdminSettings from "@/pages/admin/settings";
+
 function Router() {
   return (
     <Switch>
@@ -26,6 +37,17 @@ function Router() {
       <Route path="/get-involved" component={GetInvolved} />
       <Route path="/login" component={Login} />
       <Route path="/dashboard" component={Dashboard} />
+      
+      {/* Admin Routes */}
+      <Route path="/admin" component={Admin} />
+      <Route path="/admin/analytics" component={AdminAnalytics} />
+      <Route path="/admin/communities" component={AdminCommunities} />
+      <Route path="/admin/visits" component={AdminVisits} />
+      <Route path="/admin/students" component={AdminStudents} />
+      <Route path="/admin/trainers" component={AdminTrainers} />
+      <Route path="/admin/messages" component={AdminMessages} />
+      <Route path="/admin/notifications" component={AdminNotifications} />
+      <Route path="/admin/settings" component={AdminSettings} />
       
       {/* Placeholder Pages */}
       <Route path="/about" component={About} /> 

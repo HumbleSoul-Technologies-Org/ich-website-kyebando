@@ -5,7 +5,7 @@ import { Users, Building2, BookOpen, TrendingUp } from "lucide-react";
 import { getDashboardStats, getGrowthStats } from "@/lib/adminApi";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from "recharts";
 
-export default function Dashboard() {
+export default function AdminDashboard() {
   const [stats, setStats] = useState<any>(null);
   const [growthData, setGrowthData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -26,8 +26,8 @@ export default function Dashboard() {
 
   if (isLoading) {
     return (
-      <AdminLayout showNavbar={false}>
-        <div className="p-6 sm:p-8 flex items-center justify-center min-h-screen">
+      <AdminLayout>
+        <div className="p-4 sm:p-6 flex items-center justify-center min-h-screen">
           <p className="text-muted-foreground">Loading dashboard...</p>
         </div>
       </AdminLayout>
@@ -54,8 +54,8 @@ export default function Dashboard() {
   );
 
   return (
-    <AdminLayout showNavbar={false}>
-      <div className="p-6 sm:p-8 space-y-5 max-w-7xl mx-auto w-full">
+    <AdminLayout>
+      <div className="p-4 sm:p-6 space-y-6">
         {/* Welcome Section */}
         <div>
           <h1 className="text-3xl font-bold">Dashboard</h1>
@@ -93,7 +93,7 @@ export default function Dashboard() {
         </div>
 
         {/* Charts Row */}
-        <div className="grid gap-5 lg:grid-cols-2">
+        <div className="grid gap-6 lg:grid-cols-2">
           {/* Growth Chart */}
           <Card>
             <CardHeader>
@@ -140,7 +140,7 @@ export default function Dashboard() {
         </div>
 
         {/* Quick Stats */}
-        <div className="grid gap-5 md:grid-cols-2">
+        <div className="grid gap-6 md:grid-cols-2">
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Total Enrollments</CardTitle>
