@@ -1,0 +1,129 @@
+Got you, Josh 😎
+You want a killer AI-agent prompt that will generate a client-only (frontend) UI for the Innovation Community Hub website with an embedded admin dashboard, using React + Tailwind CSS.
+Here is a professional, production-grade prompt you can paste directly into an AI agent (like v0, Cursor, or similar):
+________________________________________
+✅ AI AGENT PROMPT
+You are a senior UI/UX designer and senior frontend engineer.
+Build a fully responsive, modern client-side only web application UI for a project called “Innovation Community Hub” by Faithlife Ministries.
+The system must be built using:
+•	React JS (functional components)
+•	Tailwind CSS
+•	Client-only logic (no backend, mock data only)
+•	Clean component structure
+•	Reusable UI components
+________________________________________
+🎯 PURPOSE OF THE WEBSITE
+The platform represents a community outreach project that visits different communities across Uganda to:
+•	Teach new skills
+•	Discover talents
+•	Support innovation
+•	Empower youth and families
+________________________________________
+🌐 PUBLIC WEBSITE UI (CLIENT SIDE)
+Create the following pages:
+1. Home Page
+•	Hero section with project tagline
+•	About preview
+•	Programs preview
+•	Impact statistics
+•	Call-to-action buttons (Join, Volunteer, Donate)
+2. About Page
+•	Mission, vision, values
+•	Faithlife Ministries background
+•	Leadership section
+3. Programs Page
+•	Cards for each program:
+o	Digital Skills
+o	Entrepreneurship
+o	Vocational Skills
+o	Talent Discovery
+•	Each card opens a modal with details
+4. Communities Page
+•	List of visited districts
+•	Upcoming visits
+•	Community stories
+5. Talent Discovery Page
+•	Talent categories
+•	“Submit Your Talent” form (mock)
+6. Get Involved Page
+•	Volunteer form
+•	Partner form
+•	Sponsor section
+7. Media Page
+•	Image gallery
+•	Video section
+8. Blog Page
+•	Blog cards
+•	Blog detail view
+9. Donate Page
+•	Donation UI (mock payment UI)
+10. Contact Page
+•	Contact form
+•	Map placeholder
+________________________________________
+🧩 DASHBOARD (EMBEDDED IN SAME APP)
+Build a protected Admin Dashboard UI inside the same React app:
+•	Sidebar navigation
+•	Top navbar
+•	Pages:
+o	Dashboard overview (stats cards)
+o	Programs manager
+o	Community visits manager
+o	Events manager
+o	Talent submissions
+o	Volunteers
+o	Blog manager
+o	Gallery manager
+o	Donations (mock data)
+Use:
+•	Mock authentication (simple state-based login)
+•	Mock data stored in arrays or localStorage
+•	CRUD UI (Add/Edit/Delete visually)
+________________________________________
+🧠 UX & DESIGN RULES
+•	Mobile-first design
+•	Church + innovation branding
+•	Warm, professional color palette
+•	Clear typography
+•	Smooth transitions
+•	Accessible buttons
+•	Clean spacing
+________________________________________
+⚙️ TECHNICAL REQUIREMENTS
+•	React Router for routing
+•	Tailwind for styling
+•	Component folders:
+o	pages/
+o	components/
+o	layouts/
+o	dashboard/
+o	data/
+•	Use reusable UI components
+•	No backend
+•	No payment integration
+•	Use placeholder images
+________________________________________
+📦 OUTPUT REQUIREMENTS
+•	Provide complete React project code
+•	Include:
+o	App.jsx
+o	main.jsx
+o	Router setup
+o	Dashboard layout
+o	Public layout
+o	Tailwind config
+•	Code must run with:
+npm install
+npm run dev
+________________________________________
+⚠️ IMPORTANT
+•	Focus on UI/UX and frontend logic only
+•	Do NOT implement backend
+•	Use mock data
+•	Ensure clean UI
+•	Ensure professional structure
+•	Make dashboard visually distinct
+Build the full UI now.
+________________________________________
+
+

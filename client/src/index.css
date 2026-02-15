@@ -1,0 +1,102 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Warm, professional community theme */
+  /* Primary: Vibrant Orange-Red (Energy, Innovation) */
+  --primary: 15 90% 55%;
+  --primary-foreground: 0 0% 100%;
+  
+  /* Secondary: Deep Teal (Trust, Stability) */
+  --secondary: 185 60% 25%;
+  --secondary-foreground: 0 0% 100%;
+
+  /* Accent: Golden Yellow (Opportunity, Growth) */
+  --accent: 45 90% 60%;
+  --accent-foreground: 185 60% 15%;
+
+  /* Backgrounds */
+  --background: 30 20% 98%;
+  --foreground: 220 20% 15%;
+  
+  /* UI Elements */
+  --card: 0 0% 100%;
+  --card-foreground: 220 20% 15%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 220 20% 15%;
+  
+  --muted: 210 20% 96%;
+  --muted-foreground: 220 10% 45%;
+  
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 98%;
+
+  --border: 220 15% 90%;
+  --input: 220 15% 90%;
+  --ring: 15 90% 55%;
+
+  --radius: 0.75rem;
+
+  /* Font variables */
+  --font-sans: 'Inter', sans-serif;
+  --font-display: 'Outfit', sans-serif;
+}
+
+.dark {
+  --background: 220 30% 10%;
+  --foreground: 210 20% 98%;
+  
+  --card: 220 25% 12%;
+  --card-foreground: 210 20% 98%;
+  
+  --popover: 220 25% 12%;
+  --popover-foreground: 210 20% 98%;
+  
+  --primary: 15 90% 60%;
+  --primary-foreground: 0 0% 100%;
+  
+  --secondary: 185 40% 40%;
+  --secondary-foreground: 0 0% 100%;
+  
+  --muted: 220 20% 16%;
+  --muted-foreground: 215 20% 65%;
+  
+  --accent: 45 80% 55%;
+  --accent-foreground: 220 30% 10%;
+  
+  --destructive: 0 62% 30%;
+  --destructive-foreground: 0 85% 97%;
+  
+  --border: 215 20% 20%;
+  --input: 215 20% 20%;
+  --ring: 15 90% 60%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    @apply font-bold tracking-tight text-foreground;
+  }
+}
+
+.text-gradient {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-orange-400;
+}
+
+.card-hover {
+  @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/5;
+}
+
+.glass-nav {
+  @apply bg-background/80 backdrop-blur-md border-b border-border/50 sticky top-0 z-50;
+}
