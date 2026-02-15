@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Link } from "wouter";
 import { ArrowRight, Users, Lightbulb, TrendingUp, HandHeart } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
@@ -104,7 +105,9 @@ export default function Home() {
                 transition={{ delay: i * 0.1 }}
                 className="text-center"
               >
-                <div className="text-4xl md:text-5xl font-display font-bold text-primary mb-2">{stat.number}</div>
+                <div className="text-4xl md:text-5xl font-display font-bold text-primary mb-2">
+                  <CountUp value={stat.number} />
+                </div>
                 <div className="text-muted-foreground font-medium">{stat.label}</div>
               </motion.div>
             ))}
@@ -207,4 +210,56 @@ function MapPin({ className }: { className?: string }) {
       <circle cx="12" cy="10" r="3" />
     </svg>
   );
+}
+
+// CountUp: simple number animator that supports comma formatting and suffixes like '+'
+function CountUp({ value, duration = 1500 }: { value: string; duration?: number }) {
+  const [display, setDisplay] = useState<string>(value);
+  const ref = useRef<HTMLDivElement | null>(null);
+  const started = useRef(false);
+
+  useEffect(() => {
+    // parse value string like "2,000+" or "50+"
+    const match = /([\d,]+)\s*(\+)?/.exec(value.trim());
+    if (!match) return setDisplay(value);
+
+    const raw = match[1].replace(/,/g, "");
+    const end = parseInt(raw, 10);
+    const suffix = match[2] ? "+" : "";
+    if (isNaN(end)) return setDisplay(value);
+
+    const node = ref.current;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !started.current) {
+            started.current = true;
+            const start = performance.now();
+            const step = (now: number) => {
+              const elapsed = now - start;
+              const t = Math.min(1, elapsed / duration);
+              // easeOutCubic
+              const eased = 1 - Math.pow(1 - t, 3);
+              const current = Math.round(eased * end);
+              setDisplay(numberWithCommas(current) + suffix);
+              if (t < 1) requestAnimationFrame(step);
+            };
+            requestAnimationFrame(step);
+            observer.disconnect();
+          }
+        });
+      },
+      { threshold: 0.2 }
+    );
+
+    if (node) observer.observe(node);
+
+    return () => observer.disconnect();
+  }, [value, duration]);
+
+  return <div ref={ref}>{display}</div>;
+}
+
+function numberWithCommas(x: number) {
+  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
