@@ -27,7 +27,7 @@ export default function Home() {
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-gradient-to-br from-background via-background/95 to-background/50 z-10" />
+          <div className="absolute inset-0 bg-gradient-to-br from-background via-background/10 to-background/20 z-10" />
           <video 
             autoPlay 
             loop 

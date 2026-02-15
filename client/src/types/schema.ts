@@ -30,6 +30,12 @@ export const insertCommunitySchema = z.object({
   visitDate: z.date().optional(),
   status: z.string().default("upcoming"),
   imageUrl: z.string().optional(),
+  community: z.string().optional(),
+  country: z.string().optional(),
+  location: z.object({
+    lat: z.number(),
+    long: z.number(),
+  }).optional(),
 });
 
 export type Community = z.infer<typeof insertCommunitySchema> & { id: number };

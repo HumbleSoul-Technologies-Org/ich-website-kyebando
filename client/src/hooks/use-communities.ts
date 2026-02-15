@@ -1,26 +1,21 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { type InsertCommunity, type Community } from "@/types/schema";
 import { useToast } from "@/hooks/use-toast";
+import { mockCommunities } from "@/lib/mockData";
 
-// Mock data
-const MOCK_COMMUNITIES: Community[] = [
-  {
-    id: 1,
-    name: "Nairobi Tech Hub",
-    district: "Westlands",
-    description: "A community focused on technology innovation",
-    status: "visited",
-    imageUrl: undefined,
-  },
-  {
-    id: 2,
-    name: "Kisumu Creative Space",
-    district: "Kisumu",
-    description: "Supporting creative and digital professionals",
-    status: "upcoming",
-    imageUrl: undefined,
-  },
-];
+// Transform mockCommunities data to Community type
+const MOCK_COMMUNITIES: Community[] = mockCommunities.map((community: any) => ({
+  id: community.id,
+  name: community.community,
+  district: community.location?.lat ? `${community.community}, ${community.country}` : community.community,
+  description: community.excerpt,
+  visitDate: community.date ? new Date(community.date) : undefined,
+  status: community.status,
+  imageUrl: community.thumbnail,
+  community: community.community,
+  country: community.country,
+  location: community.location,
+}));
 
 export function useCommunities() {
   return useQuery<Community[]>({
