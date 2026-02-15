@@ -77,25 +77,58 @@ export default function Communities() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Map */}
+            <span>
+                <h4 className="mb-5 text-center">Places we've visited and impacted communities</h4>
+
             <div className="bg-muted rounded-3xl min-h-[400px] w-full relative overflow-hidden shadow-inner">
-              <MapContainer
-                center={[51.505, -0.09]}
-                zoom={13}
-                scrollWheelZoom={false}
-                style={{ height: "400px", width: "100%" }}
-                className="rounded-3xl"
-              >
-                <TileLayer
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
-                <Marker position={[51.505, -0.09]}>
-                  <Popup>
-                    A pretty CSS3 popup. <br /> Easily customizable.
-                  </Popup>
-                </Marker>
-              </MapContainer>
+              {/* Show all visited communities as markers */}
+              {(() => {
+                const visitedWithLocation =
+                  communities?.filter(
+                    (c) =>
+                      c.status === "visited" &&
+                      c.location &&
+                      typeof c.location.lat === "number" &&
+                      typeof c.location.long === "number"
+                  ) || [];
+                return (
+                  <div>
+                    
+                     <MapContainer
+                    bounds={
+                      visitedWithLocation.length > 0
+                        ? visitedWithLocation.map((c:any) => [c.location.lat, c.location.long] as [number, number])
+                        : undefined
+                    }
+                    center={[0.3476, 32.5825]} // Central Uganda (Kampala)
+                    zoom={6}
+                    scrollWheelZoom={false}
+                    style={{ height: "400px", width: "100%" }}
+                    className="rounded-3xl"
+                  >
+                    <TileLayer
+                      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    />
+                    {visitedWithLocation.length > 0 ? (
+                      visitedWithLocation.map((c:any) => (
+                        <Marker key={c.id} position={[c.location.lat, c.location.long]}>
+                          <Popup>
+                            <strong>{c.name || c.community}</strong>
+                            <br />
+                            {c.district || c.country}
+                          </Popup>
+                        </Marker>
+                      ))
+                    ) : (
+                      <></>
+                    )}
+                  </MapContainer>
+                 </div>
+                );
+              })()}
             </div>
+            </span>
 
             {/* Upcoming Visits */}
             <div className="space-y-6 max-h-[400px] overflow-y-auto">

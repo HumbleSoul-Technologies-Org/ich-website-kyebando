@@ -8,6 +8,7 @@ import NotFound from "@/pages/not-found";
 
 // Pages
 import Home from "@/pages/Home";
+import About from "@/pages/About";
 import Programs from "@/pages/Programs";
 import Communities from "@/pages/Communities";
 import TalentDiscovery from "@/pages/TalentDiscovery";
@@ -27,7 +28,7 @@ function Router() {
       <Route path="/dashboard" component={Dashboard} />
       
       {/* Placeholder Pages */}
-      <Route path="/about" component={Home} /> 
+      <Route path="/about" component={About} /> 
       <Route path="/blog" component={Home} />
       <Route path="/contact" component={GetInvolved} />
 
