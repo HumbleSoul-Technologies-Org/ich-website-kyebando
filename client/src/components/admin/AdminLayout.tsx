@@ -14,8 +14,8 @@ export function AdminLayout({ children, showNavbar = true }: AdminLayoutProps) {
 
   return (
     <div className="min-h-screen flex flex-col">
-      {showNavbar && <Navbar />}
-      <div className={`flex flex-1 ${showNavbar ? "pt-16" : ""}`}>
+      {/* {showNavbar && <Navbar />} */}
+      <div className={`flex flex-1 ]transition-all duration-300 ${sidebarOpen ? "blur-sm" : ""}`}>
         {/* Mobile menu button */}
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
