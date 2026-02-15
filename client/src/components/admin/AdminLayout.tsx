@@ -32,13 +32,12 @@ export function AdminLayout({ children, showNavbar = true }: AdminLayoutProps) {
         <AdminSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
         {/* Main content */}
-        <main className="flex-1 lg:ml-64 overflow-auto">
+        <main className="flex-1 max-h-screen overflow-auto">
           <div className="h-full flex flex-col">
             {children}
           </div>
         </main>
       </div>
-      <Footer />
     </div>
   );
 }

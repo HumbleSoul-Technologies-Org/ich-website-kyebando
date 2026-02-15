@@ -26,7 +26,7 @@ export default function AdminDashboard() {
 
   if (isLoading) {
     return (
-      <AdminLayout>
+      <AdminLayout showNavbar={false}>
         <div className="p-4 sm:p-6 flex items-center justify-center min-h-screen">
           <p className="text-muted-foreground">Loading dashboard...</p>
         </div>
@@ -54,7 +54,7 @@ export default function AdminDashboard() {
   );
 
   return (
-    <AdminLayout>
+    <AdminLayout showNavbar={false}>
       <div className="p-4 sm:p-6 space-y-6">
         {/* Welcome Section */}
         <div>

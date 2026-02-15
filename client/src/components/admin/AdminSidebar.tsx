@@ -130,7 +130,7 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
 
       {/* Sidebar */}
       <aside
-        className={`fixed left-0 top-16 w-64 h-screen bg-card border-r border-border transition-transform duration-300 z-40 lg:relative lg:top-0 lg:translate-x-0 ${
+        className={`fixed left-0 top-16 w-96 h-screen bg-card border-r border-border transition-transform duration-300 z-40 lg:relative lg:top-0 lg:translate-x-0 ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -163,7 +163,7 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
                       className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                         isActive(item.href)
                           ? "bg-primary text-white"
-                          : "text-muted-foreground hover:bg-secondary"
+                          : "text-muted-foreground hover:bg-muted-foreground/10"
                       }`}
                     >
                       {item.icon}
@@ -187,7 +187,7 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
                       className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                         isActive(item.href)
                           ? "bg-primary text-white"
-                          : "text-muted-foreground hover:bg-secondary"
+                          : "text-muted-foreground hover:bg-muted-foreground/10"
                       }`}
                     >
                       {item.icon}
