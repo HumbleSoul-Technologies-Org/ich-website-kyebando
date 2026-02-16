@@ -5,6 +5,9 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
+import { mockCommunities,testimonials,patners } from "@/lib/mockData";
+import { Splide, SplideSlide } from "@splidejs/react-splide";
+import "@splidejs/react-splide/css";
 
 export default function Home() {
   const fadeIn = {
@@ -162,12 +165,152 @@ export default function Home() {
                   <div className="bg-primary/20 backdrop-blur-md p-3 rounded-xl w-fit mb-4">
                     {feature.icon}
                   </div>
-                  <h3 className="font-display text-2xl font-bold mb-2">{feature.title}</h3>
+                  <h3 className="font-display text-2xl text-primary font-bold mb-2">{feature.title}</h3>
                   <p className="text-white/80">{feature.description}</p>
                 </div>
               </motion.div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Upcoming Visits Section */}
+      <section className="py-24 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="text-center max-w-2xl mx-auto mb-16">
+            <h2 className="font-display text-3xl md:text-4xl font-bold mb-4">Upcoming Visits</h2>
+            <p className="text-muted-foreground text-lg">Join us as we bring opportunities to communities near you.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {mockCommunities
+              .filter(community => community.status === "upcoming")
+              .slice(0, 4)
+              .map((visit, i) => (
+              <motion.div 
+                key={visit.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="group relative rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-500 h-80"
+              >
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent z-10" />
+                <img 
+                  src={visit.thumbnail} 
+                  alt={visit.title} 
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                />
+                <div className="absolute bottom-0 left-0 right-0 p-6 z-20 text-white">
+                  <h3 className="font-display text-xl font-bold text-white mb-1">{visit.community}</h3>
+                  <p className="text-sm text-white/80 mb-3">{visit.country}</p>
+                  <p className="text-sm font-semibold text-primary mb-4">
+                    {new Date(visit.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                  </p>
+                  <p className="text-xs text-white/80 line-clamp-2 mb-4">{visit.excerpt}</p>
+                  <Button variant="outline" size="sm" className="w-full rounded-lg text-xs">
+                    Learn More
+                  </Button>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="py-24 bg-white/50">
+        <div className="container mx-auto px-4">
+          <div className="text-center max-w-2xl mx-auto mb-16">
+            <h2 className="font-display text-3xl md:text-4xl font-bold mb-4">Stories from Our Community</h2>
+            <p className="text-muted-foreground text-lg">Hear how our programs have transformed lives and created opportunities.</p>
+          </div>
+
+          <Splide 
+            options={{ 
+              type: 'carousel',
+              perPage: 3,
+              perMove: 1,
+              gap: '2rem',
+              pagination: true,
+              arrows: true,
+              breakpoints: {
+                640: { perPage: 1 },
+                1024: { perPage: 2 }
+              },
+              
+            }}
+            className="splide-container"
+          >
+            {testimonials.map((testimonial, i) => (
+              <SplideSlide key={i}>
+                <div className="bg-white rounded-2xl p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-border/50">
+                  <div className="flex items-center gap-4 mb-6">
+                    <img 
+                      src={testimonial.image} 
+                      alt={testimonial.name}
+                      className="w-14 h-14 rounded-full object-cover"
+                    />
+                    <div>
+                      <h3 className="font-display text-lg font-bold text-foreground">{testimonial.name}</h3>
+                      <p className="text-sm text-muted-foreground">{testimonial.role}</p>
+                    </div>
+                  </div>
+                  
+                  <p className="text-foreground/90 leading-relaxed mb-4 italic">"{testimonial.testimonial}"</p>
+                  
+                  <div className="pt-4 border-t border-border/30">
+                    <p className="text-xs font-semibold text-primary uppercase">Community</p>
+                    <p className="text-sm text-muted-foreground mt-1">{testimonial.community}</p>
+                  </div>
+                </div>
+              </SplideSlide>
+            ))}
+          </Splide>
+        </div>
+      </section>
+
+      {/* Partners Section */}
+      <section className="py-24 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center max-w-2xl mx-auto mb-16">
+            <h2 className="font-display text-3xl md:text-4xl font-bold mb-4">Our Partners</h2>
+            <p className="text-muted-foreground text-lg">We're proud to collaborate with leading organizations and brands committed to community empowerment.</p>
+          </div>
+
+          <Splide 
+            options={{ 
+              type: 'carousel',
+              perPage: 3,
+              perMove: 1,
+              gap: '2rem',
+              pagination: false,
+              arrows: true,
+              autoScroll: {
+                pauseOnHover: true,
+                pauseOnFocus: true,
+                rewind: false,
+                speed: 1,
+              },
+              breakpoints: {
+                640: { perPage: 2 },
+                1024: { perPage: 3 }
+              }
+            }}
+            className="splide-container"
+          >
+            {patners.map((partner, i) => (
+              <SplideSlide key={i}>
+                <div className="flex items-center justify-center h-32 bg-white/50 rounded-2xl border border-border/50 hover:border-primary/30 transition-all duration-300 p-6">
+                  <img 
+                    src={partner.logo} 
+                    alt={partner.name}
+                    className="max-w-full max-h-full object-contain filter hover:drop-shadow-lg transition-all duration-300"
+                  />
+                </div>
+              </SplideSlide>
+            ))}
+          </Splide>
         </div>
       </section>
 

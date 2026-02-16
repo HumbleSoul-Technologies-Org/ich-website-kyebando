@@ -25,7 +25,7 @@ export const mockCommunities = [
     "likes": 124,
     "views": 1023,
     "location": { "long": 32.2986, "lat": 2.7724 },
-    "status": "visited"
+    "status": "upcoming"
   },
   {
     "id": 2,
@@ -51,7 +51,7 @@ export const mockCommunities = [
     "likes": 89,
     "views": 745,
     "location": { "long": 34.175, "lat": 1.0821 },
-    "status": "visited"
+    "status": "upcoming"
   },
   {
     "id": 3,
@@ -177,3 +177,55 @@ export const mockCommunities = [
     "status": "upcoming"
   }
 ]
+
+export const testimonials = [
+              {
+                name: "Priya Sharma",
+                role: "Student, New Delhi",
+                image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop",
+                testimonial: "The digital literacy program opened doors I never knew existed. I now have the skills to pursue a tech career and inspire my younger siblings.",
+                community: "South Delhi Community Hub"
+              },
+              {
+                name: "Rajesh Kumar",
+                role: "Entrepreneur, Bangalore",
+                image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop",
+                testimonial: "Thanks to the mentorship and business training, I launched my startup successfully. The support system they built was invaluable.",
+                community: "Whitefield Business Network"
+              },
+              {
+                name: "Amrita Patel",
+                role: "Community Leader, Mumbai",
+                image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop",
+                testimonial: "Watching our youth discover their potential and gain real skills has been remarkable. This organization truly cares about sustainable growth.",
+                community: "Western Suburbs Initiative"
+              },
+              {
+                name: "Dev Singh",
+                role: "Tech Trainer, Hyderabad",
+                image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop",
+                testimonial: "As a trainer partner, I've seen firsthand the impact of quality education. The programs are well-structured and truly life-changing.",
+                community: "HITEC City Partnership"
+              },
+              {
+                name: "Sneha Gupta",
+                role: "Program Graduate, Pune",
+                image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop",
+                testimonial: "From uncertainty about my future to landing my dream job - this journey was made possible by the talent discovery program.",
+                community: "Hadapsar Youth Hub"
+              },
+              {
+                name: "Vikram Reddy",
+                role: "Community Volunteer, Chennai",
+                image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&h=400&fit=crop",
+                testimonial: "Being part of this movement and seeing the real change in our community has been the most fulfilling experience of my life.",
+                community: "OMR Community Center"
+              }
+]
+            
+export const patners = [
+              { name: "BTM", logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQH7Xb_BNApPiBvR_GfckVuRLf-xl0qUF8l3w&s" },
+              { name: "SIAS", logo: "https://siasintl.com/wp-content/uploads/2023/12/siasintl-logo-t.png" },
+              { name: "faithlife ministries", logo: "https://res.cloudinary.com/ghost150/image/upload/v1761738140/FAITHLIFE_LOGO_z9xkpt.png" },
+               
+            ]

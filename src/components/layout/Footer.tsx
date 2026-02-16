@@ -9,10 +9,10 @@ export function Footer() {
           <div>
             <div className="flex items-center gap-2 mb-6">
               <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold text-lg">
-                IC
+                ICH
               </div>
               <span className="font-display font-bold text-xl tracking-tight">
-                Innovation<span className="text-primary">Hub</span>
+                Innovation<span className="text-primary"> Community </span> Hub
               </span>
             </div>
             <p className="text-secondary-foreground/80 leading-relaxed mb-6">
