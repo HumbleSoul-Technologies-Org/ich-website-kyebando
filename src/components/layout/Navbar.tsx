@@ -35,7 +35,7 @@ export function Navbar() {
             <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-white font-bold text-xl group-hover:scale-105 transition-transform shadow-lg shadow-primary/30">
               ICH
             </div>
-            <span className="font-display font-bold text-xl tracking-tight hidden sm:block group-hover:text-primary transition-colors">
+            <span className="font-display font-bold text-sm tracking-tight sm:text-xl group-hover:text-primary transition-colors">
               Innovation<span className="text-primary"> Community </span>Hub
             </span>
           </a>

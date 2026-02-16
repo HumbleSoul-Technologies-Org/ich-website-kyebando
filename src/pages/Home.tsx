@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "wouter";
-import { ArrowRight, Users, Lightbulb, TrendingUp, HandHeart } from "lucide-react";
+import { ArrowRight, Users, Lightbulb, TrendingUp, HandHeart, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/layout/Navbar";
@@ -8,6 +8,12 @@ import { Footer } from "@/components/layout/Footer";
 import { mockCommunities,testimonials,patners } from "@/lib/mockData";
 import { Splide, SplideSlide } from "@splidejs/react-splide";
 import "@splidejs/react-splide/css";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export default function Home() {
   const fadeIn = {
@@ -22,6 +28,29 @@ export default function Home() {
         staggerChildren: 0.1
       }
     }
+  };
+
+  // Gallery pagination state
+  const [galleryPage, setGalleryPage] = useState(0);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const imagesPerPage = 6;
+
+  // Extract all gallery images from communities
+  const allGalleryImages = mockCommunities.flatMap((community) => 
+    (community.gallery || []).map((img) => ({ img, community: community.title }))
+  );
+
+  const totalPages = Math.ceil(allGalleryImages.length / imagesPerPage);
+  const startIdx = galleryPage * imagesPerPage;
+  const paginatedImages = allGalleryImages.slice(startIdx, startIdx + imagesPerPage);
+
+  const handleNextPage = () => {
+    if (galleryPage < totalPages - 1) setGalleryPage(galleryPage + 1);
+  };
+
+  const handlePrevPage = () => {
+    if (galleryPage > 0) setGalleryPage(galleryPage - 1);
   };
 
   return (
@@ -187,36 +216,191 @@ export default function Home() {
               .filter(community => community.status === "upcoming")
               .slice(0, 4)
               .map((visit, i) => (
-              <motion.div 
-                key={visit.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="group relative rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-500 h-80"
-              >
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent z-10" />
-                <img 
-                  src={visit.thumbnail} 
-                  alt={visit.title} 
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                />
-                <div className="absolute bottom-0 left-0 right-0 p-6 z-20 text-white">
-                  <h3 className="font-display text-xl font-bold text-white mb-1">{visit.community}</h3>
-                  <p className="text-sm text-white/80 mb-3">{visit.country}</p>
-                  <p className="text-sm font-semibold text-primary mb-4">
-                    {new Date(visit.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                  </p>
-                  <p className="text-xs text-white/80 line-clamp-2 mb-4">{visit.excerpt}</p>
-                  <Button variant="outline" size="sm" className="w-full rounded-lg text-xs">
-                    Learn More
-                  </Button>
-                </div>
-              </motion.div>
+              <Link key={visit.id} href={`/visits/${visit.id}`}>
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1 }}
+                  className="group relative rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-500 h-80 cursor-pointer"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent z-10" />
+                  <img 
+                    src={visit.thumbnail} 
+                    alt={visit.title} 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                  />
+                  <div className="absolute bottom-0 left-0 right-0 p-6 z-20 text-white">
+                    <h3 className="font-display text-xl font-bold text-white mb-1">{visit.community}</h3>
+                    <p className="text-sm text-white/80 mb-3">{visit.country}</p>
+                    <p className="text-sm font-semibold text-primary mb-4">
+                      {new Date(visit.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </p>
+                    <p className="text-xs text-white/80 line-clamp-2 mb-4">{visit.excerpt}</p>
+                    <Button variant="outline" size="sm" className="w-full rounded-lg text-xs">
+                      Learn More
+                    </Button>
+                  </div>
+                </motion.div>
+              </Link>
             ))}
           </div>
         </div>
       </section>
+
+      {/* Gallery Section */}
+      <section className="py-24 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center max-w-2xl mx-auto mb-16">
+            <h2 className="font-display text-3xl md:text-4xl font-bold mb-4">Gallery Showcase</h2>
+            <p className="text-muted-foreground text-lg">Explore moments from our visits and community engagement activities.</p>
+          </div>
+
+          {allGalleryImages.length > 0 ? (
+            <>
+              {/* Mobile/Tablet Carousel View */}
+              <div className="lg:hidden mb-8">
+                <Splide
+                  options={{
+                    type: 'carousel',
+                    perPage: 4,
+                    perMove: 1,
+                    gap: '1rem',
+                    pagination: true,
+                    arrows: true,
+                    breakpoints: {
+                      640: { perPage: 1 },
+                      1024: { perPage: 2 }
+                    }
+                  }}
+                  className="splide-container"
+                >
+                  {allGalleryImages.map((item, i) => (
+                    <SplideSlide key={i}>
+                      <button
+                        onClick={() => {
+                          setSelectedImage(item.img);
+                          setIsImageModalOpen(true);
+                        }}
+                        className="group relative rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-500 w-full text-left"
+                      >
+                        <div className="relative h-64 bg-muted">
+                          <img
+                            src={item.img}
+                            alt="Gallery"
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 cursor-pointer"
+                          />
+                        </div>
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300 flex items-end p-4">
+                          <p className="text-white text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            {item.community}
+                          </p>
+                        </div>
+                      </button>
+                    </SplideSlide>
+                  ))}
+                </Splide>
+              </div>
+
+              {/* Desktop Grid View */}
+              <div className="hidden lg:block">
+                <div className="grid grid-cols-3 gap-6 mb-8">
+                  {paginatedImages.map((item, i) => (
+                    <motion.div
+                      key={`${galleryPage}-${i}`}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: i * 0.1 }}
+                    >
+                      <button
+                        onClick={() => {
+                          setSelectedImage(item.img);
+                          setIsImageModalOpen(true);
+                        }}
+                        className="group relative rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-500 w-full text-left"
+                      >
+                        <div className="relative h-64 bg-muted">
+                          <img
+                            src={item.img}
+                            alt="Gallery"
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 cursor-pointer"
+                          />
+                        </div>
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300 flex items-end p-4">
+                          <p className="text-white text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            {item.community}
+                          </p>
+                        </div>
+                      </button>
+                    </motion.div>
+                  ))}
+                </div>
+
+                {/* Pagination */}
+                <div className="flex items-center justify-center gap-4">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={handlePrevPage}
+                    disabled={galleryPage === 0}
+                    className="rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                  </Button>
+
+                  <div className="flex items-center gap-2">
+                    {Array.from({ length: totalPages }).map((_, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setGalleryPage(idx)}
+                        className={`px-3 py-1 rounded-lg text-sm font-medium transition-all ${
+                          galleryPage === idx
+                            ? "bg-primary text-white"
+                            : "bg-muted text-foreground hover:bg-muted/80"
+                        }`}
+                      >
+                        {idx + 1}
+                      </button>
+                    ))}
+                  </div>
+
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={handleNextPage}
+                    disabled={galleryPage === totalPages - 1}
+                    className="rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </Button>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No images available yet.</p>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Image Modal */}
+      <Dialog open={isImageModalOpen} onOpenChange={setIsImageModalOpen}>
+        <DialogContent className="w-full max-w-2xl sm:max-w-4xl p-0 border-0 rounded-lg overflow-hidden">
+          <DialogHeader className="sr-only">
+            <DialogTitle>Image Preview</DialogTitle>
+          </DialogHeader>
+          <div className="relative w-full bg-black">
+            {selectedImage && (
+              <img
+                src={selectedImage}
+                alt="Gallery Preview"
+                className="w-full h-auto max-h-[80vh] object-contain"
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Testimonials Section */}
       <section className="py-24 bg-white/50">
@@ -362,6 +546,8 @@ function CountUp({ value, duration = 1500 }: { value: string; duration?: number 
   const started = useRef(false);
 
   useEffect(() => {
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
     // parse value string like "2,000+" or "50+"
     const match = /([\d,]+)\s*(\+)?/.exec(value.trim());
     if (!match) return setDisplay(value);

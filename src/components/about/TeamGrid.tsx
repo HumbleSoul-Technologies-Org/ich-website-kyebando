@@ -1,13 +1,13 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { teamMembers } from "@/lib/aboutData";
+import { staff } from "@/lib/mockData";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronDown } from "lucide-react";
 
 export function TeamGrid() {
   const [showAll, setShowAll] = useState(false);
-  const displayedMembers = showAll ? teamMembers : teamMembers.slice(0, 6);
+  const displayedMembers = showAll ? staff : staff.slice(0, 6);
 
   return (
     <section className="py-20 px-4">
@@ -45,11 +45,11 @@ export function TeamGrid() {
                   <p className="text-primary font-semibold text-sm mb-3">
                     {member.role}
                   </p>
-                  <p className="text-muted-foreground text-sm italic mb-4">
-                    "{member.quote}"
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {member.email}
                   </p>
-                  <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">
-                    {member.bio}
+                  <p className="text-sm text-muted-foreground">
+                    {member.phone}
                   </p>
                 </CardContent>
               </Card>
@@ -69,7 +69,7 @@ export function TeamGrid() {
               size="lg"
               className="gap-2"
             >
-              View Full Team ({teamMembers.length})
+              View Full Team ({staff.length})
               <ChevronDown className="w-4 h-4" />
             </Button>
           </motion.div>

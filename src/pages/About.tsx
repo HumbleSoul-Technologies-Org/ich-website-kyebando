@@ -44,7 +44,7 @@ export default function About() {
         <ImpactStats />
         <Timeline />
         <TeamGrid />
-        <PartnersGrid />
+        {/* <PartnersGrid /> */}
         <FAQAccordion />
         <ContactInfo />
         <NewsletterSignup />
