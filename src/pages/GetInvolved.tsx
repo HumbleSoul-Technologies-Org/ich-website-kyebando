@@ -44,7 +44,7 @@ export default function GetInvolved() {
         <div className="bg-secondary text-secondary-foreground pt-32 pb-20 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
           <div className="container mx-auto px-4 relative z-10 text-center">
-            <h1 className="font-display text-5xl md:text-6xl font-bold mb-6">Join the Mission</h1>
+            <h1 className="font-display text-5xl text-primary md:text-6xl font-bold mb-6">Join the Mission</h1>
             <p className="text-xl text-white/80 max-w-2xl mx-auto">
               Your time, skills, and support can change the trajectory of an entire community.
             </p>

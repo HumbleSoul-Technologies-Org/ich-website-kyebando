@@ -228,4 +228,352 @@ export const patners = [
               { name: "SIAS", logo: "https://siasintl.com/wp-content/uploads/2023/12/siasintl-logo-t.png" },
               { name: "faithlife ministries", logo: "https://res.cloudinary.com/ghost150/image/upload/v1761738140/FAITHLIFE_LOGO_z9xkpt.png" },
                
-            ]
+]
+            
+export const messages = [
+  {
+    "id": "msg_001",
+    "name": "Sarah Namutebi",
+    "email": "sarah.namutebi@example.com",
+    "phone": "+256701234567",
+    "subject": "Sponsorship Inquiry for Youth Coding Bootcamp",
+    "message": "Hello, I would like to know how my company can sponsor your upcoming youth coding bootcamp. Please share the sponsorship packages and expected impact.",
+    "reply": {
+      "reply": "Thank you Sarah for your interest. We have sent you our sponsorship proposal via email. We look forward to partnering with you.",
+      "repliedOn": "2026-02-10T09:15:00Z"
+    },
+    "isRead": true,
+    "isArchived": false,
+    "date": "2026-02-09T14:22:00Z"
+  },
+  {
+    "id": "msg_002",
+    "name": "Daniel Okello",
+    "email": "dan.okello@example.com",
+    "phone": "+256772345678",
+    "subject": "Volunteering as a Mentor",
+    "message": "Hi team, I am a software developer and would love to volunteer as a mentor for your community tech outreach program.",
+    "reply": {
+      "reply": "",
+      "repliedOn": null
+    },
+    "isRead": false,
+    "isArchived": false,
+    "date": "2026-02-11T08:40:00Z"
+  },
+  {
+    "id": "msg_003",
+    "name": "Grace Achieng",
+    "email": "grace.achieng@example.com",
+    "phone": "+256703456789",
+    "subject": "Request for Project Budget Breakdown",
+    "message": "Good afternoon, could you please provide a detailed budget breakdown for the clean water community project? Our foundation is reviewing potential funding opportunities.",
+    "reply": {
+      "reply": "Dear Grace, thank you for reaching out. We will share the detailed budget and impact report shortly.",
+      "repliedOn": "2026-02-12T10:05:00Z"
+    },
+    "isRead": true,
+    "isArchived": false,
+    "date": "2026-02-12T07:55:00Z"
+  },
+  {
+    "id": "msg_004",
+    "name": "Michael Kato",
+    "email": "m.kato@example.com",
+    "phone": "+256784567890",
+    "subject": "Equipment Donation Offer",
+    "message": "Hello, our organization would like to donate laptops to support your digital literacy initiative. Kindly advise on the next steps.",
+    "reply": {
+      "reply": "",
+      "repliedOn": null
+    },
+    "isRead": true,
+    "isArchived": false,
+    "date": "2026-02-13T13:12:00Z"
+  },
+  {
+    "id": "msg_005",
+    "name": "Patricia Nansubuga",
+    "email": "patricia.n@example.com",
+    "phone": "+256750123456",
+    "subject": "Community Clean-Up Participation",
+    "message": "I would like to register myself and a group of 5 friends to participate in the upcoming community clean-up drive.",
+    "reply": {
+      "reply": "Hi Patricia, thank you for your enthusiasm! We have added your group to the volunteer list and will share event details soon.",
+      "repliedOn": "2026-02-14T16:20:00Z"
+    },
+    "isRead": true,
+    "isArchived": false,
+    "date": "2026-02-14T11:45:00Z"
+  },
+  {
+    "id": "msg_006",
+    "name": "Robert Mwangi",
+    "email": "robert.mwangi@example.com",
+    "phone": "+256779876543",
+    "subject": "Inquiry About Long-Term Partnership",
+    "message": "Greetings, our NGO is exploring long-term partnerships focused on youth empowerment. We would appreciate a meeting to discuss collaboration opportunities.",
+    "reply": {
+      "reply": "",
+      "repliedOn": null
+    },
+    "isRead": false,
+    "isArchived": false,
+    "date": "2026-02-15T09:30:00Z"
+  },
+  {
+    "id": "msg_007",
+    "name": "Linda Atieno",
+    "email": "linda.atieno@example.com",
+    "phone": "+256712345098",
+    "subject": "Clarification on Fundraising Event Venue",
+    "message": "Hello, could you confirm the venue and time for the upcoming fundraising gala? I need to finalize transportation arrangements.",
+    "reply": {
+      "reply": "Dear Linda, the gala will be held at Serena Conference Hall starting at 6:00 PM. We look forward to seeing you there.",
+      "repliedOn": "2026-02-15T14:05:00Z"
+    },
+    "isRead": true,
+    "isArchived": false,
+    "date": "2026-02-15T10:18:00Z"
+  },
+  {
+    "id": "msg_008",
+    "name": "James Ouma",
+    "email": "james.ouma@example.com",
+    "phone": "+256798765432",
+    "subject": "Proposal to Sponsor Sports Equipment",
+    "message": "Good morning, I am interested in sponsoring sports equipment for the youth community project. Please share the requirements and branding opportunities available.",
+    "reply": {
+      "reply": "",
+      "repliedOn": null
+    },
+    "isRead": false,
+    "isArchived": false,
+    "date": "2026-02-16T07:50:00Z"
+  }
+]
+
+export const notifications =  [
+  {
+    "id": "notf_001",
+    "type": "system",
+    "title": "System Maintenance Scheduled",
+    "description": "The platform will undergo scheduled maintenance on 20th February from 10:00 PM to 12:00 AM.",
+    "linkTo": "/settings/system-status",
+    "seen": true,
+    "date": "2026-02-10T08:30:00Z"
+  },
+  {
+    "id": "notf_002",
+    "type": "visit",
+    "title": "New Sponsor Visit Registered",
+    "description": "A representative from BrightFuture Ltd has scheduled a visit to discuss sponsorship opportunities.",
+    "linkTo": "/visits/visit_102",
+    "seen": false,
+    "date": "2026-02-11T10:15:00Z"
+  },
+  {
+    "id": "notf_003",
+    "type": "subscription",
+    "title": "Monthly Donation Received",
+    "description": "You have received a monthly subscription donation of $50 from an anonymous supporter.",
+    "linkTo": "/finance/donations",
+    "seen": false,
+    "date": "2026-02-12T07:45:00Z"
+  },
+  {
+    "id": "notf_004",
+    "type": "system",
+    "title": "Password Changed Successfully",
+    "description": "Your account password was successfully updated. If this wasn’t you, please contact support immediately.",
+    "linkTo": "/profile/security",
+    "seen": true,
+    "date": "2026-02-12T14:20:00Z"
+  },
+  {
+    "id": "notf_005",
+    "type": "visit",
+    "title": "Community Outreach Event Reminder",
+    "description": "Reminder: The community fundraising outreach visit is scheduled for tomorrow at 9:00 AM.",
+    "linkTo": "/events/outreach-2026",
+    "seen": false,
+    "date": "2026-02-13T16:00:00Z"
+  },
+  {
+    "id": "notf_006",
+    "type": "subscription",
+    "title": "Subscription Plan Expiring Soon",
+    "description": "Your premium sponsorship visibility subscription will expire in 5 days. Renew to continue enjoying benefits.",
+    "linkTo": "/billing/subscription",
+    "seen": true,
+    "date": "2026-02-14T09:10:00Z"
+  },
+  {
+    "id": "notf_007",
+    "type": "system",
+    "title": "New Feature Released",
+    "description": "We have introduced a new analytics dashboard to help track fundraising performance in real time.",
+    "linkTo": "/reports/analytics",
+    "seen": false,
+    "date": "2026-02-15T11:35:00Z"
+  },
+  {
+    "id": "notf_008",
+    "type": "visit",
+    "title": "Volunteer Site Inspection Completed",
+    "description": "The site inspection for the youth sports equipment project has been completed successfully.",
+    "linkTo": "/projects/sports-equipment",
+    "seen": true,
+    "date": "2026-02-16T06:50:00Z"
+  }
+]
+
+
+export const staff =[
+  {
+    "id": "1",
+    "name": "Daniel Okello",
+    "phone": "+256701234567",
+    "email": "daniel.okello@example.org",
+    "role": "Project Director",
+    "image": "https://randomuser.me/api/portraits/men/11.jpg",
+    "gender": "male"
+  },
+  {
+    "id": "2",
+    "name": "Sarah Nansubuga",
+    "phone": "+256702345678",
+    "email": "sarah.nansubuga@example.org",
+    "role": "Fundraising Manager",
+    "image": "https://randomuser.me/api/portraits/women/12.jpg",
+    "gender": "female"
+  },
+  {
+    "id": "3",
+    "name": "Michael Kato",
+    "phone": "+256703456789",
+    "email": "michael.kato@example.org",
+    "role": "Finance Officer",
+    "image": "https://randomuser.me/api/portraits/men/13.jpg",
+    "gender": "male"
+  },
+  {
+    "id": "4",
+    "name": "Grace Atim",
+    "phone": "+256704567890",
+    "email": "grace.atim@example.org",
+    "role": "Communications Lead",
+    "image": "https://randomuser.me/api/portraits/women/14.jpg",
+    "gender": "female"
+  },
+  {
+    "id": "5",
+    "name": "Joseph Mwangi",
+    "phone": "+256705678901",
+    "email": "joseph.mwangi@example.org",
+    "role": "Community Outreach Coordinator",
+    "image": "https://randomuser.me/api/portraits/men/15.jpg",
+    "gender": "male"
+  },
+  {
+    "id": "6",
+    "name": "Esther Namazzi",
+    "phone": "+256706789012",
+    "email": "esther.namazzi@example.org",
+    "role": "Volunteer Coordinator",
+    "image": "https://randomuser.me/api/portraits/women/16.jpg",
+    "gender": "female"
+  },
+  {
+    "id": "7",
+    "name": "David Ochieng",
+    "phone": "+256707890123",
+    "email": "david.ochieng@example.org",
+    "role": "Logistics Manager",
+    "image": "https://randomuser.me/api/portraits/men/17.jpg",
+    "gender": "male"
+  },
+  {
+    "id": "8",
+    "name": "Rebecca Achieng",
+    "phone": "+256708901234",
+    "email": "rebecca.achieng@example.org",
+    "role": "Donor Relations Officer",
+    "image": "https://randomuser.me/api/portraits/women/18.jpg",
+    "gender": "female"
+  },
+  {
+    "id": "9",
+    "name": "Samuel Tumwine",
+    "phone": "+256709012345",
+    "email": "samuel.tumwine@example.org",
+    "role": "IT Support Officer",
+    "image": "https://randomuser.me/api/portraits/men/19.jpg",
+    "gender": "male"
+  },
+  {
+    "id": "10",
+    "name": "Patricia Nakato",
+    "phone": "+256710123456",
+    "email": "patricia.nakato@example.org",
+    "role": "Marketing Strategist",
+    "image": "https://randomuser.me/api/portraits/women/20.jpg",
+    "gender": "female"
+  },
+  {
+    "id": "11",
+    "name": "Brian Ssekandi",
+    "phone": "+256711234567",
+    "email": "brian.ssekandi@example.org",
+    "role": "Monitoring & Evaluation Officer",
+    "image": "https://randomuser.me/api/portraits/men/21.jpg",
+    "gender": "male"
+  },
+  {
+    "id": "12",
+    "name": "Linda Nabirye",
+    "phone": "+256712345678",
+    "email": "linda.nabirye@example.org",
+    "role": "Events Coordinator",
+    "image": "https://randomuser.me/api/portraits/women/22.jpg",
+    "gender": "female"
+  },
+  {
+    "id": "13",
+    "name": "Patrick Byaruhanga",
+    "phone": "+256713456789",
+    "email": "patrick.byaruhanga@example.org",
+    "role": "Procurement Officer",
+    "image": "https://randomuser.me/api/portraits/men/23.jpg",
+    "gender": "male"
+  },
+  {
+    "id": "14",
+    "name": "Joyce Namutebi",
+    "phone": "+256714567890",
+    "email": "joyce.namutebi@example.org",
+    "role": "Social Media Manager",
+    "image": "https://randomuser.me/api/portraits/women/24.jpg",
+    "gender": "female"
+  },
+  {
+    "id": "15",
+    "name": "Ronald Kisembo",
+    "phone": "+256715678901",
+    "email": "ronald.kisembo@example.org",
+    "role": "Field Operations Supervisor",
+    "image": "https://randomuser.me/api/portraits/men/25.jpg",
+    "gender": "male"
+  },
+  {
+    "id": "16",
+    "name": "Mercy Auma",
+    "phone": "+256716789012",
+    "email": "mercy.auma@example.org",
+    "role": "Administrative Assistant",
+    "image": "https://randomuser.me/api/portraits/women/26.jpg",
+    "gender": "female"
+  }
+]
+
+

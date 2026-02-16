@@ -39,9 +39,9 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
       icon: <BarChart3 className="w-5 h-5" />,
     },
     {
-      href: "/admin/communities",
-      label: "Communities",
-      icon: <Building2 className="w-5 h-5" />,
+      href: "/admin/programs",
+      label: "Programs",
+      icon: <BookOpen className="w-5 h-5" />,
     },
     {
       href: "/admin/visits",
@@ -49,13 +49,8 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
       icon: <MapPin className="w-5 h-5" />,
     },
     {
-      href: "/admin/students",
-      label: "Students",
-      icon: <Users className="w-5 h-5" />,
-    },
-    {
-      href: "/admin/trainers",
-      label: "Trainers",
+      href: "/admin/staff",
+      label: "Staff",
       icon: <UserCheck className="w-5 h-5" />,
     },
     {
@@ -63,11 +58,11 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
       label: "Messages",
       icon: <MessageSquare className="w-5 h-5" />,
     },
-    {
-      href: "/admin/notifications",
-      label: "Notifications",
-      icon: <Bell className="w-5 h-5" />,
-    },
+    // {
+    //   href: "/admin/notifications",
+    //   label: "Notifications",
+    //   icon: <Bell className="w-5 h-5" />,
+    // },
     {
       href: "/admin/settings",
       label: "Settings",
@@ -139,7 +134,7 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
           <div className="p-6 border-b border-border">
             <div className="flex items-center gap-2">
               <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-white font-bold">
-                IC
+                ICH
               </div>
               <div>
                 <p className="font-bold text-sm">Admin Panel</p>
