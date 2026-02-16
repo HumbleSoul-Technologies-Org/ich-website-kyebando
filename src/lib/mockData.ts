@@ -70,6 +70,10 @@ export const mockCommunities = [
       "https://picsum.photos/seed/jinja1/500/400",
       "https://picsum.photos/seed/jinja2/500/400",
       "https://picsum.photos/seed/jinja3/500/400",
+      "https://picsum.photos/seed/jinja4/500/400",
+      "https://picsum.photos/seed/jinja1/500/400",
+      "https://picsum.photos/seed/jinja2/500/400",
+      "https://picsum.photos/seed/jinja3/500/400",
       "https://picsum.photos/seed/jinja4/500/400"
     ],
     "comments": [

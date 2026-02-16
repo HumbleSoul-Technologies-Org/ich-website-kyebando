@@ -83,7 +83,7 @@ export default function AdminProgramsPage() {
         </div>
 
         {/* Search */}
-        <Card>
+        <Card className="border-0">
           <CardContent className="pt-6">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />

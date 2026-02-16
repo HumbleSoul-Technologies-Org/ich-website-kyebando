@@ -62,7 +62,7 @@ export default function Home() {
               transition={{ delay: 0.2, duration: 0.8 }}
               className="text-xl text-muted-foreground mb-8 max-w-2xl leading-relaxed"
             >
-              We bridge the gap between talent and opportunity by bringing digital skills, entrepreneurship programs, and creative resources directly to local districts.
+              We bridge the gap between skills and opportunity by bringing technical skills, entrepreneurship programs, and creative resources directly to local districts.
             </motion.p>
             
             <motion.div 

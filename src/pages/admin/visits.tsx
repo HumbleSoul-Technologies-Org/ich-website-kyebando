@@ -330,17 +330,17 @@ export default function AdminVisitsPage() {
         </div>
 
         {/* Search and Filters */}
-        <Card>
+        <Card className="border-0">
           <CardContent className="pt-6">
-            <div className="space-y-4">
+            <div className=" flex items-center justify-center md:justify-between gap-2">
               {/* Search Input */}
-              <div className="relative">
+              <div className="relative flex items-center w-1/2 md:w-1/3">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
                   placeholder="Search by community, country, or date..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 w-full md:w-80"
                 />
               </div>
 

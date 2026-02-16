@@ -1,8 +1,8 @@
 import { motion } from "framer-motion";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { useCommunities } from "@/hooks/use-communities";
+import { mockCommunities } from "@/lib/mockData";
 import { Card, CardContent } from "@/components/ui/card";
 import { MapPin, Calendar, CheckCircle2, Clock, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
 import { isFuture } from "date-fns";
+import { Link } from "wouter";
 
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
@@ -24,8 +25,28 @@ L.Icon.Default.mergeOptions({
 });
 
 export default function Communities() {
-  const { data: communities, isLoading } = useCommunities();
+  const [communities, setCommunities] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    const mapped = mockCommunities.map((v: any) => ({
+      id: v.id,
+      name: v.title || v.name,
+      community: v.community,
+      district: v.community,
+      country: v.country,
+      visitDate: v.date || v.visitDate,
+      imageUrl: v.thumbnail || v.image || v.imageUrl,
+      description: v.excerpt || v.description || v.content,
+      location: v.location,
+      status: v.status,
+    }));
+    setCommunities(mapped);
+    setIsLoading(false);
+  }, []);
 
   const upcomingVisits = useMemo(() => {
     return (
@@ -148,7 +169,7 @@ export default function Communities() {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: i * 0.1 }}
                   >
-                    <Card className="hover:shadow-lg transition-all border-l-4 border-l-primary overflow-hidden">
+                    <Card className="hover:shadow-lg border-t-0  relative border-r-0 border-b-0 transition-all border-l-4 border-l-primary overflow-hidden">
                       <div className="flex flex-col md:flex-row">
                         <div className="md:w-32 h-32 md:h-auto bg-muted shrink-0">
                           <img
@@ -179,12 +200,14 @@ export default function Communities() {
                             {community.description}
                           </p>
                           {community.visitDate && (
-                            <div className="text-sm font-medium flex items-center gap-2 text-primary">
-                              <Calendar className="w-4 h-4" />
-                              {format(
-                                new Date(community.visitDate),
-                                "MMMM d, yyyy",
-                              )}
+                            <div>
+                              <div className="text-sm font-medium flex items-center gap-2 text-primary">
+                                <Calendar className="w-4 h-4" />
+                                {format(new Date(community.visitDate), "MMMM d, yyyy")}
+                              </div>
+                              <Link className="inline-block mt-3 text-sm text-primary absolute right-2 bottom-2 font-medium" href={`/visits/${community.id}`}>
+                                See details →
+                              </Link>
                             </div>
                           )}
                         </div>
@@ -237,8 +260,8 @@ export default function Communities() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.1 }}
                   >
-                    <Card className="hover:shadow-lg transition-all overflow-hidden h-full flex flex-col">
-                      <div className="h-40 bg-muted shrink-0">
+                    <Card className="hover:shadow-lg border-0 relative transition-all overflow-hidden h-[500px] flex flex-col">
+                      <div className="h-full bg-muted shrink-0">
                         <img
                           src={
                             community.imageUrl ||
@@ -248,13 +271,15 @@ export default function Communities() {
                           className="w-full h-full object-cover"
                         />
                       </div>
-                      <div className="p-6 flex-grow flex flex-col">
+                      {/* Gradient Overlay */}
+                      <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
+                      <div className="p-6 flex-grow absolute bottom-1 left-1 right-1 flex flex-col  z-10">
                         <div className="flex justify-between items-start mb-3">
                           <div className="flex-grow">
-                            <h3 className="font-bold text-lg mb-1">
+                            <h3 className="font-bold text-lg mb-1 text-white">
                               {community.name}
                             </h3>
-                            <div className="flex items-center text-muted-foreground text-sm gap-1">
+                            <div className="flex items-center text-white/80 text-sm gap-1">
                               <MapPin className="w-3 h-3" />{" "}
                               {community.district}
                             </div>
@@ -266,18 +291,22 @@ export default function Communities() {
                             <CheckCircle2 className="w-3 h-3 mr-1" /> Visited
                           </Badge>
                         </div>
-                        <p className="text-sm text-muted-foreground mb-4 flex-grow line-clamp-2">
+                        <p className="text-sm text-white/70 mb-4 flex-grow line-clamp-2">
                           {community.description}
                         </p>
                         {community.visitDate && (
-                          <div className="text-sm font-medium flex items-center gap-2 text-primary">
-                            <Calendar className="w-4 h-4" />
-                            {format(
-                              new Date(community.visitDate),
-                              "MMMM d, yyyy",
-                            )}
+                          <div>
+                            <div className="text-sm font-medium flex items-center gap-2 text-primary">
+                              <Calendar className="w-4 h-4" />
+                              {format(new Date(community.visitDate), "MMMM d, yyyy")}
+                            </div>
+                            <Link href={`/visits/${community.id}`} className="inline-block absolute right-3 bottom-6 mt-3 text-sm text-primary font-medium">
+                              See details →
+                            </Link>
                           </div>
                         )}
+
+
                       </div>
                     </Card>
                   </motion.div>

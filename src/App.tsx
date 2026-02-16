@@ -11,6 +11,7 @@ import Home from "@/pages/Home";
 import About from "@/pages/About";
 import Programs from "@/pages/Programs";
 import Communities from "@/pages/Communities";
+import VisitDetails from "@/pages/VisitDetails";
 import TalentDiscovery from "@/pages/TalentDiscovery";
 import GetInvolved from "@/pages/GetInvolved";
 import Login from "@/pages/Login";
@@ -36,6 +37,7 @@ function Router() {
       <Route path="/get-involved" component={GetInvolved} />
       <Route path="/login" component={Login} />
       <Route path="/dashboard" component={Dashboard} />
+      <Route path="/visits/:id" component={VisitDetails} />
       
       {/* Admin Routes */}
       <Route path="/admin" component={Admin} />
