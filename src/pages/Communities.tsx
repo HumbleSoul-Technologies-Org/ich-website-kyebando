@@ -52,8 +52,7 @@ export default function Communities() {
     return (
       communities?.filter(
         (community) =>
-          community.status === "upcoming" ||
-          (community.visitDate && isFuture(new Date(community.visitDate))),
+          community.status === "upcoming"
       ) || []
     );
   }, [communities]);
@@ -123,7 +122,7 @@ export default function Communities() {
                     }
                     center={[0.3476, 32.5825]} // Central Uganda (Kampala)
                     zoom={6}
-                    scrollWheelZoom={false}
+                    scrollWheelZoom={true}
                     style={{ height: "400px", width: "100%" }}
                     className="rounded-3xl"
                   >
@@ -162,7 +161,7 @@ export default function Communities() {
                   <Skeleton key={i} className="h-32 w-full rounded-2xl" />
                 ))
               ) : upcomingVisits.length > 0 ? (
-                upcomingVisits.map((community, i) => (
+                upcomingVisits.filter(v => v.status === "upcoming").map((community, i) => (
                   <motion.div
                     key={community.id}
                     initial={{ opacity: 0, x: 20 }}

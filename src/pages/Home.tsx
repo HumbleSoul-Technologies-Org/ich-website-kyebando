@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "wouter";
-import { ArrowRight, Users, Lightbulb, TrendingUp, HandHeart, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ArrowRight, Users, Lightbulb, TrendingUp, HandHeart, ChevronLeft, ChevronRight, X, Cross, Church } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/layout/Navbar";
@@ -158,22 +158,22 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               {
-                title: "Digital Literacy",
-                description: "Equipping youth with essential tech skills for the modern workforce.",
+                title: "Technical Skills Training",
+                description: "Equipping the community with essential technical skills  to thrive and earn a living.",
                 icon: <Lightbulb className="w-10 h-10 text-primary" />,
-                image: "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&h=600&fit=crop"
+                image: "https://i.ytimg.com/vi/6cxFII9z5Vg/hqdefault.jpg"
               },
               {
                 title: "Talent Discovery",
                 description: "Identifying and nurturing hidden talents in underserved areas.",
                 icon: <TrendingUp className="w-10 h-10 text-primary" />,
-                image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&h=600&fit=crop"
+                image: "https://s.rfi.fr/media/display/2da667f0-02c3-11ee-8c4a-005056bf30b7/w:1024/p:16x9/000_33DM63T.jpg"
               },
               {
-                title: "Community Growth",
-                description: "Building resilient networks of support and mentorship.",
-                icon: <Users className="w-10 h-10 text-primary" />,
-                image: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=800&h=600&fit=crop"
+                title: "Gospel Preaching & Mentorship",
+                description: "Providing spiritual guidance and mentorship to foster holistic growth and resilience in communities.",
+                icon: <Church className="w-10 h-10 text-primary" />,
+                image: "https://d15k2d11r6t6rl.cloudfront.net/public/users/Integrators/BeeProAgency/74151_49446/editor_images/ZambiaDecaplois_Kasama_Taylor-03756%20%282%29.jpg"
               }
             ].map((feature, i) => (
               <motion.div 

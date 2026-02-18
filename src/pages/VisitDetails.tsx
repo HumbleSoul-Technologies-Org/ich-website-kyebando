@@ -8,7 +8,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ThumbsDown, ThumbsUp, User, ChevronDown, Eye } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ThumbsDown, ThumbsUp, User, ChevronDown, Eye, Loader2 } from "lucide-react";
 
 export default function VisitDetails() {
   const [match, params] = useRoute("/visits/:id");
@@ -24,6 +25,7 @@ export default function VisitDetails() {
   const [comments, setComments] = useState<any[]>(visit.comments || []);
   const [commentForm, setCommentForm] = useState({ name: "", phone: "", comment: "" });
   const [canScroll, setCanScroll] = useState(false);
+  const [videoLoaded, setVideoLoaded] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const commentsActive = visit.status === "visited";
@@ -121,13 +123,25 @@ export default function VisitDetails() {
             {visit.videoId && (
               <div className="mt-3 sm:mt-4 md:mt-6">
                 <div className="relative" style={{ paddingTop: "56.25%" }}>
+                  {!videoLoaded && (
+                    <div className="absolute inset-0 w-full h-full rounded flex items-center justify-center">
+                      <Skeleton className="absolute inset-0 w-full h-full rounded" />
+                      <div className="absolute flex flex-col items-center justify-center gap-3">
+                        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                        <span className="text-sm font-medium text-foreground">Loading video...</span>
+                      </div>
+                    </div>
+                  )}
                   <iframe
                     src={`https://www.youtube.com/embed/${visit.videoId}`}
                     title={visit.title}
-                    className="absolute inset-0 w-full h-full rounded"
+                    className={`absolute inset-0 w-full h-full rounded transition-opacity duration-300 ${
+                      videoLoaded ? "opacity-100" : "opacity-0"
+                    }`}
                     frameBorder="0"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
+                    onLoad={() => setVideoLoaded(true)}
                   />
                 </div>
               </div>
@@ -163,24 +177,30 @@ export default function VisitDetails() {
 
               <div className="">
                 <h3 className="font-semibold text-sm sm:text-base">Gallery</h3>
-                <div className="mt-2 sm:mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2 transition-all">
-                  {visit.gallery?.map((img: string, i: number) => (
-                    <button
-                      key={i}
-                      onClick={() => {
-                        setActiveImage(img);
-                        setIsGalleryOpen(true);
-                      }}
-                      className="overflow-hidden rounded"
-                    >
-                      <img
-                        src={img}
-                        alt={`gallery-${i}`}
-                        className="w-full h-16 sm:h-20 object-cover rounded cursor-pointer hover:scale-105 transition-transform"
-                      />
-                    </button>
-                  ))}
-                </div>
+                {visit.gallery && visit.gallery.length > 0 ? (
+                  <div className="mt-2 sm:mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2 transition-all">
+                    {visit.gallery.map((img: string, i: number) => (
+                      <button
+                        key={i}
+                        onClick={() => {
+                          setActiveImage(img);
+                          setIsGalleryOpen(true);
+                        }}
+                        className="overflow-hidden rounded"
+                      >
+                        <img
+                          src={img}
+                          alt={`gallery-${i}`}
+                          className="w-full h-16 sm:h-20 object-cover rounded cursor-pointer hover:scale-105 transition-transform"
+                        />
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="mt-2 sm:mt-3 p-3 sm:p-4 bg-muted rounded text-xs sm:text-sm text-muted-foreground">
+                    Images will be available after the event.
+                  </div>
+                )}
               </div>
             </div>
 
