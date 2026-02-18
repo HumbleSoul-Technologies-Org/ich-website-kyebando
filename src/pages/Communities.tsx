@@ -28,6 +28,7 @@ export default function Communities() {
   const [communities, setCommunities] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCommunity, setSelectedCommunity] = useState<string | null>(null);
 
   useEffect(() => {
 
@@ -69,14 +70,26 @@ export default function Communities() {
 
   const filteredPastVisits = useMemo(() => {
     return pastVisits.filter(
-      (community) =>
-        community.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        community.community
-          ?.toLowerCase()
-          .includes(searchQuery.toLowerCase()) ||
-        community.district.toLowerCase().includes(searchQuery.toLowerCase()),
+      (community) => {
+        const matchesSearch =
+          community.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          community.community
+            ?.toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          community.district.toLowerCase().includes(searchQuery.toLowerCase());
+        
+        const matchesCommunity =
+          !selectedCommunity || community.community === selectedCommunity;
+        
+        return matchesSearch && matchesCommunity;
+      }
     );
-  }, [pastVisits, searchQuery]);
+  }, [pastVisits, searchQuery, selectedCommunity]);
+
+  const uniqueCommunities = useMemo(() => {
+    const communities = pastVisits.map((v) => v.community);
+    return Array.from(new Set(communities)).sort();
+  }, [pastVisits]);
 
 
   return (
@@ -230,8 +243,8 @@ export default function Communities() {
               Past Visits
             </h2>
 
-            {/* Search Bar */}
-            <div className="mb-8 relative">
+            {/* Search Bar and Filters */}
+            <div className="mb-8 space-y-4">
               <div className="relative">
                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                 <Input
@@ -240,6 +253,33 @@ export default function Communities() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-12 py-6 text-base rounded-2xl"
                 />
+              </div>
+
+              {/* Community Filter Buttons */}
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => setSelectedCommunity(null)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                    selectedCommunity === null
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted hover:bg-muted/80"
+                  }`}
+                >
+                  All Communities
+                </button>
+                {uniqueCommunities.map((community) => (
+                  <button
+                    key={community}
+                    onClick={() => setSelectedCommunity(community)}
+                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                      selectedCommunity === community
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted hover:bg-muted/80"
+                    }`}
+                  >
+                    {community}
+                  </button>
+                ))}
               </div>
             </div>
 

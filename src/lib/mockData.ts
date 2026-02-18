@@ -473,7 +473,7 @@ export const staff =[
     "name": "Daniel Okello",
     "phone": "+256701234567",
     "email": "daniel.okello@example.org",
-    "role": "Project Director",
+    "role": "CEO",
     "image": "https://randomuser.me/api/portraits/men/11.jpg",
     "gender": "male"
   },
@@ -482,7 +482,7 @@ export const staff =[
     "name": "Sarah Nansubuga",
     "phone": "+256702345678",
     "email": "sarah.nansubuga@example.org",
-    "role": "Fundraising Manager",
+    "role": "Chairman",
     "image": "https://randomuser.me/api/portraits/women/12.jpg",
     "gender": "female"
   },
@@ -491,7 +491,7 @@ export const staff =[
     "name": "Michael Kato",
     "phone": "+256703456789",
     "email": "michael.kato@example.org",
-    "role": "Finance Officer",
+    "role": "Planner",
     "image": "https://randomuser.me/api/portraits/men/13.jpg",
     "gender": "male"
   },
@@ -500,7 +500,7 @@ export const staff =[
     "name": "Grace Atim",
     "phone": "+256704567890",
     "email": "grace.atim@example.org",
-    "role": "Communications Lead",
+    "role": "Blogger",
     "image": "https://randomuser.me/api/portraits/women/14.jpg",
     "gender": "female"
   },
@@ -509,7 +509,7 @@ export const staff =[
     "name": "Joseph Mwangi",
     "phone": "+256705678901",
     "email": "joseph.mwangi@example.org",
-    "role": "Community Outreach Coordinator",
+    "role": "Volunteer",
     "image": "https://randomuser.me/api/portraits/men/15.jpg",
     "gender": "male"
   },
@@ -518,7 +518,7 @@ export const staff =[
     "name": "Esther Namazzi",
     "phone": "+256706789012",
     "email": "esther.namazzi@example.org",
-    "role": "Volunteer Coordinator",
+    "role": "Volunteer",
     "image": "https://randomuser.me/api/portraits/women/16.jpg",
     "gender": "female"
   },
@@ -527,7 +527,7 @@ export const staff =[
     "name": "David Ochieng",
     "phone": "+256707890123",
     "email": "david.ochieng@example.org",
-    "role": "Logistics Manager",
+    "role": "Volunteer",
     "image": "https://randomuser.me/api/portraits/men/17.jpg",
     "gender": "male"
   },
@@ -536,7 +536,7 @@ export const staff =[
     "name": "Rebecca Achieng",
     "phone": "+256708901234",
     "email": "rebecca.achieng@example.org",
-    "role": "Donor Relations Officer",
+    "role": "Volunteer",
     "image": "https://randomuser.me/api/portraits/women/18.jpg",
     "gender": "female"
   },
@@ -545,7 +545,7 @@ export const staff =[
     "name": "Samuel Tumwine",
     "phone": "+256709012345",
     "email": "samuel.tumwine@example.org",
-    "role": "IT Support Officer",
+    "role": "Volunteer",
     "image": "https://randomuser.me/api/portraits/men/19.jpg",
     "gender": "male"
   },
@@ -554,7 +554,7 @@ export const staff =[
     "name": "Patricia Nakato",
     "phone": "+256710123456",
     "email": "patricia.nakato@example.org",
-    "role": "Marketing Strategist",
+    "role": "Volunteer",
     "image": "https://randomuser.me/api/portraits/women/20.jpg",
     "gender": "female"
   },
@@ -563,7 +563,7 @@ export const staff =[
     "name": "Brian Ssekandi",
     "phone": "+256711234567",
     "email": "brian.ssekandi@example.org",
-    "role": "Monitoring & Evaluation Officer",
+    "role": "Volunteer",
     "image": "https://randomuser.me/api/portraits/men/21.jpg",
     "gender": "male"
   },
@@ -572,7 +572,7 @@ export const staff =[
     "name": "Linda Nabirye",
     "phone": "+256712345678",
     "email": "linda.nabirye@example.org",
-    "role": "Events Coordinator",
+    "role": "Volunteer",
     "image": "https://randomuser.me/api/portraits/women/22.jpg",
     "gender": "female"
   },
@@ -581,7 +581,7 @@ export const staff =[
     "name": "Patrick Byaruhanga",
     "phone": "+256713456789",
     "email": "patrick.byaruhanga@example.org",
-    "role": "Procurement Officer",
+    "role": "Volunteer",
     "image": "https://randomuser.me/api/portraits/men/23.jpg",
     "gender": "male"
   },
@@ -590,7 +590,7 @@ export const staff =[
     "name": "Joyce Namutebi",
     "phone": "+256714567890",
     "email": "joyce.namutebi@example.org",
-    "role": "Social Media Manager",
+    "role": "Volunteer",
     "image": "https://randomuser.me/api/portraits/women/24.jpg",
     "gender": "female"
   },
@@ -599,7 +599,7 @@ export const staff =[
     "name": "Ronald Kisembo",
     "phone": "+256715678901",
     "email": "ronald.kisembo@example.org",
-    "role": "Field Operations Supervisor",
+    "role": "Volunteer",
     "image": "https://randomuser.me/api/portraits/men/25.jpg",
     "gender": "male"
   },
@@ -608,7 +608,7 @@ export const staff =[
     "name": "Mercy Auma",
     "phone": "+256716789012",
     "email": "mercy.auma@example.org",
-    "role": "Administrative Assistant",
+    "role": "Volunteer",
     "image": "https://randomuser.me/api/portraits/women/26.jpg",
     "gender": "female"
   }
