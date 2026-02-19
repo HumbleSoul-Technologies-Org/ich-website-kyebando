@@ -66,9 +66,10 @@ export default function Home() {
             loop 
             muted 
             playsInline
+            preload="metadata"
             className="w-full h-full object-cover opacity-20"
           >
-            <source src="/src/assets/videos/hero-background.mp4" type="video/mp4" />
+            <source src="/hero-background.mp4" type="video/mp4" />
           </video>
         </div>
         
