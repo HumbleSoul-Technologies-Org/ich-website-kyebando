@@ -11,8 +11,12 @@ import { FAQAccordion } from "@/components/about/FAQAccordion";
 import { ContactInfo } from "@/components/about/ContactInfo";
 import { NewsletterSignup } from "@/components/about/NewsletterSignup";
 import { motion } from "framer-motion";
+import { useEffect } from "react";
 
 export default function About() {
+  useEffect(() => { 
+    window.scrollTo(0, 0);
+  }, [])
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />

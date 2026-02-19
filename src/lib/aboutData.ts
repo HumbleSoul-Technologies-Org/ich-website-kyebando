@@ -1,7 +1,7 @@
 export const teamMembers = [
   {
     id: 1,
-    name: "Rev. Sarah Mukasa",
+    name: "Dr.Byamukama Henry",
     role: "Founder & Director",
     quote: "Called to serve communities with dignity and purpose",
     bio: "Sarah started this journey after seeing youth in her community struggling to find work. She holds a degree in Community Development and has 10+ years of experience in grassroots initiatives.",
@@ -143,8 +143,8 @@ export const timeline = [
     events: [
       {
         month: "March",
-        event: "First class with 20 students in Kisaasi, Kampala",
-        details: "Rev. Sarah Mukasa holds the inaugural Innovation Community Hub training session",
+        event: "Inaugural Training Session",
+        details: "Dr.Byamukama Henry holds the inaugural Innovation Community Hub training session",
       },
       {
         month: "July",
@@ -153,7 +153,7 @@ export const timeline = [
       },
       {
         month: "December",
-        event: "Graduated first cohort of 15 tailors",
+        event: "First Tailoring Workshop",
         details: "12 of them started their own tailoring businesses",
       },
     ],
@@ -220,6 +220,67 @@ export const timeline = [
         details: "Collaboration with global NGOs for knowledge exchange",
       },
     ],
+  },
+  {
+    year: 2026,
+    title: "Field Visits & Program Rollout",
+    events: [
+      {
+        month: "January",
+        event: "Launched Technical Skills Development Program",
+        details: "Equipping youth and community members with practical technical and vocational skills for employment and entrepreneurship."
+      },
+      {
+        month: "February",
+        event: "Launched Talent Discovery & Creative Arts Development",
+        details: "Identifying and nurturing talents in music, dance, drama, and creative arts to create pathways for careers and community enrichment."
+      },
+      {
+        month: "March",
+        event: "Brick Making & Construction Skills Training — Gulu",
+        details: "A community outreach focused on digital literacy and entrepreneurship in Northern Uganda."
+      },
+      {
+        month: "April",
+        event: "Carpentry & Woodwork Mastery — Mbale",
+        details: "Training youth in innovation and leadership skills to prepare them for small business and employment opportunities."
+      },
+      {
+        month: "May",
+        event: "Talent Discovery Crusade — Jinja",
+        details: "Promoting creativity and problem-solving in river-side communities and identifying artistic and musical talent."
+      },
+      {
+        month: "June",
+        event: "Electrical Installation & Wiring Training — Lira",
+        details: "Outreach focused on rural communities to bridge the digital divide by teaching basic digital skills and safe internet practices."
+      },
+      {
+        month: "July",
+        event: "Gospel Preaching & Evangelism Crusade — Mbarara",
+        details: "A program to discover and nurture hidden talents among young people while providing mentorship and confidence-building sessions."
+      },
+      {
+        month: "September",
+        event: "Plumbing & Pipe Fitting Workshop — Soroti",
+        details: "An upcoming workshop intended to equip youth with idea generation, problem analysis, and basic business planning skills."
+      },
+      {
+        month: "October",
+        event: "Welding & Metal Fabrication Skills — Masaka",
+        details: "A skills day to raise awareness about practical technology and vocational training for market vendors and students."
+      },
+      {
+        month: "November",
+        event: "Solar Panel Installation & Renewable Energy Training — Fort Portal",
+        details: "Training on renewable energy aimed at building local capacity for sustainable solutions."
+      },
+      {
+        month: "December",
+        event: "Gospel Healing & Wellness Crusade — Kabale",
+        details: "Upcoming health awareness and wellness program focusing on preventive health measures and mental health support."
+      }
+    ]
   },
 ];
 
@@ -377,12 +438,12 @@ export const missionVision = {
   vision:
     "A world where every young person, regardless of background or circumstance, has the opportunity to discover their gifts, develop their potential, and contribute meaningfully to their communities.",
   story:
-    "Innovation Community Hub was born from a simple observation: talented youth were struggling not because of lack of ability, but because of lack of opportunity. Rev. Sarah Mukasa witnessed this gap firsthand in her community and decided to act. What started as informal gatherings in a small Kampala church has grown into a dynamic organization reaching thousands across Uganda and Kenya.",
+    "Innovation Community Hub was born from a simple observation: talented youth were struggling not because of lack of ability, but because of lack of opportunity. Dr.Byamukama Henry witnessed this gap firsthand in ugandan communities and decided to act. What started as informal gatherings and crusades  has grown into a dynamic organization reaching thousands across Uganda.",
   founderQuote:
     "Every young person carries within them gifts the world desperately needs. Our job is not to create talent—it's to help young people recognize it, develop it, and use it to change their communities.",
-  founderName: "Rev. Sarah Mukasa",
+  founderName: "Dr.Byamukama Henry",
   founderRole: "Founder & Director",
-  founderImage: "https://i.pravatar.cc/150?img=10",
+  founderImage: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSAnXHkz8xsT2zZ8TVG4hKqALpN5dt5m62zUg&s",
 };
 
 export const contactMethods = [

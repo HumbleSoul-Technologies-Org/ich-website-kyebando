@@ -11,10 +11,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { motion } from "framer-motion";
 import { HandHeart, Users, Heart } from "lucide-react";
+import { useEffect } from "react";
 
 export default function GetInvolved() {
   const { mutate, isPending } = useCreateVolunteer();
-  
+   useEffect(() => { 
+    window.scrollTo(0, 0);
+  }, [])
   const form = useForm<InsertVolunteer>({
     resolver: zodResolver(insertVolunteerSchema),
     defaultValues: {

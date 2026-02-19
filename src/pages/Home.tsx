@@ -252,7 +252,7 @@ export default function Home() {
       <section className="py-24 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-2xl mx-auto mb-16">
-            <h2 className="font-display text-3xl md:text-4xl font-bold mb-4">Gallery Showcase</h2>
+            <h2 className="font-display text-3xl md:text-4xl font-bold mb-4">Gallery Showcasing Our Journey</h2>
             <p className="text-muted-foreground text-lg">Explore moments from our visits and community engagement activities.</p>
           </div>
 

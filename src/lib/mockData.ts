@@ -218,44 +218,44 @@ export const mockCommunities = [
 
 export const testimonials = [
               {
-                name: "Priya Sharma",
-                role: "Student, New Delhi",
-                image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop",
-                testimonial: "The digital literacy program opened doors I never knew existed. I now have the skills to pursue a tech career and inspire my younger siblings.",
-                community: "South Delhi Community Hub"
+                name: "Nakamya teddy",
+                role: "Student,Kololo High School, Kampala",
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQf1fiSQO7JfDw0uv1Ae_Ye-Bo9nhGNg27dwg&s",
+                testimonial: "The youth tailoring program opened doors I never knew existed. I now have the skills to pursue a fashion and design career and inspire my younger siblings.",
+                community: "Kamwocha"
               },
               {
-                name: "Rajesh Kumar",
-                role: "Entrepreneur, Bangalore",
-                image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop",
+                name: "Amina Hassan",
+                role: "Unemployed youth , Kisaasi, Kampala",
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQf1fiSQO7JfDw0uv1Ae_Ye-Bo9nhGNg27dwg&s",
                 testimonial: "Thanks to the mentorship and business training, I launched my startup successfully. The support system they built was invaluable.",
-                community: "Whitefield Business Network"
+                community: "Kisaasi"
               },
               {
-                name: "Amrita Patel",
-                role: "Community Leader, Mumbai",
-                image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop",
+                name: "Ssenyonga James",
+                role: "Community Leader, kyanja, Kampala",
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQf1fiSQO7JfDw0uv1Ae_Ye-Bo9nhGNg27dwg&s",
                 testimonial: "Watching our youth discover their potential and gain real skills has been remarkable. This organization truly cares about sustainable growth.",
-                community: "Western Suburbs Initiative"
+                community: "kyanja"
               },
               {
                 name: "Dev Singh",
                 role: "Tech Trainer, Hyderabad",
-                image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop",
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQf1fiSQO7JfDw0uv1Ae_Ye-Bo9nhGNg27dwg&s",
                 testimonial: "As a trainer partner, I've seen firsthand the impact of quality education. The programs are well-structured and truly life-changing.",
                 community: "HITEC City Partnership"
               },
               {
                 name: "Sneha Gupta",
                 role: "Program Graduate, Pune",
-                image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop",
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQf1fiSQO7JfDw0uv1Ae_Ye-Bo9nhGNg27dwg&s",
                 testimonial: "From uncertainty about my future to landing my dream job - this journey was made possible by the talent discovery program.",
                 community: "Hadapsar Youth Hub"
               },
               {
                 name: "Vikram Reddy",
                 role: "Community Volunteer, Chennai",
-                image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&h=400&fit=crop",
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQf1fiSQO7JfDw0uv1Ae_Ye-Bo9nhGNg27dwg&s",
                 testimonial: "Being part of this movement and seeing the real change in our community has been the most fulfilling experience of my life.",
                 community: "OMR Community Center"
               }
@@ -613,5 +613,61 @@ export const staff =[
     "gender": "female"
   }
 ]
+
+export const programs = [
+  {
+    "id": "1",
+    "program": "Technical Skills Development Program",
+    "excerpt": "Equipping youth and community members with practical technical and vocational skills for employment and entrepreneurship.",
+    "description": "The Technical Skills Development Program combines brick making, carpentry, welding, and other hands-on vocational trades into one comprehensive training initiative. This program was established to tackle unemployment, poverty, and the growing demand for skilled artisans within the community. Many young people lack access to formal higher education but possess the potential to thrive through practical skills training. By offering structured instruction in construction, woodworking, and metal fabrication, the program provides direct pathways to income generation and self-employment. Participants receive both technical expertise and basic business management knowledge to help them start and sustain small enterprises. The long-term impact includes job creation, improved infrastructure, reduced poverty levels, and the development of a skilled workforce capable of driving sustainable community development.",
+    "thumbnail": "https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc",
+    "images": [
+      "https://images.unsplash.com/photo-1503387762-592deb58ef4e",
+      "https://images.unsplash.com/photo-1519710164239-da123dc03ef4",
+      "https://images.unsplash.com/photo-1597262975002-c5c3b14bbd62",
+      "https://images.unsplash.com/photo-1581578731548-c64695cc6952"
+    ]
+  },
+  {
+    "id": "2",
+    "program": "Talent Discovery & Creative Arts Development",
+    "excerpt": "Identifying and nurturing talents in music, dance, drama, and creative arts.",
+    "description": "The Talent Discovery & Creative Arts Development program was established to provide a positive platform for young people to express themselves and develop their natural abilities. Many talented individuals lack opportunities, mentorship, and exposure, which can lead to wasted potential. This initiative identifies gifts in music, dance, drama, poetry, and visual arts, and nurtures them through structured training, mentorship, and public showcases. By promoting creativity and self-expression, the program builds confidence, discipline, and teamwork among participants. Its long-term impact includes the development of professional artists, strengthened cultural identity, reduced youth involvement in harmful activities, and the promotion of positive messages that inspire the broader community.",
+    "thumbnail": "https://images.unsplash.com/photo-1506157786151-b8491531f063",
+    "images": [
+      "https://images.unsplash.com/photo-1497032205916-ac775f0649ae",
+      "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4",
+      "https://images.unsplash.com/photo-1464375117522-1311dd6b0b81",
+      "https://images.unsplash.com/photo-1520975928316-7f6d7a5f9f0d"
+    ]
+  },
+  {
+    "id": "3",
+    "program": "Gospel Preaching & Evangelism Outreach",
+    "excerpt": "Spreading the gospel and providing spiritual guidance to the community.",
+    "description": "The Gospel Preaching & Evangelism Outreach program exists to foster spiritual growth, moral transformation, and unity within the community. In times of social challenges such as crime, substance abuse, and family breakdown, spiritual guidance plays a vital role in restoring hope and direction. Through open-air crusades, youth fellowships, discipleship training, and community prayer gatherings, this program shares messages of faith, love, and integrity. It also provides mentorship and counseling support to individuals facing personal struggles. The positive impact of this initiative includes strengthened families, improved moral standards, increased community harmony, and the nurturing of servant leaders who contribute positively to society.",
+    "thumbnail": "https://images.unsplash.com/photo-1507692049790-de58290a4334",
+    "images": [
+      "https://images.unsplash.com/photo-1475721027785-f74eccf877e2",
+      "https://images.unsplash.com/photo-1529070538774-1843cb3265df",
+      "https://images.unsplash.com/photo-1504052434569-70ad5836ab65",
+      "https://images.unsplash.com/photo-1519681393784-d120267933ba"
+    ]
+  },
+  {
+    "id": "4",
+    "program": "Community Growth & Empowerment Initiative",
+    "excerpt": "Promoting sustainable development and social empowerment in the community.",
+    "description": "The Community Growth & Empowerment Initiative was formed to address broader social and economic challenges affecting families and vulnerable groups. Sustainable development requires more than individual skills—it demands collective action, leadership, and responsible citizenship. This program focuses on leadership training, entrepreneurship workshops, savings groups, environmental conservation campaigns, and social support networks. By encouraging collaboration and shared responsibility, it strengthens community structures and builds resilience against poverty and social instability. The long-term impact includes improved livelihoods, cleaner environments, stronger local leadership, and a united community capable of driving its own sustainable development.",
+    "thumbnail": "https://images.unsplash.com/photo-1521737604893-d14cc237f11d",
+    "images": [
+      "https://images.unsplash.com/photo-1509099836639-18ba1795216d",
+      "https://images.unsplash.com/photo-1522202176988-66273c2fd55f",
+      "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c",
+      "https://images.unsplash.com/photo-1492724441997-5dc865305da7"
+    ]
+  }
+]
+
 
 

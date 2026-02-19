@@ -15,16 +15,15 @@ export function Story() {
             viewport={{ once: true }}
             className="relative"
           >
-            <div className="rounded-3xl overflow-hidden shadow-2xl">
+            <div className="rounded-l-2xl -mr-10 h-[500px] overflow-hidden border-0 relative">
               <img
-                src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&h=600&fit=crop"
+                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTKD2fZPqR0g94t2QfjUoM44JuBlFC5D2eGFw&s"
                 alt="Community engagement"
-                className="w-full h-full object-cover"
+                className="w-full h-full object-fill"
               />
+              <div className="absolute border-0 inset-0 pointer-events-none bg-gradient-to-r from-transparent via-white/30 to-white" />
             </div>
-            <div className="absolute top-4 right-4 bg-primary text-white rounded-full p-4 shadow-lg">
-              <span className="text-3xl">🌍</span>
-            </div>
+             
           </motion.div>
 
           {/* Text Content */}
