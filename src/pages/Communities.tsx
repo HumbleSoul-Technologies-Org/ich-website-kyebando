@@ -307,7 +307,7 @@ export default function Communities() {
                             "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=400&h=400&fit=crop"
                           }
                           alt={community.name}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-fill"
                         />
                       </div>
                       {/* Gradient Overlay */}

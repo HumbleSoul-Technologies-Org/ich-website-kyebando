@@ -20,6 +20,7 @@ export function Navbar() {
     { href: "/", label: "Home" },
     { href: "/programs", label: "Programs" },
     { href: "/communities", label: "Out Reaches" },
+    { href: "/blog", label: "Blog" },
     // { href: "/talent", label: "Talent Discovery" },
     { href: "/about", label: "About" },
     { href: "/admin", label: "Admin", admin: true },

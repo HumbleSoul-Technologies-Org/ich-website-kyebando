@@ -105,7 +105,7 @@ export default function VisitDetails() {
           {/* Left: Thumbnail */}
           <div className="flex md:items-stretch md:col-span-1 max-h-[250px] sm:max-h-[350px] md:max-h-none">
             <div
-              className="w-full bg-cover bg-center h-full md:min-h-[420px]"
+              className="w-full bg-cover bg-no-repeat bg-center h-full md:min-h-[420px]"
               style={{ backgroundImage: `url(${visit.thumbnail})` }}
             />
           </div>
@@ -175,10 +175,10 @@ export default function VisitDetails() {
                 </div>
               </div>
 
-              <div className="">
+              <div className="max-h-[200px] overflow-y-auto">
                 <h3 className="font-semibold text-sm sm:text-base">Gallery</h3>
                 {visit.gallery && visit.gallery.length > 0 ? (
-                  <div className="mt-2 sm:mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2 transition-all">
+                  <div className="mt-2 sm:mt-3   grid grid-cols-2 sm:grid-cols-3 gap-2 transition-all">
                     {visit.gallery.map((img: string, i: number) => (
                       <button
                         key={i}

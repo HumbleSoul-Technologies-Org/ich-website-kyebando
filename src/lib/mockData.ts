@@ -5,19 +5,19 @@ export const mockCommunities = [
     "community": "Gulu Municipality",
     "country": "Uganda",
     "date": "2026-03-12",
-    "excerpt": "A community outreach focused on digital literacy and entrepreneurship in Northern Uganda.",
+    "excerpt": "A community outreach focused on Brick Making & Construction Skills Training in Northern Uganda.",
     "content": "The visit to Gulu Municipality was organized after identifying a growing number of unemployed youth who lacked access to digital skills and entrepreneurship training. Innovation Community Hub partnered with local leaders and churches to introduce basic computer literacy, online safety, and small business innovation. The program aimed to reduce unemployment, encourage self-employment, and expose young people to technology-driven opportunities. Trainers also discovered musical and artistic talents among participants, creating pathways for mentorship and further development.",
-    "thumbnail": "https://picsum.photos/seed/gulu/600/400",
-    "videoId": "Si5auXCYWDI",
+    "thumbnail": "https://cdn.prod.website-files.com/63a0136a66f4166f841e4f50/64fb2cf61a04795e35644164_N1%20Paving%20The%20History%20of%20Brick%20Making%20Sep.jpg",
+    "videoId": "w_Fto5rv-Y0",
     "participants": [
       { "name": "Daniel Okello", "image": "https://i.pravatar.cc/150?img=1", "email": "daniel@gulu.com", "phone": "+256701234001", "role": "Trainer" },
       { "name": "Sarah Auma", "image": "https://i.pravatar.cc/150?img=2", "email": "sarah@gulu.com", "phone": "+256701234002", "role": "Volunteer" }
     ],
     "gallery": [
-      "https://picsum.photos/seed/gulu1/500/400",
-      "https://picsum.photos/seed/gulu2/500/400",
-      "https://picsum.photos/seed/gulu3/500/400",
-      "https://picsum.photos/seed/gulu4/500/400"
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRUhLRtnMjY30HqIXODONRWB2dWJWFn7o7jAw&s",
+      "https://thumbs.dreamstime.com/b/hand-made-bricks-14096011.jpg",
+      "https://tlstore.co.za/wp-content/uploads/2025/02/Screenshot_20250130-104053-1.png",
+      "https://media.istockphoto.com/id/622800884/photo/close-up-of-industrial-bricklayer-installing-bricks-on-construction-site.jpg?s=612x612&w=0&k=20&c=5h8_HF5wWNsBw7Pw9YoneA4KhtcPslH5iT1fiW_lJZs="
     ],
     "comments": [
       { "name": "Peter", "phone": "+256701111111", "comment": "Very inspiring training session!", "date": "2026-03-13" }
@@ -33,19 +33,19 @@ export const mockCommunities = [
     "community": "Mbale Central",
     "country": "Uganda",
     "date": "2026-04-05",
-    "excerpt": "Training youth in innovation and leadership skills.",
+    "excerpt": "a capentry and woodwork training program in Eastern Uganda.",
     "content": "This bootcamp in Mbale Central was conducted after local schools and youth groups requested support in leadership and innovation training. Many young people showed strong interest in business but lacked structured guidance. The program focused on leadership development, problem-solving, and productive use of mobile technology. The visit also aimed to build confidence among youth and prepare them to initiate small income-generating projects while identifying talents in sports and visual arts.",
-    "thumbnail": "https://picsum.photos/seed/mbale/600/400",
-    "videoId": "Bsbn2x3CeAU",
+    "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS6J-oDRk6Ph8xKM5RI-N2_hfFKLkC-ddpfgg&s",
+    "videoId": "-H8MsPePrAc",
     "participants": [
       { "name": "Joseph Waswa", "image": "https://i.pravatar.cc/150?img=3", "email": "joseph@mbale.com", "phone": "+256701234003", "role": "Coordinator" },
       { "name": "Ruth Namusoke", "image": "https://i.pravatar.cc/150?img=4", "email": "ruth@mbale.com", "phone": "+256701234004", "role": "Mentor" }
     ],
     "gallery": [
-      "https://picsum.photos/seed/mbale1/500/400",
-      "https://picsum.photos/seed/mbale2/500/400",
-      "https://picsum.photos/seed/mbale3/500/400",
-      "https://picsum.photos/seed/mbale4/500/400"
+      "https://www.swisscontact.org/_Resources/Persistent/9/0/f/3/90f397ce7eb6fe9a5c72264640aa28acd9718104/MicrosoftTeams-image%20%284%29-4864x2410-1200x595.png",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSHPxlTbyLQ5IVxFR9PXe9OgEBMmEtwo5UiHg&s",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTkvoDpBQJhIPMWLcl0Dv2StmoTIER_i83OHw&s",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRbO3q0xw0fzP9B3XgJeDKPAzXhz9PttpjPSA&s"
     ],
     "comments": [],
     "likes": 89,
@@ -59,22 +59,24 @@ export const mockCommunities = [
     "community": "Walukuba",
     "country": "Uganda",
     "date": "2026-05-10",
-    "excerpt": "Promoting creativity and problem-solving in river-side communities.",
+    "excerpt": "Discovering and nurturing artistic and musical talent in river-side communities.",
     "content": "The Jinja visit targeted river-side communities where many youths depend on fishing and small trade for survival. The program was designed to introduce creative problem-solving and design thinking as tools for improving daily livelihoods. Innovation Community Hub also aimed to identify artistic and musical talent among participants, offering guidance on how creativity can be turned into sustainable careers.",
-    "thumbnail": "https://picsum.photos/seed/jinja/600/400",
-    "videoId": "xejRN3F9quM",
+    "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTYwWcIYb69gW_FqBJo5TqWutkjASMzE-MgORJvhNgouw&s",
+    "videoId": "7fdmSfCslMA",
     "participants": [
       { "name": "Mark Kato", "image": "https://i.pravatar.cc/150?img=5", "email": "mark@jinja.com", "phone": "+256701234005", "role": "Trainer" }
     ],
     "gallery": [
-      "https://picsum.photos/seed/jinja1/500/400",
-      "https://picsum.photos/seed/jinja2/500/400",
-      "https://picsum.photos/seed/jinja3/500/400",
-      "https://picsum.photos/seed/jinja4/500/400",
-      "https://picsum.photos/seed/jinja1/500/400",
-      "https://picsum.photos/seed/jinja2/500/400",
-      "https://picsum.photos/seed/jinja3/500/400",
-      "https://picsum.photos/seed/jinja4/500/400"
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRUUZj9nJd0iTM5QYfAph6x0b4CGzNgVfuykg&s",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRxk1GjXvNy2CFO2twf54NEefWmcCeJknhX0g&shttps://s.rfi.fr/media/display/2da667f0-02c3-11ee-8c4a-005056bf30b7/w:1024/p:16x9/000_33DM63T.jpg",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRgWyE37gkuseoLwtTiPVdBOCRyZ0k5dA4tTA&s",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRhxUGqLoqWSVF6ThbGmNE6ThvTDDJIC8u0hQ&s",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR16RuZjmsz_IKnjTFITTCPPfvdoHrGYl6LHg&s",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTw980J5HDKN30vebqzf2V4BXX5J4Iamw2-dg&s",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRwvJG6JPnLJK-pgf-KChjsaSRey_Z1DuyNCA&s",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRAWu-64TPjJuxvCzXpC5ULcmZWSB-Ou_mINA&s",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR4i5Q-cJ5Q4Cx1Vb7CrtibIeEgfxVzh_xyNA&s",
+      "https://i0.wp.com/awakentalentsug.com/wp-content/uploads/2024/09/IMG-20240905-WA0171.jpg?fit=600%2C600&ssl=1"
     ],
     "comments": [
       { "name": "Alice", "phone": "+256701222222", "comment": "We learned many new skills today.", "date": "2026-05-11" }
@@ -90,18 +92,17 @@ export const mockCommunities = [
     "community": "Adyel",
     "country": "Uganda",
     "date": "2026-06-15",
-    "excerpt": "Teaching digital skills to rural communities.",
+    "excerpt": "Teaching Electrical Installation & Wiring to rural communities.",
     "content": "The outreach in Lira focused on rural communities with limited access to computers and internet services. The visit aimed to bridge the digital divide by teaching basic web browsing, document creation, and safe internet practices. Innovation Community Hub responded to community leaders who highlighted the need for youth to gain digital awareness to compete in modern job markets.",
-    "thumbnail": "https://picsum.photos/seed/lira/600/400",
-    "videoId": "Bm_-1xPEbDM",
+    "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRfnt8xeDd5x93fHn0_WSWGIEuD39KUfwwm7g&s",
+    "videoId": "HPY_PX_f4k4",
     "participants": [
       { "name": "Grace Atim", "image": "https://i.pravatar.cc/150?img=6", "email": "grace@lira.com", "phone": "+256701234006", "role": "Trainer" }
     ],
     "gallery": [
-      "https://picsum.photos/seed/lira1/500/400",
-      "https://picsum.photos/seed/lira2/500/400",
-      "https://picsum.photos/seed/lira3/500/400",
-      "https://picsum.photos/seed/lira4/500/400"
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSnmIiRWa18TNa9Ti3j0jw39AhiCbWsmnSd3w&s",
+      "https://pictures-uganda.jijistatic.com/19756720_MzAwLTY4NC00ODBhMDg2MDBk.webp",
+      "https://i0.wp.com/observer.ug/wp-content/uploads/2017/12/Umeme-staff-at-work.jpg?fit=760%2C584&ssl=1",
     ],
     "comments": [],
     "likes": 77,
@@ -115,18 +116,18 @@ export const mockCommunities = [
     "community": "Kakoba",
     "country": "Uganda",
     "date": "2026-07-20",
-    "excerpt": "Identifying talents in art, music, and sports.",
+    "excerpt": "Gospel Preaching & Evangelism Crusade in Mbarara.",
     "content": "The Mbarara camp was organized to discover and nurture hidden talents among young people in urban and semi-rural communities. Many youths showed exceptional ability in music and football but lacked platforms for exposure. Innovation Community Hub aimed to provide mentorship, confidence-building sessions, and guidance on how talent can be transformed into professional opportunities.",
-    "thumbnail": "https://picsum.photos/seed/mbarara/600/400",
-    "videoId": "6FH9qBXJVBI",
+    "thumbnail": "https://raviabrahamministries.org/wp-content/uploads/2020/08/7-Buwenge-Gospel-Healing-Cusade-Uganda-East-Africa-With-Evangelist-Ravi-Abraham.jpg",
+    "videoId": "4TdjyRM62RQ",
     "participants": [
       { "name": "Paul Tumusiime", "image": "https://i.pravatar.cc/150?img=7", "email": "paul@mbarara.com", "phone": "+256701234007", "role": "Coordinator" }
     ],
     "gallery": [
-      "https://picsum.photos/seed/mbarara1/500/400",
-      "https://picsum.photos/seed/mbarara2/500/400",
-      "https://picsum.photos/seed/mbarara3/500/400",
-      "https://picsum.photos/seed/mbarara4/500/400"
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRi2bkgPcRWVViOb1Es3YnaHFtBHfNLfuXPKg&s",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR8cQVPMnFYAtLyrr6CqEpNZfQPsux88tEoCA&s",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRKGjj9gLpcgwVmSVbR75Wq0Wf_EdZ9BAz3Rg&s",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRzfrvOOuhR-A649GGzZaLh33940-Cqixif6A&s"
     ],
     "comments": [],
     "likes": 98,
@@ -140,16 +141,15 @@ export const mockCommunities = [
     "community": "Eastern Division",
     "country": "Uganda",
     "date": "2026-09-02",
-    "excerpt": "Upcoming workshop on innovation and creativity.",
+    "excerpt": " workshop on Plumbing & Pipe Fitting Workshop.",
     "content": "The planned workshop in Soroti is intended to equip youth and community leaders with skills in idea generation, problem analysis, and basic business planning. The visit was scheduled after consultations with local councils who expressed concern about rising youth unemployment and lack of innovation training opportunities.",
-    "thumbnail": "https://picsum.photos/seed/soroti/600/400",
-    "videoId": "KUXjXW7PtC0",
+    "thumbnail": "https://media.istockphoto.com/id/2149864351/photo/irrigation-woker-using-a-red-pvc-pipe-cutter-to-cut-a-polypropylene-plastic-sprinkler-line-to.jpg?s=612x612&w=0&k=20&c=-CrJ_yOHd226-Anwgwnf2y7IhOwmWVnekZUCvfBF5pA=",
+    "videoId": "aPSZ8M8lTpI",
     "participants": [],
     "gallery": [
-      "https://picsum.photos/seed/soroti1/500/400",
-      "https://picsum.photos/seed/soroti2/500/400",
-      "https://picsum.photos/seed/soroti3/500/400",
-      "https://picsum.photos/seed/soroti4/500/400"
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRXx6igk-81GklfGK1rUIVgfGi_3uzaF-emGg&s",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTALf1sqPU9ZfVS0V196YRf_Ix0Tu_o9_j6hQ&s",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQGs2y3PxNEEpfyCAw1YE57WrkJOxfCGcZIKQ&s",
     ],
     "comments": [],
     "likes": 0,
@@ -163,16 +163,16 @@ export const mockCommunities = [
     "community": "Nyendo",
     "country": "Uganda",
     "date": "2026-10-18",
-    "excerpt": "Upcoming community technology awareness day.",
+    "excerpt": " community Welding & Metal Fabrication awareness day.",
     "content": "The Masaka Tech Day is designed to raise awareness about the importance of digital tools in education and business. The visit will target market vendors and students, showing them how mobile phones and basic applications can improve productivity and security. The program was created in response to requests from teachers and traders who sought practical technology training.",
-    "thumbnail": "https://picsum.photos/seed/masaka/600/400",
-    "videoId": "8uXh3_bt77M",
+    "thumbnail": "https://www.ugabox.com/images/business/directory/metal-fabrication/metal-fabrication-kampala-uganda-ugabox-uganda-business-directory-online-services.jpg",
+    "videoId": "oB7ROccFNgI",
     "participants": [],
     "gallery": [
-      "https://picsum.photos/seed/masaka1/500/400",
-      "https://picsum.photos/seed/masaka2/500/400",
-      "https://picsum.photos/seed/masaka3/500/400",
-      "https://picsum.photos/seed/masaka4/500/400"
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRFxdhq1sfanigiTJ-_WZ23ynciR28lG1xNjQ&s",
+      "https://c8.alamy.com/comp/2G90BYP/technicians-designing-a-machine-to-process-milk-in-kampala-uganda-2G90BYP.jpg",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQgaeHXdh8sLb5ZKVJ4g2acQOUk1HfGv4i51g&s",
+      "https://open.enabel.be/files/pictures/update/UGA160321T_6639e38a692bc1.80707553.JPG"
     ],
     "comments": [],
     "likes": 0,
@@ -188,7 +188,7 @@ export const mockCommunities = [
     "date": "2026-11-25",
     "excerpt": "Upcoming leadership development summit for young professionals.",
     "content": "The Fort Portal Leadership Summit is scheduled to bring together young professionals and entrepreneurs to discuss strategies for youth empowerment and sustainable development. This event will feature keynote speakers, networking sessions, and workshops on digital transformation and business growth.",
-    "thumbnail": "https://picsum.photos/seed/fortportal/600/400",
+    "thumbnail": "https://cns.mak.ac.ug/wp-content/uploads/2025/04/Photo3-The-trainees-in-practicals-at-the-Department-of-Physics-premises-at-Makerere-University-1500-x-1000-1024x683-1.jpg",
     "gallery": [],
     "participants": [],
     "comments": [],
@@ -205,7 +205,7 @@ export const mockCommunities = [
     "date": "2026-12-10",
     "excerpt": "Upcoming health awareness and wellness program for rural communities.",
     "content": "The Kabale health initiative aims to bring essential health information and wellness training to underserved communities in the mountainous region. The program will focus on preventive health measures, nutrition awareness, and mental health support. Community health volunteers will be trained to serve as local health ambassadors.",
-    "thumbnail": "https://picsum.photos/seed/kabale/600/400",
+    "thumbnail": "https://s3.amazonaws.com/cfanweb.crusades/20240620-uganda-crusade/gallery/Kampala%2024%20D4-10170.jpg",
     "gallery": [],
     "participants": [],
     "comments": [],
@@ -470,21 +470,21 @@ export const notifications =  [
 export const staff =[
   {
     "id": "1",
-    "name": "Daniel Okello",
+    "name": "Dr.Byamukama Henry",
     "phone": "+256701234567",
-    "email": "daniel.okello@example.org",
+    "email": "dr.byamukama.henry@example.org",
     "role": "CEO",
-    "image": "https://randomuser.me/api/portraits/men/11.jpg",
+    "image": "https://www.measummit.com/wp-content/uploads/2025/06/Henry.png",
     "gender": "male"
   },
   {
     "id": "2",
-    "name": "Sarah Nansubuga",
+    "name": "Kiyee Allan",
     "phone": "+256702345678",
-    "email": "sarah.nansubuga@example.org",
-    "role": "Chairman",
+    "email": "kiyee.allan@example.org",
+    "role": "Master of Ceremony",
     "image": "https://randomuser.me/api/portraits/women/12.jpg",
-    "gender": "female"
+    "gender": "male"
   },
   {
     "id": "3",
@@ -633,7 +633,7 @@ export const programs = [
     "program": "Talent Discovery & Creative Arts Development",
     "excerpt": "Identifying and nurturing talents in music, dance, drama, and creative arts.",
     "description": "The Talent Discovery & Creative Arts Development program was established to provide a positive platform for young people to express themselves and develop their natural abilities. Many talented individuals lack opportunities, mentorship, and exposure, which can lead to wasted potential. This initiative identifies gifts in music, dance, drama, poetry, and visual arts, and nurtures them through structured training, mentorship, and public showcases. By promoting creativity and self-expression, the program builds confidence, discipline, and teamwork among participants. Its long-term impact includes the development of professional artists, strengthened cultural identity, reduced youth involvement in harmful activities, and the promotion of positive messages that inspire the broader community.",
-    "thumbnail": "https://images.unsplash.com/photo-1506157786151-b8491531f063",
+    "thumbnail": "https://i0.wp.com/awakentalentsug.com/wp-content/uploads/2024/09/IMG-20240905-WA0171.jpg?fit=1280%2C960&ssl=1",
     "images": [
       "https://images.unsplash.com/photo-1497032205916-ac775f0649ae",
       "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4",
@@ -659,12 +659,67 @@ export const programs = [
     "program": "Community Growth & Empowerment Initiative",
     "excerpt": "Promoting sustainable development and social empowerment in the community.",
     "description": "The Community Growth & Empowerment Initiative was formed to address broader social and economic challenges affecting families and vulnerable groups. Sustainable development requires more than individual skills—it demands collective action, leadership, and responsible citizenship. This program focuses on leadership training, entrepreneurship workshops, savings groups, environmental conservation campaigns, and social support networks. By encouraging collaboration and shared responsibility, it strengthens community structures and builds resilience against poverty and social instability. The long-term impact includes improved livelihoods, cleaner environments, stronger local leadership, and a united community capable of driving its own sustainable development.",
-    "thumbnail": "https://images.unsplash.com/photo-1521737604893-d14cc237f11d",
+    "thumbnail": "https://qdic.org/wp-content/uploads/2025/03/e0cfd599-9784-4687-8b33-898ea7597c1c.png",
     "images": [
       "https://images.unsplash.com/photo-1509099836639-18ba1795216d",
       "https://images.unsplash.com/photo-1522202176988-66273c2fd55f",
       "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c",
       "https://images.unsplash.com/photo-1492724441997-5dc865305da7"
+    ]
+  }
+]
+
+
+export const blogsData = [
+  {
+    "id": "1",
+    "title": "Transforming Youth Through Technical Skills Training",
+    "excerpt": "Over 120 youth empowered with hands-on vocational skills, creating new income opportunities in the community.",
+    "content": "Since the launch of the Technical Skills Development Program, the Innovative Community Hub has trained more than 120 young people in brick making, carpentry, and welding. Many of the beneficiaries were previously unemployed and lacked direction. Through structured mentorship, practical sessions, and starter toolkits, several graduates have started small businesses, while others have secured employment in local construction projects. Community leaders report improved household incomes and reduced youth involvement in crime and substance abuse. The program has also contributed to better infrastructure, as trainees have supported in building homes, repairing schools, and fabricating community gates. The outreach has proven that equipping young people with practical skills can create lasting social and economic transformation.",
+    "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRPxoS5K2hzxYVviIHT5UK10-rJuoioUBF74Q&s",
+    "author": "Community Outreach Team",
+    "createdAt": "2026-01-12T10:30:00Z",
+    "likes": 245,
+    "comments": 38,
+    "gallery": [
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSzQDOGM1JRCUjVqXZqW4yAZBJOai2iJ9EH4g&s",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQPGoQoNmVxnFWOnOTa8K2N-3rEBqLeyFCYhg&s",
+       
+    ]
+  },
+  {
+    "id": "2",
+    "title": "Reviving Hope Through Gospel Outreach and Evangelism",
+    "excerpt": "Hundreds reached through open-air crusades, mentorship programs, and youth fellowships.",
+    "content": "The Gospel Preaching & Evangelism Outreach has had a profound spiritual and social impact on the community. Through open-air services, door-to-door ministry, and youth mentorship sessions, hundreds of individuals have received counseling, spiritual guidance, and renewed hope. Testimonies from families indicate improved relationships, reduced domestic conflicts, and stronger moral values among young people. The outreach team has also partnered with local leaders to provide follow-up support for vulnerable households. Community members highlight that the program has restored unity and strengthened the culture of compassion and service. The initiative continues to foster spiritual growth while addressing real-life challenges faced by families in the region.",
+    "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT-LMWLQsXfQw5HIoaBeGCeweun8Yd-IP-qug&s",
+    "author": "Faith & Outreach Coordinator",
+    "createdAt": "2026-01-25T14:15:00Z",
+    "likes": 312,
+    "comments": 54,
+    "gallery": [
+      "https://davidshope.org/wp-content/uploads/2025/11/Untitled-design-7.jpg",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRoeBZO4luNuFHeaxaX-fbrkLTGiNhePmqQng&s",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRe5AUGGqfnDfNHpP3wyYIU71-w5qA30gKHsw&s",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRAvwasrgs-Ub2i2D-o1jWzjkM_JhorX4EA7A&s",
+    ]
+  },
+  {
+    "id": "3",
+    "title": "Empowering Creativity and Community Leadership",
+    "excerpt": "Talent discovery and leadership workshops inspiring confidence and positive change.",
+    "content": "Through the Talent Discovery & Community Empowerment initiatives, the Innovative Community Hub has successfully created a platform for young people to showcase their abilities while developing leadership skills. Music concerts, drama presentations, poetry events, and leadership seminars have attracted large community participation. Many participants have reported increased confidence, improved communication skills, and new career opportunities in the creative arts sector. Additionally, leadership workshops have equipped community members with knowledge in entrepreneurship, savings culture, and environmental responsibility. Feedback from local stakeholders indicates that the project has strengthened social cohesion and inspired a culture of innovation and collaboration. The overall impact is a more vibrant, skilled, and united community prepared to shape its own future.",
+    "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSYknqZ6YfAOK2KfPJNm48WXiLc44iuPKJDyg&s",
+    "author": "Programs & Impact Office",
+    "createdAt": "2026-02-05T09:00:00Z",
+    "likes": 198,
+    "comments": 27,
+    "gallery": [
+      "https://creativerevolution.io/wp-content/uploads/2024/04/The-Heart-of-Creative-Leadership-1024x574.jpg",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQO9kqDSkcbf8pg6fzXmdmWQGdUD-g3RY4pWQ&s",
+      "https://learningmole.com/wp-content/uploads/2025/07/v2-t59hx-kvpmb.jpg",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTB7MqCXnPYK5n7fe6ldJwMWEO0FDRkFzeitQ&s",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS8KOyVs_xaa5hGtoyWuT2g5077FHvnaQ01jQ&s"
     ]
   }
 ]

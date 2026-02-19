@@ -30,12 +30,12 @@ export function TeamGrid() {
               transition={{ duration: 0.5, delay: index * 0.1 }}
               viewport={{ once: true }}
             >
-              <Card className="h-full overflow-hidden hover:shadow-lg transition-shadow group">
+              <Card className="h-96 w-80 border-0 overflow-hidden hover:shadow-lg transition-shadow group">
                 <div className="relative h-48 bg-gradient-to-br from-primary/20 to-secondary/20 overflow-hidden">
                   <img
                     src={member.image}
                     alt={member.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                    className="w-full h-full object-fill group-hover:scale-110 transition-transform duration-300"
                   />
                 </div>
                 <CardContent className="pt-6">

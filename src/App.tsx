@@ -8,6 +8,8 @@ import NotFound from "@/pages/not-found";
 
 // Pages
 import Home from "@/pages/Home";
+import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
 import About from "@/pages/About";
 import Programs from "@/pages/Programs";
 import Communities from "@/pages/Communities";
@@ -51,7 +53,8 @@ function Router() {
       
       {/* Placeholder Pages */}
       <Route path="/about" component={About} /> 
-      <Route path="/blog" component={Home} />
+      <Route path="/blog/:id" component={BlogPost} />
+      <Route path="/blog" component={Blog} />
       <Route path="/contact" component={GetInvolved} />
 
       <Route component={NotFound} />
