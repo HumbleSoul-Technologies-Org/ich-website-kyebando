@@ -24,43 +24,78 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { staff as mockStaff } from "@/lib/mockData";
-import { Plus, Mail, Phone, MoreVertical, Edit, Trash2 } from "lucide-react";
+import { Plus, Mail, Phone, MoreVertical, Edit, Trash2, Loader } from "lucide-react";
+import axios from "axios";
+import { set } from "date-fns";
+import { apiRequest } from "@/lib/queryClient";
+import { useQuery } from "@tanstack/react-query";
 
 export default function AdminStaffPage() {
+
+  const { data: staffData, isLoading: staffLoading } = useQuery<any>({
+    queryKey: ['staff','all'],
+  })  
   const [staff, setStaff] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [formData, setFormData] = useState<any>({
-    id: "",
+    _id: "",
     name: "",
     email: "",
     phone: "",
     role: "",
     gender: "",
-    image: "",
+    image:{url:"",public_id:""},
   });
-  const [selectedImage, setSelectedImage] = useState<string>("");
+  const [selectedImage, setSelectedImage] = useState<File|null>(null);
+  const [imagePreview, setImagePreview] = useState<string|null>(null);
+  const [saving, setSaving] = useState<boolean|null>(null);
+  const [deleting, setDeleting] = useState<string|null>(null);
 
   useEffect(() => {
-    setStaff(mockStaff);
-    setIsLoading(false);
+    if (staffData) {
+      setStaff(staffData); 
+    }
+    
+    
   }, []);
 
   const resetForm = () => {
     setFormData({
-      id: "",
+      _id: "",
       name: "",
       email: "",
       phone: "",
       role: "",
       gender: "",
-      image: "",
+      image:{url:"",public_id:""},
     });
-    setSelectedImage("");
+    setSelectedImage(null);
     setIsEditMode(false);
   };
+
+   // upload the selected image to the server
+    const uploadFileToServer = async (file: File) => {
+      
+      try {
+        const formData = new FormData();
+        formData.append("image", file);
+        const { data } = await axios.post(
+          `${import.meta.env.VITE_API_URL}/staff/upload/image`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+        return data;
+      } catch (error) {
+      
+        return {url:'',public_id:''};
+      }  
+    };
 
   const handleAddStaff = () => {
     resetForm();
@@ -68,44 +103,82 @@ export default function AdminStaffPage() {
   };
 
   const handleEdit = (member: any) => {
-    setFormData(member);
-    setSelectedImage("");
+    setFormData({
+      _id: member._id,
+      name: member.name,
+      email: member.email,
+      phone: member.phone,
+      role: member.role,
+      gender: member.gender,
+      image: member.image || member.photo || {url:'',public_id:''},
+    });
+    setSelectedImage(null);
+    setImagePreview(member.image?.url || member.photo?.url || null);
     setIsEditMode(true);
     setIsDialogOpen(true);
   };
 
-  const handleDelete = (memberId: string) => {
-    setStaff(staff.filter((m) => m.id !== memberId));
+  const handleDelete = async (memberId: string) => {
+    setDeleting(memberId);
+    try {
+      await apiRequest('DELETE',`/staff/delete/${memberId}`);
+     setStaff(staff.filter((m) => m._id !== memberId));
+   } catch (error) {
+    console.log('====================================');
+    console.log(error);
+    console.log('====================================');
+   }finally {
+    setDeleting(null);
+   }
   };
 
-  const handleSaveStaff = () => {
-    if (!formData.name || !formData.email || !formData.role) {
+  const handleSaveStaff = async() => {
+    try {
+     setSaving(true);
+     if (!formData.name || !formData.email || !formData.role) {
       alert("Please fill in all required fields");
       return;
     }
 
-    // Use uploaded image if available, otherwise use URL
-    const finalData = {
-      ...formData,
-      image: selectedImage || formData.image,
+    let photoData = {url:'',public_id:''};
+    if (selectedImage) {
+      photoData = await uploadFileToServer(selectedImage);
+    }
+
+    // Use uploaded image if available, otherwise use existing image
+    const finalImage = photoData.url ? photoData : formData.image;
+
+    const payload = {
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      role: formData.role,
+      gender: formData.gender,
+      image: finalImage,
     };
 
     if (isEditMode) {
+      await apiRequest('PUT',`/staff/update/${formData._id}`, payload);
       setStaff(
         staff.map((m) =>
-          m.id === finalData.id ? finalData : m
+          m._id === formData._id ? { ...m, ...payload, _id: formData._id } : m
         )
       );
     } else {
-      const newStaff = {
-        ...finalData,
-        id: Date.now().toString(),
-      };
-      setStaff([...staff, newStaff]);
+      const response = await apiRequest('POST','/staff/create', payload);
+      setStaff([...staff, { ...response, _id: response._id || response.id }]);
     }
 
     setIsDialogOpen(false);
     resetForm();
+   } catch (error) {
+    console.log('====================================');
+    console.log(error);
+    console.log('====================================');
+    } finally {
+     setSaving(false);
+      
+   }
   };
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -129,13 +202,14 @@ export default function AdminStaffPage() {
       const reader = new FileReader();
       reader.onload = (event) => {
         const imageData = event.target?.result as string;
-        setSelectedImage(imageData);
+        setImagePreview(imageData);
+        setSelectedImage(file);
       };
       reader.readAsDataURL(file);
     }
   };
 
-  if (isLoading) {
+  if (staffLoading) {
     return (
       <AdminLayout>
         <div className="p-4 sm:p-6 flex items-center justify-center min-h-screen">
@@ -164,80 +238,96 @@ export default function AdminStaffPage() {
 
         {/* Staff Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {staff.map((member) => (
-            <div
-              key={member.id}
-              className="relative h-80 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow group"
-              style={{
-                backgroundImage: `url(${member.image})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              }}
-            >
-              {/* Black gradient overlay from left */}
-              <div className="absolute inset-0 bg-gradient-to-r from-black via-black/60 to-transparent" />
-
-              {/* Menu Button */}
-              <div className="absolute top-3 right-3 z-10">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="h-8 w-8 bg-black/40 hover:bg-black/60 text-white"
-                    >
-                      <MoreVertical className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => handleEdit(member)} className="gap-2">
-                      <Edit className="h-4 w-4" />
-                      <span>Edit</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => handleDelete(member.id)}
-                      className="gap-2 text-red-600 focus:text-red-600"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                      <span>Delete</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-              
-              {/* Content */}
-              <div className="absolute inset-0 p-6 flex flex-col justify-between">
-                <div>
-                  <h3 className="text-xl font-bold text-white">{member.name}</h3>
-                  <p className="text-sm text-gray-200">{member.role}</p>
-                </div>
-
-                <div className="space-y-3">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-sm">
-                      <Mail className="h-4 w-4 text-gray-200" />
-                      <span className="text-gray-200 truncate">{member.email}</span>
-                    </div>
-                    {member.phone && (
-                      <div className="flex items-center gap-2 text-sm">
-                        <Phone className="h-4 w-4 text-gray-200" />
-                        <span className="text-gray-200">{member.phone}</span>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex gap-2 pt-2">
-                    <Badge variant="secondary" className="text-xs">
-                      {member.gender}
-                    </Badge>
-                    {/* <Badge variant="default" className="text-xs">
-                      {member.role}
-                    </Badge> */}
-                  </div>
-                </div>
+          {staff.length === 0 ? (
+            <div className="col-span-full">
+              <div className=" bg-white flex-1 h-screen flex items-center justify-center   rounded-lg p-8 text-center">
+                <span>
+                  <img src='/no-user.avif' className="w-96 h-96 object-cover rounded-lg" />
+                  No staff members found. Click "Add Staff" to create your first staff profile.
+                </span>
               </div>
             </div>
-          ))}
+          ) : (
+            staff.map((member) => (
+              <div
+                key={member._id}
+                className="relative h-80 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow group"
+                style={{
+                  backgroundImage: `url(${member.image?.url || member.photo?.url})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                }}
+              >
+                {/* Black gradient overlay from left */}
+                <div className="absolute inset-0 bg-gradient-to-r from-black via-black/60 to-transparent" />
+
+                {/* Menu Button */}
+                <div className="absolute top-3 right-3 z-10">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8 bg-black/40 hover:bg-black/60 text-white"
+                      >
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => handleEdit(member)} className="gap-2">
+                        <Edit className="h-4 w-4" />
+                        <span>Edit</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleDelete(member._id)}
+                        className="gap-2 text-red-600 focus:text-red-600"
+                      >
+                        {deleting === member._id ? (
+                          <><Loader className="w-4 h-4 animate-spin" /> Deleting...</>
+                        ) : (
+                          <><Trash2 className="h-4 w-4" />
+                          <span>Delete</span>
+                          </>
+                        )}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+                
+                {/* Content */}
+                <div className="absolute inset-0 p-6 flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-xl font-bold text-white">{member.name}</h3>
+                    <p className="text-sm text-gray-200">{member.role}</p>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-sm">
+                        <Mail className="h-4 w-4 text-gray-200" />
+                        <span className="text-gray-200 truncate">{member.email}</span>
+                      </div>
+                      {member.phone && (
+                        <div className="flex items-center gap-2 text-sm">
+                          <Phone className="h-4 w-4 text-gray-200" />
+                          <span className="text-gray-200">{member.phone}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex gap-2 pt-2">
+                      <Badge variant="secondary" className="text-xs">
+                        {member.gender}
+                      </Badge>
+                      {/* <Badge variant="default" className="text-xs">
+                        {member.role}
+                      </Badge> */}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
@@ -320,7 +410,7 @@ export default function AdminStaffPage() {
                   <Input
                     id="image"
                     name="image"
-                    value={formData.image}
+                    value={formData?.image?.url}
                     onChange={handleFormChange}
                     placeholder="https://example.com/image.jpg"
                   />
@@ -338,13 +428,13 @@ export default function AdminStaffPage() {
                 </div>
 
                 {/* Image Preview */}
-                {(formData.image || selectedImage) && (
+                {(formData.image.url || imagePreview) && (
                   <div className="mt-3">
                     <p className="text-sm font-medium text-gray-700 mb-2">Preview</p>
                     <img
-                      src={selectedImage || formData.image}
+                      src={imagePreview || formData.image.url}
                       alt="Staff preview"
-                      className="w-full h-40 object-cover rounded-lg border border-gray-200"
+                      className="w-full h-40 object-contain rounded-lg  "
                     />
                   </div>
                 )}
@@ -357,7 +447,7 @@ export default function AdminStaffPage() {
               Cancel
             </Button>
             <Button onClick={handleSaveStaff}>
-              {isEditMode ? "Update Staff" : "Create Staff"}
+              {isEditMode ? (saving ? "Updating..." : "Update Staff") : (saving ? "Saving..." : "Save Staff")}
             </Button>
           </DialogFooter>
         </DialogContent>
