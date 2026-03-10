@@ -165,8 +165,8 @@ export default function AdminStaffPage() {
         )
       );
     } else {
-      const response = await apiRequest('POST','/staff/create', payload);
-      setStaff([...staff, { ...response, _id: response._id || response.id }]);
+      await apiRequest('POST', '/staff/create', payload);
+      setStaff([...staff, { ...payload }]);
     }
 
     setIsDialogOpen(false);
