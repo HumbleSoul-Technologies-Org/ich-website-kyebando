@@ -536,6 +536,11 @@ let thumbnailUrl = {url: formData.thumbnail?.url || "", public_id: formData.thum
           {filteredVisits.length === 0 ? (
             <Card>
               <CardContent className="pt-6">
+                <img
+                  src="/no-visits.webp"
+                  alt="No visits found"
+                  className="mx-auto h-96 w-96 object-contain text-muted-foreground"
+                />
                 <p className="text-center text-muted-foreground py-8">
                   No visits found matching your criteria
                 </p>

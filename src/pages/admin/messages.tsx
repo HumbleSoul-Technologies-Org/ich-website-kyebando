@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { messages as mockMessages } from "@/lib/mockData";
-import { Send, Search, MailOpen, Archive } from "lucide-react";
+import { Send, Search, MailOpen, Archive, Loader2, Trash2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { set } from "date-fns";
 import { apiRequest } from "@/lib/queryClient";
@@ -26,6 +26,7 @@ export default function AdminMessagesPage() {
       "new" | "read" | "replied" | "archived"
   >("new");
   const [replyText, setReplyText] = useState("");
+  const [replyLoading, setReplyLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   const { data: messageData, isLoading: loadingMessages } = useQuery<any>({
@@ -106,7 +107,8 @@ export default function AdminMessagesPage() {
 
   const handleSendReply = async () => { 
     try {
-      if (!replyText.trim()) return;
+      if (!replyText.trim() || !selectedConversation) return;
+      setReplyLoading(true);
 
       await apiRequest('POST', `/messages/${selectedConversation._id}/reply`, { reply: replyText });
       setMessages((prev) =>
@@ -114,13 +116,26 @@ export default function AdminMessagesPage() {
           msg._id === selectedConversation._id ? { ...msg, reply: { ...msg.reply, reply: replyText } } : msg,
         )
       );
+      setReplyText("");
     } catch (error) {
       console.log('====================================');
       console.log(error);
       console.log('====================================');
+    } finally {
+      setReplyLoading(false);
     }
   }
-
+  const handleDeleteMessage = async (msgId: string) => {
+    try {
+      await apiRequest('DELETE', `/messages/${msgId}/delete`);
+      setMessages((prev) => prev.filter((msg) => msg._id !== msgId));
+      setSelectedConversation(null);
+    } catch (error) {
+      console.log('====================================' );
+      console.log(error);
+      console.log('====================================' );
+    }
+  }
   return (
     <AdminLayout>
       <div className="p-4 sm:p-6 space-y-6">
@@ -196,7 +211,7 @@ export default function AdminMessagesPage() {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: idx * 0.05 }}
-                  className={`w-full text-left p-4 border-b border-border flex items-start gap-3 hover:bg-secondary hover:text-white transition-colors ${
+                  className={`w-full text-left p-4 border-b border-border flex items-start gap-3 hover:bg-secondary hover:text-white hover:shadow-lg hover:scale-105 transition-all ${
                     selectedConversation?._id === msg._id ? "bg-secondary text-white" : "bg-white"
                   }`}
                 >
@@ -252,15 +267,26 @@ export default function AdminMessagesPage() {
                       </p>
                     </div>
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleArchiveToggle(selectedConversation._id)}
-                    className="gap-2"
-                  >
-                    <Archive className="h-4 w-4" />
-                    {selectedConversation.isArchived ? "Unarchive" : "Archive"}
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleArchiveToggle(selectedConversation._id)}
+                      className="gap-2"
+                    >
+                      <Archive className="h-4 w-4" />
+                      {selectedConversation.isArchived ? "Unarchive" : "Archive"}
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => handleDeleteMessage(selectedConversation._id)}
+                      className="gap-2"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      Delete
+                    </Button>
+                  </div>
                 </div>
               </div>
 
@@ -320,13 +346,17 @@ export default function AdminMessagesPage() {
                   onChange={(e) => setReplyText(e.target.value)}
                 />
                 <motion.button
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
+                  whileHover={{ scale: replyLoading ? 1 : 1.03 }}
+                  whileTap={{ scale: replyLoading ? 1 : 0.97 }}
                   className="w-full"
                 >
-                  <Button className="w-full gap-2">
-                    <Send className="h-4 w-4" />
-                    Send Reply
+                  <Button className="w-full gap-2"  onClick={handleSendReply} disabled={replyLoading}>
+                    {replyLoading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Send className="h-4 w-4" />
+                    )}
+                    {replyLoading ? "Sending..." : "Send Reply"}
                   </Button>
                 </motion.button>
               </motion.div>
