@@ -11,25 +11,32 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { messages as mockMessages } from "@/lib/mockData";
-import { Send, Search } from "lucide-react";
+import { Send, Search, MailOpen, Archive } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { set } from "date-fns";
+import { apiRequest } from "@/lib/queryClient";
+import { motion } from "framer-motion";
+
 
 export default function AdminMessagesPage() {
   const [messages, setMessages] = useState<any[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [messageFilter, setMessageFilter] = useState<
-    "all" | "new" | "read" | "replied" | "archived"
+      "new" | "read" | "replied" | "archived"
   >("new");
   const [replyText, setReplyText] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
+  const { data: messageData, isLoading: loadingMessages } = useQuery<any>({
+    queryKey: ["messages","all"],
+  })
+
   useEffect(() => {
-    setMessages(mockMessages);
-    if (mockMessages.length > 0) {
-      setSelectedConversation(mockMessages[0]);
-    }
-    setIsLoading(false);
-  }, []);
+     if (messageData) {
+      setMessages(messageData);
+     }
+  }, [messageData]);
 
   const filteredMessages = messages.filter((msg) => {
     // Filter by search term
@@ -44,7 +51,7 @@ export default function AdminMessagesPage() {
     if (messageFilter === "new") {
       return !msg.isRead;
     } else if (messageFilter === "read") {
-      return msg.isRead;
+      return msg.isRead && !msg.isArchived;
     } else if (messageFilter === "replied") {
       return msg.reply?.reply && msg.reply.reply.length > 0;
     } else if (messageFilter === "archived") {
@@ -54,7 +61,7 @@ export default function AdminMessagesPage() {
     return true;
   });
 
-  if (isLoading) {
+  if (loadingMessages) {
     return (
       <AdminLayout>
         <div className="p-4 sm:p-6 flex items-center justify-center min-h-screen">
@@ -62,6 +69,56 @@ export default function AdminMessagesPage() {
         </div>
       </AdminLayout>
     );
+  }
+
+  const handleReadMessage = async(msgId:string) => { 
+    try {
+
+      await apiRequest('POST', `/messages/${msgId}/mark-read` );
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg._id === msgId ? { ...msg, isRead: true } : msg,
+        )
+      );
+      
+    } catch (error) {
+      console.log('====================================');
+      console.log(error);
+      console.log('====================================');
+    }
+  }
+
+  const handleArchiveToggle = async (msgId: string) => { 
+    try {
+      await apiRequest('POST', `/messages/${msgId}/toggle-archive`);
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg._id === msgId ? { ...msg, isArchived: !msg.isArchived } : msg,
+        )
+      );
+      setSelectedConversation(null)
+    } catch (error) {
+      console.log('====================================');
+      console.log(error);
+      console.log('====================================');
+    }
+  }
+
+  const handleSendReply = async () => { 
+    try {
+      if (!replyText.trim()) return;
+
+      await apiRequest('POST', `/messages/${selectedConversation._id}/reply`, { reply: replyText });
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg._id === selectedConversation._id ? { ...msg, reply: { ...msg.reply, reply: replyText } } : msg,
+        )
+      );
+    } catch (error) {
+      console.log('====================================');
+      console.log(error);
+      console.log('====================================');
+    }
   }
 
   return (
@@ -104,7 +161,7 @@ export default function AdminMessagesPage() {
                   onClick={() => setMessageFilter("read")}
                   size="sm"
                 >
-                  Read ({messages.filter((m) => m.isRead).length})
+                  Read ({messages.filter((m) => m.isRead && !m.isArchived).length})
                 </Button>
                 <Button
                   variant={messageFilter === "replied" ? "default" : "outline"}
@@ -130,38 +187,81 @@ export default function AdminMessagesPage() {
             </div>
 
             <div className="flex-1 overflow-y-auto">
-              {filteredMessages.map((msg) => (
-                <button
-                  key={msg.id}
-                  onClick={() => setSelectedConversation(msg)}
-                  className={`w-full text-left p-4 border-b border-border hover:bg-secondary hover:text-white transition-colors ${
-                    selectedConversation?.id === msg.id ? "bg-secondary" : ""
+              {filteredMessages.map((msg, idx) => (
+                <motion.button
+                  key={msg._id}
+                  onClick={() => { setSelectedConversation(msg); if (!msg.isRead) handleReadMessage(msg._id); }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: idx * 0.05 }}
+                  className={`w-full text-left p-4 border-b border-border flex items-start gap-3 hover:bg-secondary hover:text-white transition-colors ${
+                    selectedConversation?._id === msg._id ? "bg-secondary text-white" : "bg-white"
                   }`}
                 >
-                  <p className="font-semibold text-sm">{msg.name}</p>
-                  <p className="text-xs text-muted-foreground truncate hover:text-white">
-                    {msg.subject}
+                  <div className="flex-shrink-0 mt-1">
+                    {msg.isRead ? (
+                      <MailOpen className="h-5 w-5 text-muted-foreground" />
+                    ) : (
+                      <div className="w-2 h-2 bg-red-500 rounded-full" />
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-semibold text-sm truncate">
+                      {msg.subject || msg.name}
+                    </p>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {msg.message.length > 80
+                        ? msg.message.substring(0, 80) + "..."
+                        : msg.message}
+                    </p>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1 flex-shrink-0">
+                    {new Date(msg.createdAt).toLocaleDateString()}
                   </p>
-                  <p className="text-xs text-muted-foreground mt-1 hover:text-white">
-                    {new Date(msg.date).toLocaleDateString()}
-                  </p>
-                </button>
+                </motion.button>
               ))}
             </div>
           </div>
 
           {/* Message View */}
           {selectedConversation ? (
-            <div className="lg:col-span-2 flex flex-col">
+            <motion.div
+              key={selectedConversation._id}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              transition={{ duration: 0.3 }}
+              className="lg:col-span-2 flex flex-col overflow-y-auto bg-white/50 backdrop-blur-sm rounded-lg shadow-inner"
+            >
               {/* Header */}
               <div className="border-b border-border p-4">
-                <h3 className="font-semibold">{selectedConversation.name}</h3>
-                <p className="text-xs text-muted-foreground">
-                  {selectedConversation.email} • {selectedConversation.phone}
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {new Date(selectedConversation.date).toLocaleString()}
-                </p>
+                <div className="flex items-start justify-between">
+                  <div className="flex-1 flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">
+                      {selectedConversation.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <h3 className="font-semibold">{selectedConversation.name}</h3>
+                      <p className="text-xs text-muted-foreground">
+                        {selectedConversation.email} • {selectedConversation.phone}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {new Date(selectedConversation.createdAt).toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleArchiveToggle(selectedConversation._id)}
+                    className="gap-2"
+                  >
+                    <Archive className="h-4 w-4" />
+                    {selectedConversation.isArchived ? "Unarchive" : "Archive"}
+                  </Button>
+                </div>
               </div>
 
               {/* Messages */}
@@ -172,16 +272,26 @@ export default function AdminMessagesPage() {
                       {selectedConversation.subject}
                     </p>
                     <div className="flex justify-start">
-                      <div className="bg-secondary rounded-lg p-3 max-w-md">
+                      <motion.div
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="bg-secondary rounded-lg p-3 max-w-md"
+                      >
                         <p className="text-sm text-white">
                           {selectedConversation.message}
                         </p>
-                      </div>
+                      </motion.div>
                     </div>
                   </div>
                   {selectedConversation.reply?.reply && (
                     <div className="flex justify-end">
-                      <div className="bg-primary text-primary-foreground rounded-lg p-3 max-w-md">
+                      <motion.div
+                        initial={{ opacity: 0, x: 10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.3, delay: 0.1 }}
+                        className="bg-primary text-primary-foreground rounded-lg p-3 max-w-md"
+                      >
                         <p className="text-sm">
                           {selectedConversation.reply.reply}
                         </p>
@@ -190,32 +300,50 @@ export default function AdminMessagesPage() {
                             selectedConversation.reply.repliedOn,
                           ).toLocaleString()}
                         </p>
-                      </div>
+                      </motion.div>
                     </div>
                   )}
                 </div>
               </div>
 
               {/* Reply Input */}
-              <div className="border-t border-border p-4 space-y-2">
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+                className="border-t border-border p-4 space-y-2"
+              >
                 <Textarea
                   placeholder="Type your reply..."
                   className="min-h-20"
                   value={replyText}
                   onChange={(e) => setReplyText(e.target.value)}
                 />
-                <Button className="w-full gap-2">
-                  <Send className="h-4 w-4" />
-                  Send Reply
-                </Button>
-              </div>
-            </div>
+                <motion.button
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  className="w-full"
+                >
+                  <Button className="w-full gap-2">
+                    <Send className="h-4 w-4" />
+                    Send Reply
+                  </Button>
+                </motion.button>
+              </motion.div>
+            </motion.div>
           ) : (
-            <div className="lg:col-span-2 flex items-center justify-center">
-              <p className="text-muted-foreground">
-                Select a conversation to view
-              </p>
-            </div>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="lg:col-span-2 flex items-center justify-center"
+            >
+                <span className="text-center items-center justify-center space-y-4">
+                  <MailOpen className="w-16 h-16 text-muted-foreground" />
+                  <p className="text-muted-foreground">
+                    Select a message to view more details
+                  </p>
+                </span>
+            </motion.div>
           )}
         </div>
       </div>

@@ -1,42 +1,75 @@
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { insertVolunteerSchema, type InsertVolunteer } from "@/types/schema";
-import { useCreateVolunteer } from "@/hooks/use-volunteers";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Label } from "@/components/ui/label";
 import { motion } from "framer-motion";
-import { HandHeart, Users, Heart } from "lucide-react";
-import { useEffect } from "react";
+import { HandHeart, Users, Heart, CheckCircle, Clock, UserCheck, MessageSquare, ArrowRight, BookOpen, Target, Save } from "lucide-react";
+import { useEffect, useState } from "react";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function GetInvolved() {
-  const { mutate, isPending } = useCreateVolunteer();
-   useEffect(() => { 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [messageSent, setMessageSent] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+
+  // Form state for all input fields
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    role: "",
+    message: "",
+  });
+
+  useEffect(() => {
     window.scrollTo(0, 0);
-  }, [])
-  const form = useForm<InsertVolunteer>({
-    resolver: zodResolver(insertVolunteerSchema),
-    defaultValues: {
+  }, []);
+
+  // Handle input changes
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  // Reset form
+  const resetForm = () => {
+    setFormData({
       name: "",
       email: "",
       phone: "",
       role: "",
       message: "",
-      status: "pending"
-    }
-  });
-
-  const onSubmit = (data: InsertVolunteer) => {
-    mutate(data, {
-      onSuccess: () => {
-        form.reset();
-      }
     });
   };
+
+  
+  const sendMessage = async () => {
+    try {
+      setIsSubmitting(true);
+      await apiRequest('POST', '/messages/volunteers/create', formData);
+
+      // Hide form and show success message
+      setShowSuccessMessage(true);
+      resetForm();
+
+      // After 4 seconds, animate success message away and show form again
+      setTimeout(() => {
+        setShowSuccessMessage(false);
+      }, 4000);
+
+    } catch (error) {
+      console.log('====================================');
+      console.log(error);
+      console.log('====================================');
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -79,109 +112,167 @@ export default function GetInvolved() {
               ))}
             </div>
 
-            {/* Form */}
+            {/* Form/Success Message Container */}
             <motion.div 
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
               className="lg:col-span-2 bg-card p-8 md:p-10 rounded-3xl shadow-xl border border-border"
             >
-              <h2 className="font-display text-3xl font-bold mb-8">Get Started</h2>
-              
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <FormField
-                      control={form.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Full Name</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Jane Smith" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email</FormLabel>
-                          <FormControl>
-                            <Input placeholder="jane@example.com" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+              {!showSuccessMessage ? (
+                <>
+                  <h2 className="font-display text-3xl font-bold mb-8">Get Started</h2>
+
+              <form className="space-y-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Full Name</Label>
+                    <Input
+                      id="name"
+                      placeholder="Jane Smith"
+                      value={formData.name}
+                      onChange={(e) => handleInputChange("name", e.target.value)}
+                      required
                     />
                   </div>
-
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <FormField
-                      control={form.control}
-                      name="phone"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Phone (Optional)</FormLabel>
-                          <FormControl>
-                            <Input placeholder="+1 234 567 890" {...field} value={field.value || ''} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="role"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>I'm interested in...</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value || ''}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select a role" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="Volunteer">Volunteering</SelectItem>
-                              <SelectItem value="Partner">Partnership</SelectItem>
-                              <SelectItem value="Sponsor">Sponsorship</SelectItem>
-                              <SelectItem value="Other">Other</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="jane@example.com"
+                      value={formData.email}
+                      onChange={(e) => handleInputChange("email", e.target.value)}
+                      required
                     />
                   </div>
+                </div>
 
-                  <FormField
-                    control={form.control}
-                    name="message"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Message</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            placeholder="Tell us how you'd like to help..." 
-                            className="min-h-[150px]" 
-                            {...field} 
-                            value={field.value || ''}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Phone (Optional)</Label>
+                    <Input
+                      id="phone"
+                      placeholder="+1 234 567 890"
+                      value={formData.phone}
+                      onChange={(e) => handleInputChange("phone", e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="role">I'm interested in...</Label>
+                    <Select value={formData.role} onValueChange={(value) => handleInputChange("role", value)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a role" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Volunteer">Volunteering</SelectItem>
+                        <SelectItem value="Partner">Partnership</SelectItem>
+                        <SelectItem value="Sponsor">Sponsorship</SelectItem>
+                        <SelectItem value="Other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="message">Message</Label>
+                  <Textarea
+                    id="message"
+                    placeholder="Tell us how you'd like to help..."
+                    className="min-h-[150px]"
+                    value={formData.message}
+                    onChange={(e) => handleInputChange("message", e.target.value)}
                   />
+                </div>
 
-                  <Button type="submit" size="lg" disabled={isPending} className="w-full md:w-auto font-bold">
-                    {isPending ? "Sending..." : "Send Message"}
-                  </Button>
-                </form>
-              </Form>
+                <Button
+                  onClick={sendMessage}
+                  disabled={isSubmitting}
+                  size="lg"
+                  className="w-full md:w-auto font-bold"
+                >
+                  {isSubmitting ? <span className="flex items-center justify-center gap-2">Sending... <Save className="w-5 h-5 animate-bounce"/></span> : "Send Message"}
+                </Button>
+              </form>
+                </>
+              ) : (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9, y: -20 }}
+                  transition={{ duration: 0.5, ease: "easeOut" }}
+                  className="text-center"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-green-400 via-emerald-500 to-teal-600 rounded-3xl" />
+                  <div className="absolute inset-0 bg-white/10 backdrop-blur-sm rounded-3xl" />
+                  <div className="relative p-8 md:p-10">
+                    <div className="text-center mb-8">
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                        className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg"
+                      >
+                        <CheckCircle className="w-10 h-10 text-white" />
+                      </motion.div>
+                      <h3 className="font-display text-2xl md:text-3xl font-bold text-white mb-2">
+                        🎉 Message Sent Successfully!
+                      </h3>
+                      <p className="text-white/90 text-lg">
+                        Thank you for reaching out! Your message has been received.
+                      </p>
+                    </div>
+                    <motion.div
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.3 }}
+                      className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-6 border border-white/20 max-w-md mx-auto"
+                    >
+                      <div className="flex items-center justify-center gap-4">
+                        <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                          <Clock className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-white mb-1">Response Time</h4>
+                          <p className="text-white/80">We'll get back to you within 24-48 hours</p>
+                        </div>
+                      </div>
+                    </motion.div>
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.4 }}
+                      className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 max-w-md mx-auto"
+                    >
+                      <h4 className="font-semibold text-white mb-3 flex items-center justify-center gap-2">
+                        <BookOpen className="w-5 h-5" />
+                        While you wait...
+                      </h4>
+                      <p className="text-white/80 mb-4 text-center">
+                        Explore our community and learn more about how you can make an impact
+                      </p>
+                      <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                        <a
+                          href="/programs"
+                          className="flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg transition-colors group"
+                        >
+                          <BookOpen className="w-4 h-4" />
+                          Explore Programs
+                          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        </a>
+                        <a
+                          href="/about"
+                          className="flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg transition-colors group"
+                        >
+                          <Heart className="w-4 h-4" />
+                          Our Mission
+                          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        </a>
+                      </div>
+                    </motion.div>
+                  </div>
+                </motion.div>
+              )}
             </motion.div>
           </div>
         </div>

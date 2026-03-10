@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { useQuery } from "@tanstack/react-query";
+import { motion } from "framer-motion";
 import { blogsData } from "@/lib/mockData";
 import {
   Dialog,
@@ -366,6 +367,11 @@ export default function AdminBlogsPage() {
           {filteredBlogs.length === 0 ? (
             <Card>
               <CardContent className="pt-6">
+                <img
+                  src="/no-blogs.avif"
+                  alt="No blog posts found"
+                  className="mx-auto h-96 w-96 object-contain text-muted-foreground"
+                />
                 <p className="text-center text-muted-foreground py-8">
                   No blog posts found matching your criteria
                 </p>
