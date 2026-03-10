@@ -4,10 +4,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { mockCommunities } from "@/lib/mockData";
-import { Search, MoreVertical, Edit, Star, View, Trash, Trash2, Image as ImageIcon, Users } from "lucide-react";
+import { Search, MoreVertical, Edit, Star, View,  Trash2, Image as ImageIcon, Users, Loader2, Loader, X } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { useQuery } from "@tanstack/react-query";
 import {
   Dialog,
   DialogContent,
@@ -16,10 +16,20 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import axios from "axios";
+ 
+import { apiRequest } from "@/lib/queryClient";
+import { set } from "date-fns";
 
 export default function AdminVisitsPage() {
+
+  const { data: visitsData, isLoading: visitsLoading } = useQuery<any>({
+    queryKey: ["visits","all"],
+  })
+
   const [visits, setVisits] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "visited" | "upcoming">("all");
   const [openMenu, setOpenMenu] = useState<number | null>(null);
@@ -33,32 +43,44 @@ export default function AdminVisitsPage() {
     date: "",
     excerpt: "",
     content: "",
-    thumbnail: "",
+    thumbnail: {url:'',public_id:''},
     videoId: "",
     status: "upcoming",
     participants: [],
     location: { lat: "", long: "" },
-    likes: 0,
-    views: 0,
+    
   });
   const [useCurrentLocation, setUseCurrentLocation] = useState(false);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [selectedImagePreview, setSelectedImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [galleryOpen, setGalleryOpen] = useState(false);
-  const [galleryForm, setGalleryForm] = useState<{ title: string; url: string; image: string }>({ title: "", url: "", image: "" });
+  const [galleryForm, setGalleryForm] = useState<{   image: { url: string; public_id: string } }>({   image: { url: "", public_id: "" } });
   const galleryFileInputRef = useRef<HTMLInputElement | null>(null);
   const [selectedGalleryImage, setSelectedGalleryImage] = useState<string | null>(null);
+  const [galleryDragActive, setGalleryDragActive] = useState(false);
   const [participantsOpen, setParticipantsOpen] = useState(false);
-  const [participantForm, setParticipantForm] = useState<{ name: string; email: string; phone: string; role: string; url: string; image: string }>({ name: "", email: "", phone: "", role: "", url: "", image: "" });
+  const [participantForm, setParticipantForm] = useState<{ name: string; email: string; phone: string; role: string;   photo: { url: string; public_id: string } }>({ name: "", email: "", phone: "", role: "" , photo: { url: "" ,public_id:''} });
   const participantImageInputRef = useRef<HTMLInputElement | null>(null);
   const [selectedParticipantImage, setSelectedParticipantImage] = useState<string | null>(null);
+  const [participantPhoto, setParticipantPhoto] = useState<File | null>(null);
+  const [galleryImage, setGalleryImage] = useState<File | null>(null);
+  const [patId, setPatId] = useState<String | null>('');
+  const [galId, setGalId] = useState<String | null>('');
+
+  useEffect(() => { 
+    if (visitsData) { 
+      setVisits(visitsData);
+    }
+  }, [visitsData])
 
   const handleThumbnailUpload = (file: File) => {
     const reader = new FileReader();
     reader.onload = () => {
       const dataUrl = String(reader.result || "");
-      setSelectedImage(dataUrl);
-      handleFormChange('thumbnail', dataUrl);
+      setSelectedImage(file);
+      setSelectedImagePreview(dataUrl);
+      // setFormData((prev: any) => ({ ...prev, thumbnail: { ...prev.thumbnail, url: dataUrl } }));
     };
     reader.readAsDataURL(file);
   };
@@ -80,22 +102,55 @@ export default function AdminVisitsPage() {
 
   const onGalleryFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
-    if (f) handleGalleryUpload(f);
+    if (f) { handleGalleryUpload(f); setGalleryImage(f)};
   };
 
-  const handleGallerySubmit = (e: any) => {
+  const handleGalleryDrag = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
-    if (!selectedVisit) return;
-    const newItem = {
-      title: galleryForm.title || "",
-      url: galleryForm.url || "",
-      image: galleryForm.image || "",
-    };
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setGalleryDragActive(true);
+    } else if (e.type === "dragleave") {
+      setGalleryDragActive(false);
+    }
+  };
 
-    setVisits((prev) => prev.map((v) => (v.id === selectedVisit.id ? { ...v, gallery: [...(v.gallery || []), newItem] } : v)));
-    setSelectedVisit((prev: any) => (prev ? { ...prev, gallery: [...(prev.gallery || []), newItem] } : prev));
-    setGalleryOpen(false);
-    setOpenMenu(null);
+  const handleGalleryDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setGalleryDragActive(false);
+    
+    const files = e.dataTransfer?.files;
+    if (files && files[0]) {
+      handleGalleryUpload(files[0]);
+      setGalleryImage(files[0]);
+    }
+  };
+
+  const handleGallerySubmit = async (visitId: string) => {
+    // e.preventDefault();
+    setSaving(true);
+     try {
+       const image = await uploadFileToServer(galleryImage as File);
+        await apiRequest("POST", `/visits/add/gallery/${visitId}`, { image });
+     } catch (error) {
+      console.log('====================================');
+      console.log(error);
+      console.log('====================================');
+     }finally {
+      setSaving(false);
+     }
+
+    // setVisits((prev) => prev.map((v) => (v.id === selectedVisit.id ? { ...v, gallery: [...(v.gallery || []), newItem] } : v)));
+    // setSelectedVisit((prev: any) => (prev ? { ...prev, gallery: [...(prev.gallery || []), newItem] } : prev));
+    // setGalleryOpen(false);
+    // setGalleryForm({ image: { url: "", public_id: "" } });
+    // setSelectedGalleryImage(null);
+    // setGalleryDragActive(false);
+    // if (galleryFileInputRef.current) {
+    //   galleryFileInputRef.current.value = "";
+    // }
+    // setOpenMenu(null);
   };
 
   const viewDetails = (visit: any) => {
@@ -113,14 +168,20 @@ export default function AdminVisitsPage() {
       content: visit.content || "",
       location: visit.location ? { lat: String(visit.location.lat), long: String(visit.location.long) } : { lat: "", long: "" },
     });
+    setSelectedImage(null);
+    setSelectedImagePreview(null);
     setFormOpen(true);
     setOpenMenu(null);
   };
 
   const openGallery = (visit: any) => {
     setSelectedVisit(visit);
-    setGalleryForm({ title: "", url: "", image: "" });
+    setGalleryForm({ image: { url: "", public_id: "" } });
     setSelectedGalleryImage(null);
+    setGalleryDragActive(false);
+    if (galleryFileInputRef.current) {
+      galleryFileInputRef.current.value = "";
+    }
     setGalleryOpen(true);
     setOpenMenu(null);
   };
@@ -130,7 +191,7 @@ export default function AdminVisitsPage() {
     reader.onload = () => {
       const dataUrl = String(reader.result || "");
       setSelectedParticipantImage(dataUrl);
-      setParticipantForm((prev) => ({ ...prev, image: dataUrl }));
+      setParticipantPhoto(file);
     };
     reader.readAsDataURL(file);
   };
@@ -142,29 +203,91 @@ export default function AdminVisitsPage() {
 
   const openParticipants = (visit: any) => {
     setSelectedVisit(visit);
-    setParticipantForm({ name: "", email: "", phone: "", role: "", url: "", image: "" });
+    setParticipantForm({ name: "", email: "", phone: "", role: "",   photo: { url: "", public_id: "" } });
     setSelectedParticipantImage(null);
+    setParticipantPhoto(null);
+    if (participantImageInputRef.current) {
+      participantImageInputRef.current.value = "";
+    }
     setParticipantsOpen(true);
     setOpenMenu(null);
   };
 
-  const handleParticipantSubmit = (e: any) => {
-    e.preventDefault();
+  const handleParticipantSubmit = async (visitId: string  ) => {
+    // e.preventDefault();
     if (!selectedVisit) return;
-    const newParticipant = {
-      name: participantForm.name || "",
-      email: participantForm.email || "",
-      phone: participantForm.phone || "",
-      role: participantForm.role || "",
-      url: participantForm.url || "",
-      image: participantForm.image || "",
-    };
-
-    setVisits((prev) => prev.map((v) => (v.id === selectedVisit.id ? { ...v, participants: [...(v.participants || []), newParticipant] } : v)));
-    setSelectedVisit((prev: any) => (prev ? { ...prev, participants: [...(prev.participants || []), newParticipant] } : prev));
+    setSaving(true);
+    try {
+      let photoData = { url: "", public_id: "" };
+      
+      const photoUrl = await uploadFileToServer(participantPhoto as File);
+        photoData = { url: photoUrl.url  , public_id: photoUrl.public_id   };
+      
+      const payload = {
+        name: participantForm.name || "",
+        email: participantForm.email || "",
+        phone: participantForm.phone || "",
+        role: participantForm.role || "",
+        photo: photoData,
+      }
+ 
+      await apiRequest("POST", `/visits/add/participant/${visitId}`, payload);
+       setVisits((prev) => prev.map((v) => (v.id === visitId ? { ...v, participants: [...(v.participants || []), payload] } : v)));
+    setSelectedVisit((prev: any) => (prev ? { ...prev, participants: [...(prev.participants || []), payload] } : prev));
     setParticipantsOpen(false);
     setOpenMenu(null);
+    setParticipantPhoto(null);
+    setSelectedParticipantImage(null);
+    if (participantImageInputRef.current) {
+      participantImageInputRef.current.value = "";
+    }
+       
+    } catch (error) {
+     
+    } finally {
+      setSaving(false);
+    }
+    // const newParticipant = {
+    //   name: participantForm.name || "",
+    //   email: participantForm.email || "",
+    //   phone: participantForm.phone || "",
+    //   role: participantForm.role || "",
+    //   url: participantForm.url || "",
+    //   photo: participantForm.photo || { url: "", public_id: "" },
+    // };
+
+    // setVisits((prev) => prev.map((v) => (v.id === selectedVisit.id ? { ...v, participants: [...(v.participants || []), newParticipant] } : v)));
+    // setSelectedVisit((prev: any) => (prev ? { ...prev, participants: [...(prev.participants || []), newParticipant] } : prev));
+    // setParticipantsOpen(false);
+    // setOpenMenu(null);
   };
+
+  const removeParticipant = async (visitId: string, participantId: string) => {
+    setPatId(participantId);
+    try {
+      await apiRequest("POST", `/visits/remove/participant/${visitId}`, { participantId });
+      setSelectedVisit((prev: any) => {
+        if (!prev) return prev;
+        return { ...prev, participants: prev.participants.filter((p: any) => p._id !== participantId) };
+      });
+    } catch (error) {
+       
+    } finally { setPatId(null); }
+   }
+  const removeGalleryImage = async (visitId: string, galleryId: string) => {
+    setGalId(galleryId);
+    try {
+      await apiRequest("POST", `/visits/remove/image/${visitId}`, { galleryId });
+      setSelectedVisit((prev: any) => {
+        if (!prev) return prev;
+        return { ...prev, participants: prev.participants.filter((p: any) => p._id !== galleryId) };
+      });
+    } catch (error) {
+      console.log('====================================');
+      console.log(error);
+      console.log('====================================');
+    } finally { setGalId(null); }
+   }
 
   const openCreateForm = () => {
     setFormData({
@@ -174,12 +297,13 @@ export default function AdminVisitsPage() {
       date: "",
       content: "",
       excerpt: "",
-      thumbnail: "",
+      thumbnail: {url:'',public_id:''},
       status: "upcoming",
       participants: [],
-      likes: 0,
-      views: 0,
+       
     });
+    setSelectedImage(null);
+    setSelectedImagePreview(null);
     setFormOpen(true);
   };
 
@@ -191,29 +315,14 @@ export default function AdminVisitsPage() {
       if (key === "locationLong") {
         return { ...prev, location: { ...prev.location, long: value } };
       }
+      if (key === "thumbnail") {
+        return { ...prev, thumbnail: { ...prev.thumbnail, url: value } };
+      }
       return { ...prev, [key]: value };
     });
   };
 
-  const addParticipant = () => {
-    setFormData((prev: any) => ({ ...prev, participants: [...(prev.participants || []), { name: "", phone: "", role: "" }] }));
-  };
-
-  const updateParticipant = (index: number, key: string, value: string) => {
-    setFormData((prev: any) => {
-      const parts = [...(prev.participants || [])];
-      parts[index] = { ...parts[index], [key]: value };
-      return { ...prev, participants: parts };
-    });
-  };
-
-  const removeParticipant = (index: number) => {
-    setFormData((prev: any) => {
-      const parts = [...(prev.participants || [])];
-      parts.splice(index, 1);
-      return { ...prev, participants: parts };
-    });
-  };
+  
 
   const handleUseCurrentLocationChange = (checked: boolean) => {
     setUseCurrentLocation(checked);
@@ -236,31 +345,69 @@ export default function AdminVisitsPage() {
     }
   };
 
-  const handleFormSubmit = (e: any) => {
+   // upload the selected image to the server
+  const uploadFileToServer = async (file: File) => {
+    
+    try {
+      const formData = new FormData();
+      formData.append("image", file);
+      const { data } = await axios.post(
+        `${import.meta.env.VITE_API_URL}/visits/upload/image`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      return data;
+    } catch (error) {
+       
+      console.log('====================================');
+      console.log(error);
+      console.log('====================================');
+      return {url:'',public_id:''};
+    }  
+  };
+
+  const handleFormSubmit = async(e: any) => {
     e.preventDefault();
-    const payload = {
+    setSaving(true);
+    try {
+       
+
+      const thumbnailUrl = await uploadFileToServer(selectedImage as File);
+      const payload = {
       ...formData,
       participants: formData.participants ? formData.participants.map((p: any) => ({ name: p.name || "", phone: p.phone || "", role: p.role || "" })) : [],
-      likes: Number(formData.likes) || 0,
-      views: Number(formData.views) || 0,
-      videoId: formData.videoId || "",
+       
+        videoId: formData.videoId || "",
+      thumbnail: { url: thumbnailUrl.url||formData.thumbnail?.url,public_id: thumbnailUrl.public_id||"" } ,
       location: {
         lat: formData.location && formData.location.lat ? Number(formData.location.lat) : 0,
         long: formData.location && formData.location.long ? Number(formData.location.long) : 0,
       },
-    };
-
+      };
+      
     if (formData.id) {
       // update
       setVisits((prev) => prev.map((v) => (v.id === formData.id ? { ...v, ...payload } : v)));
     } else {
       // create
+       await apiRequest("POST", "/visits/create", payload);
       const nextId = Math.max(0, ...visits.map((v) => v.id || 0)) + 1;
       setVisits((prev) => [{ id: nextId, ...payload }, ...prev]);
     }
 
     setFormOpen(false);
     setOpenMenu(null);
+    } catch (error) {
+      console.log('====================================');
+      console.log(error);
+      console.log('====================================');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const setFeatured = (visit: any) => {
@@ -275,11 +422,7 @@ export default function AdminVisitsPage() {
     setOpenMenu(null);
   };
 
-  useEffect(() => {
-    // Use mockCommunities data
-    setVisits(mockCommunities);
-    setIsLoading(false);
-  }, []);
+   
 
   const filteredVisits = visits.filter((visit) => {
     // Filter by status
@@ -303,7 +446,7 @@ export default function AdminVisitsPage() {
     return true;
   });
 
-  if (isLoading) {
+  if (visitsLoading) {
     return (
       <AdminLayout>
         <div className="p-4 sm:p-6 flex items-center justify-center min-h-screen">
@@ -398,7 +541,7 @@ export default function AdminVisitsPage() {
                   {/* Background Image */}
                   <div className="absolute inset-0 z-0">
                     <img 
-                      src={visit.thumbnail} 
+                      src={typeof visit.thumbnail === 'string' ? visit.thumbnail : visit.thumbnail?.url} 
                       alt={visit.community}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
@@ -440,11 +583,11 @@ export default function AdminVisitsPage() {
                         </div>
                         <div>
                           <p className="text-xs font-medium text-white/70">Likes</p>
-                          <p className="text-lg font-semibold">{visit.likes}</p>
+                          <p className="text-lg font-semibold">{visit.likes.length || 0}</p>
                         </div>
                         <div>
                           <p className="text-xs font-medium text-white/70">Views</p>
-                          <p className="text-lg font-semibold">{visit.views}</p>
+                          <p className="text-lg font-semibold">{visit.views.length || 0}</p>
                         </div>
                       </div>
                     </div>
@@ -501,7 +644,7 @@ export default function AdminVisitsPage() {
             </DialogHeader>
 
             <div className="grid gap-4">
-              <img src={selectedVisit.thumbnail} alt={selectedVisit.community} className="w-full h-56 object-cover rounded-md" />
+              <img src={typeof selectedVisit.thumbnail === 'string' ? selectedVisit.thumbnail : selectedVisit.thumbnail?.url} alt={selectedVisit.community} className="w-full h-56 object-cover rounded-md" />
 
               <div>
                 <h4 className="font-semibold mb-1">Title</h4>
@@ -517,20 +660,25 @@ export default function AdminVisitsPage() {
                 <p className="text-sm text-justify text-muted-foreground">{selectedVisit.content}</p>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
+              <div className="grid grid-cols-2   gap-4">
+                <div className="">
                   <h5 className="text-xs font-medium text-muted-foreground">Participants</h5>
-                  <ul className="mt-2 text-sm">
-                    {selectedVisit.participants.map((p: any, idx: number) => (
-                      <li key={idx}>{p.name} — {p.role}</li>
-                    ))}
+                  <ul className="mt-2 text-sm  h-40 overflow-y-auto  space-y-1">
+                    {selectedVisit.participants && selectedVisit.participants.length > 0 ? (
+                      selectedVisit.participants.map((p: any, idx: number) => (
+                        <li className="flex bg-white relative rounded-md p-2 shadow-md gap-2 items-center  " key={idx}><img src={p.photo?.url || "/user.avif"} alt={p.name} className="w-12 h-12 rounded-full object-cover" />{p.name} — {p.role} {patId===p._id ? <Loader   className="w-4 h-4 font-bold animate-spin   absolute top-2 right-2 text-red-500"/>:<X onClick={()=>{removeParticipant(selectedVisit._id,p._id)}} className="w-4 h-4 font-bold  cursor-pointer absolute top-2 right-2 text-red-500"/>}</li>
+                      ))
+                    ) : (
+                      <li className="text-muted-foreground">No participants yet</li>
+                    )}
+                    
                   </ul>
                 </div>
                 <div>
                   <p className="text-xs font-medium text-muted-foreground">Stats</p>
                   <div className="mt-2 text-sm space-y-1">
-                    <div>Likes: {selectedVisit.likes}</div>
-                    <div>Views: {selectedVisit.views}</div>
+                    <div>Likes: {selectedVisit.likes.length || 0}</div>
+                    <div>Views: {selectedVisit.views.length || 0}</div>
                     <div>Video ID: {selectedVisit.videoId || '—'}</div>
                     <div>Location: {selectedVisit.location ? `${selectedVisit.location.lat}, ${selectedVisit.location.long}` : '—'}</div>
                   </div>
@@ -545,9 +693,9 @@ export default function AdminVisitsPage() {
                       const src = typeof g === 'string' ? g : (g.image || g.url || '');
                       const title = typeof g === 'string' ? '' : g.title || '';
                       return (
-                        <div key={i} className="flex-shrink-0">
+                        <div key={i} className="flex-shrink-0 relative">
                           <img src={src} alt={`gallery-${i}`} className="w-32 h-20 object-cover rounded-md" />
-                          {title && <p className="text-xs mt-1 text-white/80">{title}</p>}
+                           {galId===g._id ? <Loader   className="w-4 h-4 font-bold animate-spin   absolute top-1 right-1 text-red-500"/>:<X onClick={()=>{removeGalleryImage(selectedVisit._id,g._id)}} className="w-4 h-4 font-bold  cursor-pointer absolute top-1 right-1 text-red-500"/>}
                         </div>
                       );
                     })}
@@ -574,27 +722,61 @@ export default function AdminVisitsPage() {
             <DialogDescription>{selectedVisit ? selectedVisit.community : ""}</DialogDescription>
           </DialogHeader>
 
-          <form onSubmit={handleGallerySubmit} className="grid gap-4">
-            <Input placeholder="Title" value={galleryForm.title} onChange={(e) => setGalleryForm((p) => ({ ...p, title: e.target.value }))} />
-            <Input placeholder="URL (optional)" value={galleryForm.url} onChange={(e) => setGalleryForm((p) => ({ ...p, url: e.target.value }))} />
-
-            <div className="flex items-center gap-2">
-              <input ref={galleryFileInputRef} type="file" accept="image/*" onChange={onGalleryFileInputChange} className="hidden" />
-              <Button type="button" onClick={() => galleryFileInputRef.current?.click()}>Upload</Button>
-              <p className="text-sm text-muted-foreground">or provide a URL above</p>
+          <form   className="grid gap-4">
+            {/* Dropzone */}
+            <div
+              onDragEnter={handleGalleryDrag}
+              onDragLeave={handleGalleryDrag}
+              onDragOver={handleGalleryDrag}
+              onDrop={handleGalleryDrop}
+              onClick={() => galleryFileInputRef.current?.click()}
+              className={`relative border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-all ${
+                galleryDragActive
+                  ? "border-primary bg-primary/10"
+                  : "border-muted-foreground/30 hover:border-primary hover:bg-primary/5"
+              }`}
+            >
+              <input
+                ref={galleryFileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={onGalleryFileInputChange}
+                className="hidden"
+              />
+              <div className="flex flex-col items-center gap-2">
+                <ImageIcon className="w-8 h-8 text-muted-foreground" />
+                <div>
+                  <p className="font-medium text-sm">
+                    {galleryDragActive ? "Drop image here" : "Drag image or click to upload"}
+                  </p>
+                  <p className="text-xs text-muted-foreground">PNG, JPG, GIF up to 10MB</p>
+                </div>
+              </div>
             </div>
 
-            {(selectedGalleryImage || galleryForm.url) && (
-              <div>
+            {/* Preview */}
+            {selectedGalleryImage && (
+              <div className="rounded-lg overflow-hidden">
                 <p className="text-sm font-medium text-muted-foreground mb-2">Preview</p>
-                <img src={selectedGalleryImage || galleryForm.url} alt="gallery-preview" className="w-52 h-36 object-cover rounded-md" />
+                <img
+                  src={selectedGalleryImage}
+                  alt="gallery-preview"
+                  className="w-full h-48 object-contain rounded-md"
+                />
               </div>
             )}
 
             <DialogFooter>
               <div className="flex gap-2">
-                <Button type="submit">Add to Gallery</Button>
-                <Button variant="outline" onClick={() => setGalleryOpen(false)}>Cancel</Button>
+                <Button onClick={()=>{handleGallerySubmit(selectedVisit._id)}} type="submit" disabled={!selectedGalleryImage || saving  }>
+                  {saving ? <span className="flex items-center justify-center gap-2">Saving... <Loader className="w-4 h-4 animate-spin"/></span> : "Save"}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setGalleryOpen(false)}
+                >
+                  Cancel
+                </Button>
               </div>
             </DialogFooter>
           </form>
@@ -615,17 +797,17 @@ export default function AdminVisitsPage() {
             <Input placeholder="Country" value={formData.country} onChange={(e) => handleFormChange('country', e.target.value)} />
             <Input type="date" value={formData.date} onChange={(e) => handleFormChange('date', e.target.value)} />
             <div className="flex items-center gap-2">
-              <Input placeholder="Thumbnail URL or upload" value={formData.thumbnail} onChange={(e) => handleFormChange('thumbnail', e.target.value)} />
+              <Input placeholder="Thumbnail URL or upload" value={formData.thumbnail.url} onChange={(e) => handleFormChange('thumbnail', e.target.value)} />
               <input ref={fileInputRef} type="file" accept="image/*" onChange={onFileInputChange} className="hidden" />
               <Button type="button" onClick={() => fileInputRef.current?.click()}>Upload</Button>
             </div>
-            <Textarea placeholder="Full content / Description" value={formData.content} onChange={(e) => handleFormChange('content', e.target.value)} />
+            
 
             {/* Preview for uploaded image */}
-            {(selectedImage || formData.thumbnail) && (
+            {(selectedImagePreview || formData.thumbnail?.url) && (
               <div className="pt-2">
                 <p className="text-sm font-medium text-muted-foreground mb-2">Thumbnail Preview</p>
-                <img src={selectedImage || formData.thumbnail} alt="thumbnail-preview" className="w-48 h-32 object-cover rounded-md" />
+                <img src={selectedImagePreview || formData.thumbnail?.url} alt="thumbnail-preview" className="w-48 h-32 object-cover rounded-md" />
               </div>
             )}
             <Input placeholder="Video ID" value={formData.videoId} onChange={(e) => handleFormChange('videoId', e.target.value)} />
@@ -653,7 +835,7 @@ export default function AdminVisitsPage() {
 
             <DialogFooter>
               <div className="flex gap-2">
-                <Button type="submit">Save</Button>
+                <Button type="submit">{saving ? <span className="flex items-center justify-center gap-2">Saving... <Loader className="w-4 h-4 animate-spin"/></span> : "Save"}</Button>
                 <Button variant="outline" onClick={() => setFormOpen(false)}>Cancel</Button>
               </div>
             </DialogFooter>
@@ -669,12 +851,12 @@ export default function AdminVisitsPage() {
             <DialogDescription>{selectedVisit ? selectedVisit.community : ""}</DialogDescription>
           </DialogHeader>
 
-          <form onSubmit={handleParticipantSubmit} className="grid gap-4">
+          <form  className="grid gap-4">
             <Input placeholder="Name" value={participantForm.name} onChange={(e) => setParticipantForm((p) => ({ ...p, name: e.target.value }))} />
             <Input placeholder="Email" type="email" value={participantForm.email} onChange={(e) => setParticipantForm((p) => ({ ...p, email: e.target.value }))} />
             <Input placeholder="Phone" value={participantForm.phone} onChange={(e) => setParticipantForm((p) => ({ ...p, phone: e.target.value }))} />
             <Input placeholder="Role" value={participantForm.role} onChange={(e) => setParticipantForm((p) => ({ ...p, role: e.target.value }))} />
-            <Input placeholder="URL" value={participantForm.url} onChange={(e) => setParticipantForm((p) => ({ ...p, url: e.target.value }))} />
+             
 
             <div className="flex items-center gap-2">
               <input ref={participantImageInputRef} type="file" accept="image/*" onChange={onParticipantImageInputChange} className="hidden" />
@@ -682,16 +864,16 @@ export default function AdminVisitsPage() {
               <p className="text-sm text-muted-foreground">Profile photo</p>
             </div>
 
-            {(selectedParticipantImage || participantForm.image) && (
+            {(selectedParticipantImage ) && (
               <div>
                 <p className="text-sm font-medium text-muted-foreground mb-2">Image Preview</p>
-                <img src={selectedParticipantImage || participantForm.image} alt="participant-preview" className="w-40 h-40 object-cover rounded-md" />
+                <img src={selectedParticipantImage}   className="w-40 h-40 object-cover rounded-md" />
               </div>
             )}
 
             <DialogFooter>
               <div className="flex gap-2">
-                <Button type="submit">Add Participant</Button>
+                <Button onClick={() => handleParticipantSubmit(selectedVisit?._id)} type="submit">{saving ? <span className="flex items-center justify-center gap-2">Adding... <Loader className="w-4 h-4 animate-spin"/></span> : "Save"}</Button>
                 <Button variant="outline" onClick={() => setParticipantsOpen(false)}>Cancel</Button>
               </div>
             </DialogFooter>
