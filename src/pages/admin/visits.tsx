@@ -67,6 +67,8 @@ export default function AdminVisitsPage() {
   const [galleryImage, setGalleryImage] = useState<File | null>(null);
   const [patId, setPatId] = useState<String | null>('');
   const [galId, setGalId] = useState<String | null>('');
+  const [deleting, setDeleting] = useState<String | null>('');
+  const [processing, setProcessing] = useState(false);
 
   useEffect(() => { 
     if (visitsData) { 
@@ -132,7 +134,17 @@ export default function AdminVisitsPage() {
     setSaving(true);
      try {
        const image = await uploadFileToServer(galleryImage as File);
-        await apiRequest("POST", `/visits/add/gallery/${visitId}`, { image });
+       await apiRequest("POST", `/visits/add/gallery/${visitId}`, { image });
+       setGalleryForm({ image: { url: "", public_id: "" } });
+       setSelectedVisit((prev: any) => (prev ? { ...prev, gallery: [...(prev.gallery || []), image] } : prev));
+       setGalleryOpen(false);
+    setGalleryForm({ image: { url: "", public_id: "" } });
+    setSelectedGalleryImage(null);
+    setGalleryDragActive(false);
+    if (galleryFileInputRef.current) {
+      galleryFileInputRef.current.value = "";
+    }
+    setOpenMenu(null);
      } catch (error) {
       console.log('====================================');
       console.log(error);
@@ -141,16 +153,7 @@ export default function AdminVisitsPage() {
       setSaving(false);
      }
 
-    // setVisits((prev) => prev.map((v) => (v.id === selectedVisit.id ? { ...v, gallery: [...(v.gallery || []), newItem] } : v)));
-    // setSelectedVisit((prev: any) => (prev ? { ...prev, gallery: [...(prev.gallery || []), newItem] } : prev));
-    // setGalleryOpen(false);
-    // setGalleryForm({ image: { url: "", public_id: "" } });
-    // setSelectedGalleryImage(null);
-    // setGalleryDragActive(false);
-    // if (galleryFileInputRef.current) {
-    //   galleryFileInputRef.current.value = "";
-    // }
-    // setOpenMenu(null);
+     
   };
 
   const viewDetails = (visit: any) => {
@@ -362,10 +365,7 @@ export default function AdminVisitsPage() {
       );
       return data;
     } catch (error) {
-       
-      console.log('====================================');
-      console.log(error);
-      console.log('====================================');
+    
       return {url:'',public_id:''};
     }  
   };
@@ -375,12 +375,13 @@ export default function AdminVisitsPage() {
     setSaving(true);
     try {
        
-
-      const thumbnailUrl = await uploadFileToServer(selectedImage as File);
+let thumbnailUrl = {url: formData.thumbnail?.url || "", public_id: formData.thumbnail?.public_id || ""};
+      
+      if (selectedImage) {
+        thumbnailUrl = await uploadFileToServer(selectedImage as File);
+      }
       const payload = {
       ...formData,
-      participants: formData.participants ? formData.participants.map((p: any) => ({ name: p.name || "", phone: p.phone || "", role: p.role || "" })) : [],
-       
         videoId: formData.videoId || "",
       thumbnail: { url: thumbnailUrl.url||formData.thumbnail?.url,public_id: thumbnailUrl.public_id||"" } ,
       location: {
@@ -389,8 +390,9 @@ export default function AdminVisitsPage() {
       },
       };
       
-    if (formData.id) {
+    if (!!editVisit||selectedVisit._id) {
       // update
+       await apiRequest("PUT", `/visits/update/${selectedVisit._id}`, payload);
       setVisits((prev) => prev.map((v) => (v.id === formData.id ? { ...v, ...payload } : v)));
     } else {
       // create
@@ -410,16 +412,25 @@ export default function AdminVisitsPage() {
     }
   };
 
-  const setFeatured = (visit: any) => {
-    alert(`${visit.community} set as featured`);
-    setOpenMenu(null);
+  const toggleFeatured = async (visit: any) => {
+    setProcessing(true);
+    try {
+      await apiRequest("POST", `/visits/featured/${visit._id}`);
+      setVisits((prev) => prev.map((v) => ({ ...v, featured: v._id === visit._id })));
+    } catch (error) {
+      console.error(error);
+    }finally { setProcessing(false); }
   };
 
-  const deleteVisit = (visit: any) => {
-    if (confirm(`Delete ${visit.community}? This cannot be undone.`)) {
-      setVisits((prev) => prev.filter((v) => v.id !== visit.id));
-    }
+  const deleteVisit = async (visit: any) => {
+    setDeleting(visit._id);
+    try {
+       await apiRequest("DELETE", `/visits/delete/${visit._id}`);
+        setVisits((prev) => prev.filter((v) => v._id !== visit._id));
     setOpenMenu(null);
+    } catch (error) {
+       
+    }finally { setDeleting(null); }
   };
 
    
@@ -608,20 +619,34 @@ export default function AdminVisitsPage() {
                           <button onClick={() => viewDetails(visit)} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-800 hover:bg-gray-100">
                             <View className="w-4 h-4" /> View Details
                           </button>
-                          <button onClick={() => editVisit(visit)} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-800 hover:bg-gray-100">
+                          <button onClick={() => {editVisit(visit); setSelectedVisit(visit);}} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-800 hover:bg-gray-100">
                             <Edit className="w-4 h-4" /> Edit
                           </button>
                           <button onClick={() => openGallery(visit)} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-800 hover:bg-gray-100">
-                            <ImageIcon className="w-4 h-4" /> Gallery
+                            <ImageIcon className="w-4 h-4" /> Gallery ({visit.gallery ? visit.gallery.length : 0})
                           </button>
                           <button onClick={() => openParticipants(visit)} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-800 hover:bg-gray-100">
-                            <Users className="w-4 h-4" /> Participants
+                            <Users className="w-4 h-4" /> Participants ({visit.participants ? visit.participants.length : 0})
                           </button>
-                          <button onClick={() => setFeatured(visit)} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-800 hover:bg-gray-100">
-                            <Star className="w-4 h-4" /> Set Featured
+                          <button onClick={async () => { await toggleFeatured(visit) }} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-800 hover:bg-gray-100">
+                            {processing ? <><span className="flex items-center justify-center gap-2 text-primary"> Processing...<Loader className="w-4 h-4 animate-spin text-primary " /></span></>:visit.isFeatured?.includes(visit._id) ? (
+                              <>
+                               <><Star className="w-4 h-4 text-primary fill-primary" /> Unset Featured</>  
+                              </>
+                            ) : (
+                               <><Star className="w-4 h-4   " /> Set Featured</>
+                            )}
                           </button>
-                          <button onClick={() => deleteVisit(visit)} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-600 hover:bg-gray-100">
-                            <Trash2 className="w-4 h-4" /> Delete
+                          <button onClick={() => {deleteVisit(visit); setSelectedVisit(visit)}} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-600 hover:bg-gray-100">
+                            {deleting === visit._id ? (
+                              <span className="flex items-center justify-center gap-2">
+                                <Loader className="w-4 h-4 animate-spin" /> Deleting...
+                              </span>
+                            ) : (
+                              <>
+                                <Trash2 className="w-4 h-4" /> Delete
+                              </>
+                            )}
                           </button>
                         </div>
                       )}
