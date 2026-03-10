@@ -97,7 +97,6 @@ export default function AdminVisitsPage() {
     reader.onload = () => {
       const dataUrl = String(reader.result || "");
       setSelectedGalleryImage(dataUrl);
-      setGalleryForm((prev) => ({ ...prev, image: dataUrl }));
     };
     reader.readAsDataURL(file);
   };
@@ -732,7 +731,7 @@ let thumbnailUrl = {url: formData.thumbnail?.url || "", public_id: formData.thum
             <DialogFooter>
               <div className="flex gap-2">
                 <Button onClick={() => { editVisit(selectedVisit); setDialogOpen(false); }}>Edit</Button>
-                <Button variant="outline" onClick={() => { setFeatured(selectedVisit); setDialogOpen(false); }}>Set Featured</Button>
+                <Button variant="outline" onClick={() => { toggleFeatured(selectedVisit); setDialogOpen(false); }}>Set Featured</Button>
               </div>
             </DialogFooter>
           </DialogContent>
