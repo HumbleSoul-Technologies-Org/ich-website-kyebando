@@ -16,6 +16,7 @@ import {
   Briefcase,
   Sparkles,
   Hand,
+  Newspaper,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -33,20 +34,25 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
       label: "Dashboard",
       icon: <LayoutDashboard className="w-5 h-5" />,
     },
-    {
-      href: "/admin/analytics",
-      label: "Analytics",
-      icon: <BarChart3 className="w-5 h-5" />,
-    },
-    {
-      href: "/admin/programs",
-      label: "Programs",
-      icon: <BookOpen className="w-5 h-5" />,
-    },
+    // {
+    //   href: "/admin/analytics",
+    //   label: "Analytics",
+    //   icon: <BarChart3 className="w-5 h-5" />,
+    // },
+    // {
+    //   href: "/admin/programs",
+    //   label: "Programs",
+    //   icon: <BookOpen className="w-5 h-5" />,
+    // },
     {
       href: "/admin/visits",
       label: "Visits",
       icon: <MapPin className="w-5 h-5" />,
+    },
+    {
+      href: "/admin/blogs",
+      label: "Blogs",
+      icon: <Newspaper className="w-5 h-5" />,
     },
     {
       href: "/admin/staff",

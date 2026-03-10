@@ -681,6 +681,8 @@ export const blogsData = [
     "createdAt": "2026-01-12T10:30:00Z",
     "likes": 245,
     "comments": 38,
+    "views": 1250,
+    "shares": 45,
     "gallery": [
       "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSzQDOGM1JRCUjVqXZqW4yAZBJOai2iJ9EH4g&s",
       "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQPGoQoNmVxnFWOnOTa8K2N-3rEBqLeyFCYhg&s",
@@ -697,6 +699,8 @@ export const blogsData = [
     "createdAt": "2026-01-25T14:15:00Z",
     "likes": 312,
     "comments": 54,
+    "views": 1890,
+    "shares": 67,
     "gallery": [
       "https://davidshope.org/wp-content/uploads/2025/11/Untitled-design-7.jpg",
       "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRoeBZO4luNuFHeaxaX-fbrkLTGiNhePmqQng&s",
@@ -714,6 +718,8 @@ export const blogsData = [
     "createdAt": "2026-02-05T09:00:00Z",
     "likes": 198,
     "comments": 27,
+    "views": 950,
+    "shares": 32,
     "gallery": [
       "https://creativerevolution.io/wp-content/uploads/2024/04/The-Heart-of-Creative-Leadership-1024x574.jpg",
       "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQO9kqDSkcbf8pg6fzXmdmWQGdUD-g3RY4pWQ&s",

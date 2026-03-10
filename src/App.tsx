@@ -24,6 +24,7 @@ import Admin from "@/pages/admin";
 import AdminAnalytics from "@/pages/admin/analytics";
 import AdminPrograms from "@/pages/admin/programs";
 import AdminVisits from "@/pages/admin/visits";
+import AdminBlogs from "@/pages/admin/blogs";
 import AdminStaff from "@/pages/admin/staff";
 import AdminMessages from "@/pages/admin/messages";
 import AdminNotifications from "@/pages/admin/notifications";
@@ -46,6 +47,7 @@ function Router() {
       <Route path="/admin/analytics" component={AdminAnalytics} />
       <Route path="/admin/programs" component={AdminPrograms} />
       <Route path="/admin/visits" component={AdminVisits} />
+      <Route path="/admin/blogs" component={AdminBlogs} />
       <Route path="/admin/staff" component={AdminStaff} />
       <Route path="/admin/messages" component={AdminMessages} />
       <Route path="/admin/notifications" component={AdminNotifications} />
