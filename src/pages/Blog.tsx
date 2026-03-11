@@ -6,6 +6,7 @@ import { blogsData, testimonials } from "@/lib/mockData";
 import { impactStats } from "@/lib/aboutData";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 
@@ -67,10 +68,11 @@ export default function Blog() {
   const [blogs,setBlogs] = useState<any[]>([]);
     useEffect(() => {
       window.scrollTo(0, 0);
-         if (blogData) {
+      if (blogData) {
+          
       setBlogs(blogData)
     }
-      }, [])
+      }, [blogData])
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -85,33 +87,57 @@ export default function Blog() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <section className="lg:col-span-8 space-y-8">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
-                {blogs.map((post) => (
-                  <motion.article key={post._id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className="bg-white/80 rounded-xl overflow-hidden border border-border/50 shadow-sm hover:shadow-md transition-shadow">
-                    <div className="flex flex-col md:flex-row">
-                      <div className="md:w-44 w-1/4 h-40 md:h-auto overflow-hidden">
-                        <img src={post.thumbnail.url} alt={post.title} className="w-full h-full object-cover" />
-                      </div>
-                      <div className="p-4 flex flex-col w-3/4 justify-between">
-                        <div>
-                          <h3 className="text-lg font-semibold mb-2 line-clamp-2">{post.title}</h3>
-                          <p className="text-sm text-justify text-muted-foreground mb-3 line-clamp-3">{post.excerpt}</p>
-                        </div>
-                        <div className="flex items-center justify-between mt-2">
-                          <div className="text-xs text-muted-foreground">{post.author}</div>
-                          <div className="flex items-center gap-3">
-                            <time className="text-xs text-muted-foreground">{new Date(post.createdAt).toLocaleDateString()}</time>
-                            <Link href={`/blog/${post._id}`}><a className="text-primary text-sm font-semibold">Read →</a></Link>
+                {loading ? (
+                  <>
+                    {[...Array(4)].map((_, i) => (
+                      <div key={i} className="bg-white/80 rounded-xl overflow-hidden border border-border/50 shadow-sm">
+                        <div className="flex flex-col md:flex-row">
+                          <Skeleton className="md:w-44 w-1/4 h-40 md:h-auto" />
+                          <div className="p-4 w-3/4 space-y-3">
+                            <Skeleton className="h-6 w-3/4" />
+                            <Skeleton className="h-12 w-full" />
+                            <Skeleton className="h-4 w-1/2" />
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </motion.article>
-                ))}
+                    ))}
+                  </>
+                ) : blogs.length === 0 ? (
+                  <div className="col-span-full text-center py-12">
+                    <h3 className="text-lg font-semibold text-muted-foreground mb-2">No blogs yet</h3>
+                    <p className="text-sm text-muted-foreground">Check back soon for the latest news and updates.</p>
+                  </div>
+                ) : (
+                  blogs.map((post) => (
+                    <motion.article key={post._id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className="bg-white/80 rounded-xl overflow-hidden border border-border/50 shadow-sm hover:shadow-md transition-shadow">
+                      <div className="flex flex-col md:flex-row">
+                        <div className="md:w-44 w-1/4 h-40 md:h-auto overflow-hidden">
+                          <img src={post.thumbnail.url} alt={post.title} className="w-full h-full object-cover" />
+                        </div>
+                        <div className="p-4 flex flex-col w-3/4 justify-between">
+                          <div>
+                            <h3 className="text-lg font-semibold mb-2 line-clamp-2">{post.title}</h3>
+                            <p className="text-sm text-justify text-muted-foreground mb-3 line-clamp-3">{post.excerpt}</p>
+                          </div>
+                          <div className="flex items-center justify-between mt-2">
+                            <div className="text-xs text-muted-foreground">{post.author}</div>
+                            <div className="flex items-center gap-3">
+                              <time className="text-xs text-muted-foreground">{new Date(post.createdAt).toLocaleDateString()}</time>
+                              <Link href={`/blog/${post._id}`}><a className="text-primary text-sm font-semibold">Read →</a></Link>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.article>
+                  ))
+                )}
               </div>
 
-              <div className="flex justify-center mt-4">
-                <Button variant="ghost">Load more</Button>
-              </div>
+              {!loading && blogs.length > 0 && (
+                <div className="flex justify-center mt-4">
+                  <Button variant="ghost">Load more</Button>
+                </div>
+              )}
             </section>
 
             <aside className="lg:col-span-4 space-y-6">

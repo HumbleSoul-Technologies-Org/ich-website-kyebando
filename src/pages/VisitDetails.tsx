@@ -11,10 +11,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ThumbsDown, ThumbsUp, User, ChevronDown, Eye, Loader2, Loader } from "lucide-react";
+import { ThumbsDown, ThumbsUp, User, ChevronDown, Eye, Loader2, Loader, Share2 } from "lucide-react";
 import { set } from "date-fns";
 import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
+import { log } from "node:console";
 
 export default function VisitDetails() {
   
@@ -28,7 +29,7 @@ const [match, params] = useRoute("/visits/:id");
 
   const [visit, setVisit] = useState<any>(null);
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
-  const [activeImage, setActiveImage] = useState<string | null>(null);
+  const [activeImage, setActiveImage] = useState<any>(null);
   const [comments, setComments] = useState<any[]>([]);
   const [name, setName] = useState("");
   const [commentText, setCommentText] = useState("");
@@ -36,6 +37,8 @@ const [match, params] = useRoute("/visits/:id");
   const [videoLoaded, setVideoLoaded] = useState(false);
   const [commenting, setCommenting] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [UUID, setUUID] = useState<any|string>("");
+
 
   const commentsActive = visit?.status === "visited";
 
@@ -79,12 +82,17 @@ const [match, params] = useRoute("/visits/:id");
       window.removeEventListener("resize", checkScroll);
     };
     }, []);
+ 
   
   useEffect(() => {
+    
     if (visitsData) {
       const foundVisit = Array.isArray(visitsData) ? visitsData[0] : visitsData;
       setVisit(foundVisit);
+      create_UUID();
     }
+
+     
   }, [visitsData]);
 
   useEffect(() => {
@@ -92,6 +100,17 @@ const [match, params] = useRoute("/visits/:id");
       setComments(visit?.comments || []);
     }
   }, [visit]);
+
+  const create_UUID = async() => {
+       const savedUUID = localStorage.getItem("visitor_uuid");
+      if (savedUUID) {
+        setUUID(savedUUID);
+      } else {
+        const newUUID = uuidv4();
+        localStorage.setItem("visitor_uuid", newUUID);
+        setUUID(newUUID);
+      }
+    }
 
   const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -109,7 +128,7 @@ const [match, params] = useRoute("/visits/:id");
 
       const payload = {
         ...newComment,
-        uuid: uuidv4(),
+        uuid: UUID,
         type: "visit",
         typeId: visit._id,
       };
@@ -129,6 +148,78 @@ const [match, params] = useRoute("/visits/:id");
   };
 
   if (!visit) return <NotFound />;
+
+   const toggleCommunityLikes = async (comment: any) => { 
+      try {
+        await apiRequest('POST', `/comments/${comment._id}/toggle-like`, {
+          uuid: UUID,
+        });
+  
+        setComments((s) => s.map((c) => {
+          if (c._id === comment._id) {
+            const hasLiked = c.likes?.includes(UUID);
+            return {
+              ...c,
+              likes: hasLiked ? c.likes.filter((l: string) => l !== UUID) : [...(c.likes || []), UUID],
+            };
+          }
+          return c;
+        }));
+        
+      } catch (error) {
+        console.log('====================================');
+        console.log(error);
+        console.log('====================================');
+      }
+  } 
+  
+   const toggleLikes = async (visitId: any) => { 
+      try {
+        await apiRequest('POST', `/visits/${visit._id}/toggle-like`, {
+          uuid: UUID,
+        });
+  
+        setVisit((s: any) => {
+          if (s._id === visitId) {
+            const hasLiked = s.likes?.includes(UUID);
+            return {
+              ...s,
+              likes: hasLiked ? s.likes.filter((l: string) => l !== UUID) : [...(s.likes || []), UUID],
+            };
+          }
+          return s;
+        }
+        );
+        
+      } catch (error) {
+         
+      }
+    }
+   
+   const logViews = async () => { 
+      try {
+        await apiRequest('POST', `/visits/${visit._id}/log-view`, {
+          uuid: UUID,
+        });
+
+        setVisit((s: any) => {
+          if (s._id === visit._id) {
+            return {
+              ...s,
+              views: [...(s.views || []), UUID],
+            };
+          } 
+          return s;
+        });
+  
+        
+      } catch (error) {
+         
+      }
+  }
+  
+
+  
 
   return (
     <div className="max-w-6xl mx-auto p-3 sm:p-4 md:p-6">
@@ -218,7 +309,7 @@ const [match, params] = useRoute("/visits/:id");
                 <h3 className="font-semibold text-sm sm:text-base">Gallery</h3>
                 {visit?.gallery && visit.gallery.length > 0 ? (
                   <div className="mt-2 sm:mt-3   grid grid-cols-2 sm:grid-cols-3 gap-2 transition-all">
-                    {visit.gallery.map((img: string, i: number) => (
+                    {visit.gallery.map((img: any, i: number) => (
                       <button
                         key={i}
                         onClick={() => {
@@ -244,9 +335,21 @@ const [match, params] = useRoute("/visits/:id");
             </div>
 
             <div className="mt-4 sm:mt-6 flex flex-col gap-2">
-              <div className="flex gap-4 text-xs sm:text-sm text-muted-foreground">
-                {visit?.likes && visit.likes > 0 && (<div className="flex items-center gap-1"><ThumbsUp className="w-3 h-3 sm:w-4 sm:h-4 cursor-pointer" /><span>Likes: {visit?.likes}</span></div>)}
-                {visit?.dislikes && visit.dislikes > 0 && (<div className="flex items-center gap-1"><ThumbsDown className="w-3 h-3 sm:w-4 sm:h-4 cursor-pointer" /><span>Dislikes: {visit?.dislikes}</span></div>)}
+              <div className="flex justify-center sm:justify-end w-full gap-4 mb-1 text-xs sm:text-sm text-muted-foreground">
+                {visit?.status === 'visited'  && (
+                  <div className="flex items-center gap-1">
+                    <ThumbsUp onClick={() => toggleLikes(visit._id)}  
+                      className={`    w-3 h-3 sm:w-4 sm:h-4 bottom-1 ${visit?.likes?.includes(UUID) ? "fill-primary text-primary" : "text-muted-foreground"} right-1  hover:shadow-lg hover:w-5 cursor-pointer`}
+                      />
+                    <span>Likes: {visit?.likes.length||0}</span>
+                  </div>
+                )}
+                
+                 
+                <div className="flex items-center gap-1">
+                    <Share2 onClick={()=> logShares(visit._id)} className="w-3 h-3 sm:w-4 sm:h-4 cursor-pointer" />
+                    <span>Shares: {visit?.shares?.length||0}</span>
+                  </div>
               </div>
             </div>
 
@@ -312,7 +415,7 @@ const [match, params] = useRoute("/visits/:id");
                     <div className="text-sm text-foreground">{c.comment}</div>
                   </div>
                   <span className="absolute flex gap-2 items-center justify-center top-0 right-0 text-xs text-muted-foreground">Likes: {c?.likes?.length || 0}</span>
-                  <ThumbsUp className="w-4 absolute bottom-1 right-1 h-4" />
+                  <ThumbsUp onClick={() => toggleCommunityLikes(c)} className={`w-4 absolute bottom-1 ${c?.likes?.includes(UUID) ? 'fill-primary text-primary' : 'text-muted-foreground'} right-1 h-4 hover:shadow-lg hover:w-5 cursor-pointer`} />
                 </div>
               ))}
             </div>

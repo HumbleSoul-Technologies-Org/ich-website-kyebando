@@ -6,10 +6,11 @@ import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { blogsData } from "@/lib/mockData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useQuery } from "@tanstack/react-query";
 import { v4 as uuidv4 } from 'uuid';
 import { set } from "date-fns";
-import { ThumbsUp, User } from "lucide-react";
+import { ThumbsUp, User, Loader2 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 
 
@@ -19,11 +20,12 @@ export default function BlogPost() {
   // const post = blogsData.find((p) => p.id === id);
   const [post, setPost] = useState<any>(null);
 
-  const initialComments = Array.isArray(post?.comments) ? post?.comments : [];
-  const [comments, setComments] = useState<any[]>(initialComments || []);
+  const [comments, setComments] = useState<any[]>(post?.comments || []);
   const [name, setName] = useState("");
   const [commentText, setCommentText] = useState("");
   const [commenting, setCommenting] = useState(true);
+  const [videoLoaded, setVideoLoaded] = useState(false);
+  const [UUID, setUUID] = useState<any>(null);
 
   const { data: postdata, isLoading: loading } = useQuery<any>({
       queryKey: ["blogs",`${params?.id}`],
@@ -32,10 +34,26 @@ export default function BlogPost() {
    useEffect(() => {
       if (postdata) {
         setPost(postdata);
+        console.log('====================================');
+        console.log(postdata);
+        console.log('====================================');
+        create_UUID();
+        setComments(postdata.comments || []);
       }
     }, [postdata]);
   
-
+  const create_UUID = async() => {
+     const savedUUID = localStorage.getItem("visitor_uuid");
+    if (savedUUID) {
+      setUUID(savedUUID);
+    } else {
+      const newUUID = uuidv4();
+      localStorage.setItem("visitor_uuid", newUUID);
+      setUUID(newUUID);
+    }
+  }
+  
+  
  async function handleAddComment(e: React.FormEvent) {
     e.preventDefault();
     setCommenting(true);
@@ -49,24 +67,44 @@ export default function BlogPost() {
 
       const payload = {
         ...newComment,
-        uuid: uuidv4(),
+        uuid: UUID,
         type: "blog",
         typeId: post._id,
       };
 
       await apiRequest('POST', '/comments/new', payload);
-      console.log('====================================');
-      console.log(payload);
-      console.log('====================================');
+       
       setComments((s) => [newComment, ...s]);
       setName("");
       setCommentText("");
     } catch (error) {
-      console.log('====================================');
-      console.log();
-      console.log('====================================');
+       
     } finally {
       setCommenting(false);
+    }
+  }
+
+  const toggleLikes = async (comment: any) => { 
+    try {
+      await apiRequest('POST', `/comments/${comment._id}/toggle-like`, {
+        uuid: UUID,
+      });
+
+      setComments((s) => s.map((c) => {
+        if (c._id === comment._id) {
+          const hasLiked = c.likes?.includes(UUID);
+          return {
+            ...c,
+            likes: hasLiked ? c.likes.filter((l: string) => l !== UUID) : [...(c.likes || []), UUID],
+          };
+        }
+        return c;
+      }));
+      
+    } catch (error) {
+      console.log('====================================');
+      console.log(error);
+      console.log('====================================');
     }
   }
 
@@ -107,8 +145,32 @@ export default function BlogPost() {
                     </CardContent>
                   </Card>
 
-                  
-                    
+                  {post?.videoId && (
+                    <div className="mt-6 mb-8">
+                      <div className="relative" style={{ paddingTop: "56.25%" }}>
+                        {!videoLoaded && (
+                          <div className="absolute inset-0 w-full h-full rounded flex items-center justify-center">
+                            <Skeleton className="absolute inset-0 w-full h-full rounded" />
+                            <div className="absolute flex flex-col items-center justify-center gap-3">
+                              <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                              <span className="text-sm font-medium text-foreground">Loading video...</span>
+                            </div>
+                          </div>
+                        )}
+                        <iframe
+                          src={`https://www.youtube.com/embed/${post.videoId}`}
+                          title={post.title}
+                          className={`absolute inset-0 w-full h-full rounded transition-opacity duration-300 ${
+                            videoLoaded ? "opacity-100" : "opacity-0"
+                          }`}
+                          frameBorder="0"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                          onLoad={() => setVideoLoaded(true)}
+                        />
+                      </div>
+                    </div>
+                  )}
 
                   <div className="mt-6">
                     <Link href="/blog"><a className="inline-flex items-center text-primary font-semibold">← Back to News</a></Link>
@@ -131,22 +193,22 @@ export default function BlogPost() {
                       </div>
                     </form>
 
-                    <div className="space-y-4 max-h-[60vh] overflow-auto pr-2">
+                    <div className="space-y-4 mt-10 max-h-[60vh] overflow-auto pr-2">
                       {comments.length === 0 && (
                         <div className="text-sm text-muted-foreground">No comments yet — be the first to comment.</div>
                       )}
-                      {comments.map((c, i) => (
-                        <div key={i} className="flex relative items-start gap-3 border-b-2 border-border/50 pb-3">
+                      {comments.map((c:any, i:number) => (
+                        <div key={i} className="flex relative  items-start gap-3 border-b-2 border-border/50 pb-3">
                           <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold">
                             {String(c.name || "A").charAt(0).toUpperCase()}
                           </div>
                           <div className="min-w-0">
                             <div className="text-sm font-semibold">{c.name}</div>
-                            <div className="text-xs text-muted-foreground mb-1">{new Date(c.date).toLocaleString()}</div>
-                            <div className="text-sm text-foreground">{c.comment}</div>
+                            <div className="text-xs text-muted-foreground mb-1">{new Date(c.createdAt || c.date).toLocaleString()}</div>
+                            <div className="text-sm text-justify text-foreground">{c.comment}</div>
                           </div>
                           <span className="absolute flex gap-2 items-center justify-center top-0 right-0 text-xs text-muted-foreground">Likes: {c?.likes?.length || 0}</span>
-                          <ThumbsUp className="w-4 absolute bottom-1 right-1 h-4"/>
+                          <ThumbsUp onClick={() => toggleLikes(c)} className={`w-4 absolute bottom-1 ${c?.likes?.includes(UUID) ? 'fill-primary text-primary' : 'text-muted-foreground'} right-1 h-4 hover:shadow-lg hover:w-5 cursor-pointer`} />
                         </div>
                       ))}
                     </div>

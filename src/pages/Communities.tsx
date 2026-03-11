@@ -16,6 +16,9 @@ import { useQuery } from "@tanstack/react-query";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import { apiRequest } from "@/lib/queryClient";
+import { v4 as uuidv4 } from 'uuid';
+
 
 // Fix default icon URLs for production (avoids missing marker icons)
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -35,6 +38,8 @@ export default function Communities() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCommunity, setSelectedCommunity] = useState<string | null>(null);
+  const [UUID, setUUID] = useState<any|string>("");
+  
 
   
 
@@ -58,6 +63,7 @@ export default function Communities() {
     }
 
     window.scrollTo({ top: 0, behavior: "smooth" });
+    create_UUID();
     
   }, [visitsData]);
 
@@ -102,6 +108,27 @@ export default function Communities() {
     const communities = pastVisits.map((v) => v.community);
     return Array.from(new Set(communities)).sort();
   }, [pastVisits]);
+
+   const create_UUID = async() => {
+       const savedUUID = localStorage.getItem("visitor_uuid");
+      if (savedUUID) {
+        setUUID(savedUUID);
+      } else {
+        const newUUID = uuidv4();
+        localStorage.setItem("visitor_uuid", newUUID);
+        setUUID(newUUID);
+      }
+    }
+
+   const logViews = async (visitId: any) => { 
+        try {
+          await apiRequest('POST', `/visits/${visitId}/log-view`, {
+            uuid: UUID,
+          });
+        } catch (error) {
+           
+        }
+    }
 
 
   return (
@@ -331,8 +358,8 @@ export default function Communities() {
                               {community.name}
                             </h3>
                             <div className="flex items-center text-white/80 text-sm gap-1">
-                              <MapPin className="w-3 h-3" />{" "}
-                              {community.district}
+                              <MapPin className="w-4 h-4" />{" "}
+                              {community.community} - {community.country}
                             </div>
                           </div>
                           <Badge
@@ -351,7 +378,7 @@ export default function Communities() {
                               <Calendar className="w-4 h-4" />
                               {format(new Date(community.visitDate), "MMMM d, yyyy")}
                             </div>
-                            <Link href={`/visits/${community.id}`} className="inline-block absolute right-3 bottom-6 mt-3 text-sm text-primary font-medium">
+                            <Link onClick={()=>logViews(community.id)} href={`/visits/${community.id}`} className="inline-block absolute right-3 bottom-6 mt-3 text-sm text-primary font-medium">
                               See details →
                             </Link>
                           </div>
