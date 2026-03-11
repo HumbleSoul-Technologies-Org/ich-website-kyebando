@@ -1,9 +1,9 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, Redirect } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AuthProvider } from "@/hooks/use-auth";
+import { AuthProvider, useAuth } from "@/hooks/use-auth";
 import NotFound from "@/pages/not-found";
 
 // Pages
@@ -18,6 +18,7 @@ import TalentDiscovery from "@/pages/TalentDiscovery";
 import GetInvolved from "@/pages/GetInvolved";
 import Login from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
+import { RequireAuth } from "@/components/auth/RequireAuth"; // route guard
 
 // Admin Pages
 import Admin from "@/pages/admin";
@@ -30,6 +31,19 @@ import AdminMessages from "@/pages/admin/messages";
 import AdminNotifications from "@/pages/admin/notifications";
 import AdminSettings from "@/pages/admin/settings";
 
+// wrapper component used only by Router to decide whether to render login or admin UI
+function AdminWrapper() {
+  const { user, isInitializing } = useAuth();
+  if (!isInitializing && !user) {
+    return <Login />;
+  }
+  return (
+    <RequireAuth>
+      <Admin />
+    </RequireAuth>
+  );
+}
+
 function Router() {
   return (
     <Switch>
@@ -38,20 +52,80 @@ function Router() {
       <Route path="/communities" component={Communities} />
       <Route path="/talent" component={TalentDiscovery} />
       <Route path="/get-involved" component={GetInvolved} />
-      <Route path="/login" component={Login} />
-      <Route path="/dashboard" component={Dashboard} />
+      {/* legacy shortcut redirect */}
+      <Route path="/login">
+        {() => <Redirect to="/admin" />}
+      </Route>
+
+      {/* login is now served at /admin; if user is already authenticated show admin UI */}
+      <Route path="/admin" component={AdminWrapper} />
+
+      {/* protected dashboard section */}
+      <Route path="/dashboard">
+        {() => (
+          <RequireAuth>
+            <Dashboard />
+          </RequireAuth>
+        )}
+      </Route>
+
       <Route path="/visits/:id" component={VisitDetails} />
-      
-      {/* Admin Routes */}
-      <Route path="/admin" component={Admin} />
-      <Route path="/admin/analytics" component={AdminAnalytics} />
-      <Route path="/admin/programs" component={AdminPrograms} />
-      <Route path="/admin/visits" component={AdminVisits} />
-      <Route path="/admin/blogs" component={AdminBlogs} />
-      <Route path="/admin/staff" component={AdminStaff} />
-      <Route path="/admin/messages" component={AdminMessages} />
-      <Route path="/admin/notifications" component={AdminNotifications} />
-      <Route path="/admin/settings" component={AdminSettings} />
+      <Route path="/admin/analytics">
+        {() => (
+          <RequireAuth>
+            <AdminAnalytics />
+          </RequireAuth>
+        )}
+      </Route>
+      <Route path="/admin/programs">
+        {() => (
+          <RequireAuth>
+            <AdminPrograms />
+          </RequireAuth>
+        )}
+      </Route>
+      <Route path="/admin/visits">
+        {() => (
+          <RequireAuth>
+            <AdminVisits />
+          </RequireAuth>
+        )}
+      </Route>
+      <Route path="/admin/blogs">
+        {() => (
+          <RequireAuth>
+            <AdminBlogs />
+          </RequireAuth>
+        )}
+      </Route>
+      <Route path="/admin/staff">
+        {() => (
+          <RequireAuth>
+            <AdminStaff />
+          </RequireAuth>
+        )}
+      </Route>
+      <Route path="/admin/messages">
+        {() => (
+          <RequireAuth>
+            <AdminMessages />
+          </RequireAuth>
+        )}
+      </Route>
+      <Route path="/admin/notifications">
+        {() => (
+          <RequireAuth>
+            <AdminNotifications />
+          </RequireAuth>
+        )}
+      </Route>
+      <Route path="/admin/settings">
+        {() => (
+          <RequireAuth>
+            <AdminSettings />
+          </RequireAuth>
+        )}
+      </Route>
       
       {/* Placeholder Pages */}
       <Route path="/about" component={About} /> 

@@ -3,10 +3,30 @@ import axios from "axios";
 
 const BASE_URL = import.meta.env.VITE_API_URL;
 
+// simple in-memory rate limit tracker (requests per window)
+const REQUEST_THRESHOLD = parseInt(import.meta.env.VITE_API_THRESHOLD || "60", 10); // max requests per window
+const THROTTLE_WINDOW = parseInt(import.meta.env.VITE_THROTTLE_WINDOW || "60000", 10); // 1 minute by default
+let requestTimestamps: number[] = [];
+
+function checkRateLimit() {
+  const now = Date.now();
+  // drop old timestamps
+  requestTimestamps = requestTimestamps.filter(ts => now - ts < THROTTLE_WINDOW);
+  if (requestTimestamps.length >= REQUEST_THRESHOLD) {
+    throw new Error("API request limit exceeded, please try again later");
+  }
+  requestTimestamps.push(now);
+}
+
 // ✅ Axios instance for GET only
 const axiosClient = axios.create({
   baseURL: BASE_URL,
-  
+});
+
+// attach rate limit check to every request
+axiosClient.interceptors.request.use((config) => {
+  checkRateLimit();
+  return config;
 });
 
 // ✅ Throws error if response is not OK
@@ -23,6 +43,8 @@ export async function apiRequest(
   url: string,
   data?: unknown,
 ): Promise<Response> {
+  checkRateLimit();
+
   const res = await fetch(`${BASE_URL}${url}`, {
     method,
     headers: data ? { "Content-Type": "application/json" } : {},

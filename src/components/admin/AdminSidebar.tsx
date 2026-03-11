@@ -19,6 +19,26 @@ import {
   Newspaper,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/use-auth";
+
+// simple button component that triggers logout helper and closes sidebar
+function LogoutButton({ onClose }: { onClose: () => void }) {
+  const { logout, isLoading } = useAuth();
+  return (
+    <Button
+      variant="outline"
+      className="w-full gap-2"
+      onClick={() => {
+        onClose();
+        logout();
+      }}
+      disabled={isLoading}
+    >
+      <LogOut className="w-4 h-4" />
+      Logout
+    </Button>
+  );
+}
 
 interface AdminSidebarProps {
   isOpen: boolean;
@@ -202,18 +222,8 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
 
           {/* Logout */}
           <div className="p-4 border-t border-border">
-            <Link href="/login">
-              <a>
-                <Button
-                  variant="outline"
-                  className="w-full gap-2"
-                  onClick={onClose}
-                >
-                  <LogOut className="w-4 h-4" />
-                  Logout
-                </Button>
-              </a>
-            </Link>
+            {/* logout button should clear auth state via context */}
+          <LogoutButton onClose={onClose} />
           </div>
         </div>
       </aside>

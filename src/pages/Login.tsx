@@ -16,7 +16,7 @@ const loginSchema = z.object({
 });
 
 export default function Login() {
-  const { loginMutation, user } = useAuth();
+  const { login, user, isInitializing, isLoading } = useAuth();
   const [_, setLocation] = useLocation();
 
   useEffect(() => {
@@ -24,6 +24,10 @@ export default function Login() {
       setLocation("/dashboard");
     }
   }, [user, setLocation]);
+
+  if (isInitializing) {
+    return null; // don't show form while we know auth state
+  }
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -33,8 +37,8 @@ export default function Login() {
     },
   });
 
-  const onSubmit = (data: z.infer<typeof loginSchema>) => {
-    loginMutation.mutate(data);
+  const onSubmit = async (data: z.infer<typeof loginSchema>) => {
+    await login(data);
   };
 
   return (
@@ -78,8 +82,8 @@ export default function Login() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full font-bold" disabled={loginMutation.isPending}>
-                {loginMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              <Button type="submit" className="w-full font-bold" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Sign In
               </Button>
             </form>

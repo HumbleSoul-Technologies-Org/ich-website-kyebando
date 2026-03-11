@@ -1,14 +1,16 @@
-import { createContext, ReactNode, useContext, useState } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { type User, type InsertUser } from "@/types/schema";
+import { createContext, ReactNode, useContext, useState, useEffect } from "react";
+import { type User } from "@/types/schema";
 import { useToast } from "@/hooks/use-toast";
+
+// simple auth context: stores user and provides login/logout helpers
 
 type AuthContextType = {
   user: User | null;
   isLoading: boolean;
+  isInitializing: boolean; // waiting for localStorage
   error: Error | null;
-  loginMutation: any;
-  logoutMutation: any;
+  login: (credentials: { username: string; password: string }) => Promise<void>;
+  logout: () => void;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -25,72 +27,84 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  const loginMutation = useMutation({
-    mutationFn: async (credentials: Pick<InsertUser, "username" | "password">) => {
-      // Simulate API delay
-      setIsLoading(true);
-      await new Promise(resolve => setTimeout(resolve, 500));
-      setIsLoading(false);
-      
-      // Simulate successful login - always succeeds
-      return MOCK_USER;
-    },
-    onSuccess: (user: User) => {
-      setUser(user);
-      setError(null);
+  // load persisted user from storage
+  useEffect(() => {
+    const stored = localStorage.getItem("authUser");
+    if (stored) {
+      try {
+        setUser(JSON.parse(stored));
+      } catch {}
+    }
+    setIsInitializing(false);
+  }, []);
+
+  // simple login / logout helpers
+  const login = async (credentials: { username: string; password: string }) => {
+    setIsLoading(true);
+    setError(null);
+
+    // demo-mock path
+    if (import.meta.env.VITE_USE_MOCK_AUTH === "true") {
+      await new Promise((r) => setTimeout(r, 500));
+      setUser(MOCK_USER);
+      try {
+        localStorage.setItem("authUser", JSON.stringify(MOCK_USER));
+      } catch {}
       toast({
         title: "Welcome back!",
-        description: `Logged in as ${user.username}`,
+        description: `Logged in as ${MOCK_USER.username}`,
       });
-    },
-    onError: (error: Error) => {
-      setError(error);
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const res = await apiRequest("POST", "/auth/login", credentials);
+      const data = (await res.json()) as User;
+      setUser(data);
+      try {
+        localStorage.setItem("authUser", JSON.stringify(data));
+      } catch {}
+      toast({
+        title: "Welcome back!",
+        description: `Logged in as ${data.username}`,
+      });
+    } catch (err: any) {
+      setError(err);
       toast({
         title: "Login failed",
-        description: error.message,
+        description: err.message || String(err),
         variant: "destructive",
       });
-    },
-  });
-
-  const logoutMutation = useMutation({
-    mutationFn: async () => {
-      // Simulate API delay
-      setIsLoading(true);
-      await new Promise(resolve => setTimeout(resolve, 300));
+    } finally {
       setIsLoading(false);
-      
-      // Always succeeds
-      return undefined;
-    },
-    onSuccess: () => {
-      setUser(null);
-      setError(null);
-      toast({
-        title: "Logged out",
-        description: "You have been logged out successfully",
-      });
-    },
-    onError: (error: Error) => {
-      setError(error);
-      toast({
-        title: "Logout failed",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
+    }
+  };
+
+  const logout = () => {
+    setUser(null);
+    setError(null);
+    try {
+      localStorage.removeItem("authUser");
+    } catch {}
+    toast({
+      title: "Logged out",
+      description: "You have been logged out successfully",
+    });
+  };
 
   return (
     <AuthContext.Provider
       value={{
         user,
         isLoading,
+        isInitializing,
         error,
-        loginMutation,
-        logoutMutation,
+        login,
+        logout,
       }}
     >
       {children}

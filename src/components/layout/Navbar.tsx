@@ -1,12 +1,14 @@
 import { Link, useLocation } from "wouter";
 import { Menu, X, ArrowRight } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 export function Navbar() {
   const [location] = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
+  const { user, logout } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -23,7 +25,7 @@ export function Navbar() {
     { href: "/blog", label: "Blog" },
     // { href: "/talent", label: "Talent Discovery" },
     { href: "/about", label: "About" },
-    { href: "/admin", label: "Admin", admin: true },
+    // { href: "/admin", label: "Admin", admin: true },
   ];
 
   return (
@@ -56,9 +58,14 @@ export function Navbar() {
         </div>
 
         <div className="hidden lg:flex items-center gap-4">
-          <Link href="/login">
-            <a className="text-sm font-medium hover:text-primary transition-colors">Log In</a>
-          </Link>
+          {user && (
+            <button
+              onClick={logout}
+              className="text-sm font-medium hover:text-primary transition-colors"
+            >
+              Log Out
+            </button>
+          )}
           <Link href="/get-involved">
             <Button className="font-bold shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all">
               Get Involved
@@ -85,9 +92,14 @@ export function Navbar() {
                 </Link>
               ))}
               <hr className="border-border" />
-              <Link href="/login">
-                <a className="text-lg font-medium text-foreground">Log In</a>
-              </Link>
+              {user && (
+                <button
+                  onClick={logout}
+                  className="text-lg font-medium text-foreground"
+                >
+                  Log Out
+                </button>
+              )}
               <Link href="/get-involved">
                 <Button className="w-full font-bold">Get Involved</Button>
               </Link>
