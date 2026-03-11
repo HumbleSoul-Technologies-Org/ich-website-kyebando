@@ -60,7 +60,9 @@ export default function AdminVisitsPage() {
   const [selectedGalleryImage, setSelectedGalleryImage] = useState<string | null>(null);
   const [galleryDragActive, setGalleryDragActive] = useState(false);
   const [participantsOpen, setParticipantsOpen] = useState(false);
-  const [participantForm, setParticipantForm] = useState<{ name: string; email: string; phone: string; role: string;   photo: { url: string; public_id: string } }>({ name: "", email: "", phone: "", role: "" , photo: { url: "" ,public_id:''} });
+  const [participantForm, setParticipantForm] = useState<{ name: string; phone: string; role: string;   photo: { url: string; public_id: string } }>({ name: "", phone: "", role: "" , photo: { url: "" ,public_id:''} });
+  // when editing an existing participant we store its id here
+  const [editingParticipantId, setEditingParticipantId] = useState<string | null>(null);
   const participantImageInputRef = useRef<HTMLInputElement | null>(null);
   const [selectedParticipantImage, setSelectedParticipantImage] = useState<string | null>(null);
   const [participantPhoto, setParticipantPhoto] = useState<File | null>(null);
@@ -161,6 +163,9 @@ export default function AdminVisitsPage() {
     setOpenMenu(null);
   };
 
+  // helper to return a unique visit identifier (handles both _id from backend and id from mock data)
+  const getVisitId = (visit: any) => visit._id || visit.id || `visit-${Math.random()}`;
+
   const editVisit = (visit: any) => {
     // open form populated for editing
     setFormData({
@@ -194,6 +199,7 @@ export default function AdminVisitsPage() {
       const dataUrl = String(reader.result || "");
       setSelectedParticipantImage(dataUrl);
       setParticipantPhoto(file);
+      console.log("participantPhoto set to:", file); // Log to confirm it's saved
     };
     reader.readAsDataURL(file);
   };
@@ -205,7 +211,9 @@ export default function AdminVisitsPage() {
 
   const openParticipants = (visit: any) => {
     setSelectedVisit(visit);
-    setParticipantForm({ name: "", email: "", phone: "", role: "",   photo: { url: "", public_id: "" } });
+    // prepare form for adding a new participant
+    setParticipantForm({ name: "", phone: "", role: "",   photo: { url: "", public_id: "" } });
+    setEditingParticipantId(null);
     setSelectedParticipantImage(null);
     setParticipantPhoto(null);
     if (participantImageInputRef.current) {
@@ -216,52 +224,100 @@ export default function AdminVisitsPage() {
   };
 
   const handleParticipantSubmit = async (visitId: string  ) => {
-    // e.preventDefault();
-    if (!selectedVisit) return;
+    
     setSaving(true);
     try {
-      let photoData = { url: "", public_id: "" };
+      // require an image on new participants
+      if (!editingParticipantId && !participantPhoto) {
+        alert("Please select a profile photo before saving");
+        setSaving(false);
+        return;
+      }
+
+      // prepare photo data using existing form value or a new upload
+      let photoData = participantForm.photo || { url: "", public_id: "" };
+      if (participantPhoto) {
+        const photoUrl = await uploadFileToServer(participantPhoto as File);
+        console.log("cloudinary upload result:", photoUrl);
+        photoData = {
+          url: photoUrl.url || photoUrl.secure_url || "",
+          public_id: photoUrl.public_id || photoUrl.asset_id || "",
+        };
+        setParticipantForm((p) => ({ ...p, photo: photoData }));
+      }
+      // Always upload attempt removed - only upload if a new file is selected
+      // const photoUrl = await uploadFileToServer(participantPhoto as File);
       
-      const photoUrl = await uploadFileToServer(participantPhoto as File);
-        photoData = { url: photoUrl.url  , public_id: photoUrl.public_id   };
-      
-      const payload = {
+      // console.log('====================================');
+      // console.log(photoUrl);
+      // console.log('====================================');
+
+      const payload: any = {
         name: participantForm.name || "",
-        email: participantForm.email || "",
         phone: participantForm.phone || "",
         role: participantForm.role || "",
         photo: photoData,
+      };
+
+      console.log("participant payload:", payload);
+
+      if (editingParticipantId) {
+        // update existing participant on server (backend may reuse add endpoint)
+        await apiRequest("POST", `/visits/add/participant/${visitId}`, payload);
+        // update local state copies without overriding photo if not returned
+        setVisits((prev) =>
+          prev.map((v) =>
+            getVisitId(v) === visitId
+              ? {
+                  ...v,
+                  participants: v.participants.map((p: any) =>
+                    p._id === editingParticipantId ? { ...p, ...payload } : p,
+                  ),
+                }
+              : v,
+          ),
+        );
+        setSelectedVisit((prev: any) =>
+          prev
+            ? {
+                ...prev,
+                participants: prev.participants.map((p: any) =>
+                  p._id === editingParticipantId ? { ...p, ...payload } : p,
+                ),
+              }
+            : prev,
+        );
+      } else {
+        // create a new participant
+        const response = await apiRequest("POST", `/visits/add/participant/${visitId}`, payload);
+        const newParticipant = { ...payload, ...response };
+        setVisits((prev) =>
+          prev.map((v) =>
+            getVisitId(v) === visitId
+              ? { ...v, participants: [...(v.participants || []), newParticipant] }
+              : v,
+          ),
+        );
+        setSelectedVisit((prev: any) =>
+          prev ? { ...prev, participants: [...(prev.participants || []), newParticipant] } : prev,
+        );
       }
- 
-      await apiRequest("POST", `/visits/add/participant/${visitId}`, payload);
-       setVisits((prev) => prev.map((v) => (v.id === visitId ? { ...v, participants: [...(v.participants || []), payload] } : v)));
-    setSelectedVisit((prev: any) => (prev ? { ...prev, participants: [...(prev.participants || []), payload] } : prev));
-    setParticipantsOpen(false);
-    setOpenMenu(null);
-    setParticipantPhoto(null);
-    setSelectedParticipantImage(null);
-    if (participantImageInputRef.current) {
-      participantImageInputRef.current.value = "";
-    }
-       
+
+      // reset form state
+      setParticipantsOpen(false);
+      setOpenMenu(null);
+      setParticipantPhoto(null);
+      console.log("participantPhoto reset to null"); // Confirm reset
+      setSelectedParticipantImage(null);
+      setEditingParticipantId(null);
+      if (participantImageInputRef.current) {
+        participantImageInputRef.current.value = "";
+      }
     } catch (error) {
-     
+      console.error(error);
     } finally {
       setSaving(false);
     }
-    // const newParticipant = {
-    //   name: participantForm.name || "",
-    //   email: participantForm.email || "",
-    //   phone: participantForm.phone || "",
-    //   role: participantForm.role || "",
-    //   url: participantForm.url || "",
-    //   photo: participantForm.photo || { url: "", public_id: "" },
-    // };
-
-    // setVisits((prev) => prev.map((v) => (v.id === selectedVisit.id ? { ...v, participants: [...(v.participants || []), newParticipant] } : v)));
-    // setSelectedVisit((prev: any) => (prev ? { ...prev, participants: [...(prev.participants || []), newParticipant] } : prev));
-    // setParticipantsOpen(false);
-    // setOpenMenu(null);
   };
 
   const removeParticipant = async (visitId: string, participantId: string) => {
@@ -272,18 +328,47 @@ export default function AdminVisitsPage() {
         if (!prev) return prev;
         return { ...prev, participants: prev.participants.filter((p: any) => p._id !== participantId) };
       });
+      setVisits((prev) =>
+        prev.map((v) =>
+          getVisitId(v) === visitId
+            ? { ...v, participants: v.participants.filter((p: any) => p._id !== participantId) }
+            : v,
+        ),
+      );
     } catch (error) {
-       
+      
     } finally { setPatId(null); }
    }
+
+  // prepare form for editing an existing participant
+  const editParticipant = (participant: any) => {
+    setEditingParticipantId(participant._id || null);
+    setParticipantForm({
+      name: participant.name || "",
+      phone: participant.phone || "",
+      role: participant.role || "",
+      photo: participant.photo || { url: "", public_id: "" },
+    });
+    setSelectedParticipantImage(participant.photo?.url || null);
+    setParticipantPhoto(null); // user can choose new file later
+    setParticipantsOpen(true);
+    setOpenMenu(null);
+  };
   const removeGalleryImage = async (visitId: string, galleryId: string) => {
     setGalId(galleryId);
     try {
       await apiRequest("POST", `/visits/remove/image/${visitId}`, { galleryId });
       setSelectedVisit((prev: any) => {
         if (!prev) return prev;
-        return { ...prev, participants: prev.participants.filter((p: any) => p._id !== galleryId) };
+        return { ...prev, gallery: prev.gallery.filter((g: any) => g._id !== galleryId) };
       });
+      setVisits((prev) =>
+        prev.map((v) =>
+          getVisitId(v) === visitId
+            ? { ...v, gallery: v.gallery.filter((g: any) => g._id !== galleryId) }
+            : v,
+        ),
+      );
     } catch (error) {
       console.log('====================================');
       console.log(error);
@@ -292,6 +377,7 @@ export default function AdminVisitsPage() {
    }
 
   const openCreateForm = () => {
+    setSelectedVisit(null); // clear any previously selected visit
     setFormData({
       community: "",
       title: "",
@@ -302,7 +388,8 @@ export default function AdminVisitsPage() {
       thumbnail: {url:'',public_id:''},
       status: "upcoming",
       participants: [],
-       
+      // ensure no _id on new entry
+      _id: undefined,
     });
     setSelectedImage(null);
     setSelectedImagePreview(null);
@@ -362,10 +449,15 @@ export default function AdminVisitsPage() {
           },
         }
       );
+      console.log('====================================');
+      console.log(data);
+      console.log('====================================');
       return data;
     } catch (error) {
-    
-      return {url:'',public_id:''};
+      console.log('====================================');
+      console.log(error);
+      console.log('====================================');
+      throw new Error("Image upload failed");
     }  
   };
 
@@ -389,15 +481,20 @@ let thumbnailUrl = {url: formData.thumbnail?.url || "", public_id: formData.thum
       },
       };
       
-    if (!!editVisit||selectedVisit._id) {
-      // update
-       await apiRequest("PUT", `/visits/update/${selectedVisit._id}`, payload);
-      setVisits((prev) => prev.map((v) => (v.id === formData.id ? { ...v, ...payload } : v)));
+    if (selectedVisit && selectedVisit._id) {
+      // update existing visit
+      const response = await apiRequest("PUT", `/visits/update/${selectedVisit._id}`, payload);
+      // merge server response if available
+      setVisits((prev) =>
+        prev.map((v) =>
+          getVisitId(v) === getVisitId(selectedVisit) ? { ...v, ...response, ...payload } : v,
+        ),
+      );
+      setSelectedVisit((prev: any) => (prev ? { ...prev, ...response, ...payload } : prev));
     } else {
-      // create
-       await apiRequest("POST", "/visits/create", payload);
-      const nextId = Math.max(0, ...visits.map((v) => v.id || 0)) + 1;
-      setVisits((prev) => [{ id: nextId, ...payload }, ...prev]);
+      // create new visit
+      const response = await apiRequest("POST", "/visits/create", payload);
+      setVisits((prev) => [response, ...prev]);
     }
 
     setFormOpen(false);
@@ -550,7 +647,7 @@ let thumbnailUrl = {url: formData.thumbnail?.url || "", public_id: formData.thum
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredVisits.map((visit) => (
                 <div 
-                  key={visit.id} 
+                  key={getVisitId(visit)} 
                   className="relative rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 h-96 group"
                 >
                   {/* Background Image */}
@@ -594,15 +691,15 @@ let thumbnailUrl = {url: formData.thumbnail?.url || "", public_id: formData.thum
                       <div className="grid grid-cols-3 gap-3 pt-2 border-t border-white/20">
                         <div>
                           <p className="text-xs font-medium text-white/70">Participants</p>
-                          <p className="text-lg font-semibold">{visit.participants.length}</p>
+                          <p className="text-lg font-semibold">{visit?.participants.length}</p>
                         </div>
                         <div>
                           <p className="text-xs font-medium text-white/70">Likes</p>
-                          <p className="text-lg font-semibold">{visit.likes.length || 0}</p>
+                          <p className="text-lg font-semibold">{visit?.likes.length || 0}</p>
                         </div>
                         <div>
                           <p className="text-xs font-medium text-white/70">Views</p>
-                          <p className="text-lg font-semibold">{visit.views.length || 0}</p>
+                          <p className="text-lg font-semibold">{visit?.views.length || 0}</p>
                         </div>
                       </div>
                     </div>
@@ -611,14 +708,14 @@ let thumbnailUrl = {url: formData.thumbnail?.url || "", public_id: formData.thum
                   <div className="absolute bottom-4 right-4 z-20 text-sm">
                     <div className="relative">
                       <button
-                        onClick={() => setOpenMenu(openMenu === visit.id ? null : visit.id)}
+                        onClick={() => setOpenMenu(openMenu === getVisitId(visit) ? null : getVisitId(visit))}
                         className="p-2 bg-white/10 hover:bg-white/20 rounded-full"
                         aria-label="Actions"
                       >
                         <MoreVertical className="w-5 h-5 text-white" />
                       </button>
 
-                      {openMenu === visit.id && (
+                      {openMenu === getVisitId(visit) && (
                         <div className="absolute bottom-10 right-0 mt-2 w-44 bg-white rounded-md shadow-lg ring-1 ring-black/5 overflow-hidden text-left">
                           <button onClick={() => viewDetails(visit)} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-800 hover:bg-gray-100">
                             <View className="w-4 h-4" /> View Details
@@ -876,13 +973,51 @@ let thumbnailUrl = {url: formData.thumbnail?.url || "", public_id: formData.thum
       <Dialog open={participantsOpen} onOpenChange={(open) => setParticipantsOpen(open)}>
         <DialogContent className="max-h-[600px] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Add Participant</DialogTitle>
+            <DialogTitle>{editingParticipantId ? "Edit Participant" : "Add Participant"}</DialogTitle>
             <DialogDescription>{selectedVisit ? selectedVisit.community : ""}</DialogDescription>
           </DialogHeader>
 
+          {/* existing participants list */}
+          {selectedVisit?.participants && selectedVisit.participants.length > 0 && (
+            <div className="space-y-2 mb-4">
+              {selectedVisit.participants.map((p: any) => (
+                <div key={p._id || p.phone || Math.random()} className="flex items-center justify-between p-2 border rounded">
+                  <div className="flex items-center gap-2">
+                    <img
+                      src={p.photo?.url || "/user.avif"}
+                      className="w-10 h-10 rounded-full object-cover"
+                    />
+                    <div>
+                      <div className="font-medium">{p.name}</div>
+                      <div className="text-xs text-muted-foreground">{p.role}</div>
+                    </div>
+                  </div>
+                  <div className="flex gap-1">
+                    <button
+                      type="button"
+                      onClick={() => editParticipant(p)}
+                      className="text-gray-600 hover:text-gray-800"
+                      aria-label="Edit"
+                    >
+                      <Edit className="w-4 h-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => selectedVisit && removeParticipant(selectedVisit._id, p._id)}
+                      className="text-red-600 hover:text-red-800"
+                      aria-label="Remove"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
           <form  className="grid gap-4">
             <Input placeholder="Name" value={participantForm.name} onChange={(e) => setParticipantForm((p) => ({ ...p, name: e.target.value }))} />
-            <Input placeholder="Email" type="email" value={participantForm.email} onChange={(e) => setParticipantForm((p) => ({ ...p, email: e.target.value }))} />
+            {/* email field removed as per request */}
             <Input placeholder="Phone" value={participantForm.phone} onChange={(e) => setParticipantForm((p) => ({ ...p, phone: e.target.value }))} />
             <Input placeholder="Role" value={participantForm.role} onChange={(e) => setParticipantForm((p) => ({ ...p, role: e.target.value }))} />
              
@@ -902,7 +1037,7 @@ let thumbnailUrl = {url: formData.thumbnail?.url || "", public_id: formData.thum
 
             <DialogFooter>
               <div className="flex gap-2">
-                <Button onClick={() => handleParticipantSubmit(selectedVisit?._id)} type="submit">{saving ? <span className="flex items-center justify-center gap-2">Adding... <Loader className="w-4 h-4 animate-spin"/></span> : "Save"}</Button>
+                <Button onClick={() => handleParticipantSubmit(selectedVisit?._id)} type="submit">{saving ? <span className="flex items-center justify-center gap-2">{editingParticipantId ? "Updating..." : "Adding..."} <Loader className="w-4 h-4 animate-spin"/></span> : editingParticipantId ? "Update" : "Save"}</Button>
                 <Button variant="outline" onClick={() => setParticipantsOpen(false)}>Cancel</Button>
               </div>
             </DialogFooter>

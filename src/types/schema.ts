@@ -2,10 +2,10 @@ import { z } from "zod";
 
 // === USER TYPES ===
 export const insertUserSchema = z.object({
-  id: z.number().optional(),
+  id: z.string().optional(),
   username: z.string(),
-  password: z.string(),
   role: z.string().default("admin"),
+  token: z.string().optional(),
 });
 
 export type User = z.infer<typeof insertUserSchema>;

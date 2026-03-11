@@ -4,13 +4,14 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { mockCommunities } from "@/lib/mockData";
 import { Card, CardContent } from "@/components/ui/card";
-import { MapPin, Calendar, CheckCircle2, Clock, Search } from "lucide-react";
+import { MapPin, Calendar, CheckCircle2, Clock, Search, Dot } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
 import { isFuture } from "date-fns";
 import { Link } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
@@ -25,29 +26,40 @@ L.Icon.Default.mergeOptions({
 });
 
 export default function Communities() {
+  const { data: visitsData, isLoading: visitsLoading } = useQuery<any>({
+    queryKey: ["visits","all"],
+  })
+
+
   const [communities, setCommunities] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCommunity, setSelectedCommunity] = useState<string | null>(null);
 
+  
+
   useEffect(() => {
 
-    window.scrollTo({ top: 0, behavior: "smooth" });
-    const mapped = mockCommunities.map((v: any) => ({
-      id: v.id,
-      name: v.title || v.name,
+    if (visitsData) { 
+     const mapped = visitsData.map((v: any) => ({
+      id: v._id,
+      name: v.title ,
       community: v.community,
-      district: v.community,
       country: v.country,
-      visitDate: v.date || v.visitDate,
-      imageUrl: v.thumbnail || v.image || v.imageUrl,
-      description: v.excerpt || v.description || v.content,
+      visitDate: v.date  ,
+      imageUrl: v.thumbnail?.url ,
+      description: v.content ,
       location: v.location,
-      status: v.status,
+       status: v.status,
+      excerpt: v.excerpt,
     }));
     setCommunities(mapped);
     setIsLoading(false);
-  }, []);
+    }
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    
+  }, [visitsData]);
 
   const upcomingVisits = useMemo(() => {
     return (
@@ -200,8 +212,8 @@ export default function Communities() {
                                 {community.name}
                               </h3>
                               <div className="flex items-center text-muted-foreground text-sm gap-1">
-                                <MapPin className="w-3 h-3" />{" "}
-                                {community.district}
+                                <MapPin className="w-5 h-5" />{" "}
+                                {community.community}<Dot className="w-12 text-gray-300 -ml-4 -mr-4 h-12" /> {community.country}
                               </div>
                             </div>
                             <Badge variant="secondary" className="capitalize">

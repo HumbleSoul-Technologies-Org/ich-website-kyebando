@@ -151,6 +151,7 @@ export default function AdminBlogsPage() {
   };
 
   const openCreateForm = () => {
+    setSelectedBlog(null); // make sure we are not editing an existing post
     setFormData({
       title: "",
       author: "",
@@ -158,8 +159,8 @@ export default function AdminBlogsPage() {
       content: "",
       thumbnail: { url: "", public_id: "" },
       status: "draft",
-
       videoId: "",
+      _id: undefined,
     });
     setSelectedImage(null);
     setSelectedImagePreview(null);
@@ -167,6 +168,7 @@ export default function AdminBlogsPage() {
   };
 
   const editBlog = (blog: any) => {
+    setSelectedBlog(blog);
     setFormData({
       ...blog,
       publishDate: blog.publishDate
@@ -211,9 +213,15 @@ export default function AdminBlogsPage() {
 
       if (formData._id) {
         // update
-        await apiRequest("PUT", `/blogs/update/${formData._id}`, payload);
+        const response = await apiRequest("PUT", `/blogs/update/${formData._id}`, payload);
         setBlogs((prev) =>
-          prev.map((b) => (b._id === formData._id ? { ...b, ...payload } : b)),
+          prev.map((b) =>
+            getBlogId(b) === formData._id ? { ...b, ...response, ...payload } : b,
+          ),
+        );
+        // if we were viewing details, refresh that too
+        setSelectedBlog((prev: any) =>
+          prev ? { ...prev, ...response, ...payload } : prev,
         );
       } else {
         // create
@@ -236,6 +244,10 @@ export default function AdminBlogsPage() {
       try {
         await apiRequest("DELETE", `/blogs/delete/${blogId}`);
         setBlogs((prev) => prev.filter((b) => getBlogId(b) !== blogId));
+        if (selectedBlog && getBlogId(selectedBlog) === blogId) {
+          setSelectedBlog(null);
+          setDialogOpen(false);
+        }
       } catch (error) {
         console.error(error);
       } finally {
@@ -390,7 +402,7 @@ export default function AdminBlogsPage() {
                     {/* Featured Image */}
                     <div className="absolute inset-0 z-0">
                       <img
-                        src={blog.thumbnail?.url}
+                        src={blog?.thumbnail?.url}
                         alt={blog.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
@@ -403,9 +415,9 @@ export default function AdminBlogsPage() {
                       <div className="flex items-start justify-between">
                         <div>
                           <h3 className="text-xl text-primary font-bold mb-1 line-clamp-2">
-                            {blog.title}
+                            {blog?.title}
                           </h3>
-                          <p className="text-sm text-white/80">{blog.author}</p>
+                          <p className="text-sm text-white/80">{blog?.author}</p>
                         </div>
                         <Badge
                           variant={
@@ -414,19 +426,19 @@ export default function AdminBlogsPage() {
                               : "secondary"
                           }
                         >
-                          {blog.status === "published" ? "Published" : "Draft"}
+                          {blog?.status === "published" ? "Published" : "Draft"}
                         </Badge>
                       </div>
 
                       {/* Bottom Section */}
                       <div className="space-y-4">
                         <p className="text-sm text-white/90 line-clamp-2">
-                          {blog.excerpt}
+                          {blog?.excerpt}
                         </p>
 
                         <div className="pt-2 border-t border-white/20">
                           <p className="text-xs text-white/70">
-                            {blog.publishDate
+                            {blog?.publishDate
                               ? new Date(blog.publishDate).toLocaleDateString(
                                   "en-US",
                                   {
@@ -462,22 +474,22 @@ export default function AdminBlogsPage() {
                           <div className="flex items-center gap-4 mt-3 pt-2 border-t border-white/20">
                             <div className="flex items-center gap-1 text-white/80">
                               <Heart className="w-4 h-4" />
-                              <span className="text-xs">{blog.likes.length || 0}</span>
+                              <span className="text-xs">{blog?.likes?.length || 0}</span>
                             </div>
                             <div className="flex items-center gap-1 text-white/80">
                               <MessageCircle className="w-4 h-4" />
                               <span className="text-xs">
-                                {blog.comments.length || 0}
+                                {blog?.comments?.length || 0}
                               </span>
                             </div>
                             <div className="flex items-center gap-1 text-white/80">
                               <Eye className="w-4 h-4" />
-                              <span className="text-xs">{blog.views.length || 0}</span>
+                              <span className="text-xs">{blog?.views?.length || 0}</span>
                             </div>
                             <div className="flex items-center gap-1 text-white/80">
                               <Share2 className="w-4 h-4" />
                               <span className="text-xs">
-                                {blog.shares.length || 0}
+                                {blog?.shares?.length || 0}
                               </span>
                             </div>
                           </div>

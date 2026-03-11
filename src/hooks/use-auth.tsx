@@ -1,6 +1,7 @@
 import { createContext, ReactNode, useContext, useState, useEffect } from "react";
 import { type User } from "@/types/schema";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 
 // simple auth context: stores user and provides login/logout helpers
 
@@ -15,14 +16,7 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-// Mock user for simulation
-const MOCK_USER: User = {
-  id: 1,
-  username: "admin",
-  password: "password123",
-  role: "admin",
-};
-
+ 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
   const [user, setUser] = useState<User | null>(null);
@@ -45,24 +39,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (credentials: { username: string; password: string }) => {
     setIsLoading(true);
     setError(null);
-
-    // demo-mock path
-    if (import.meta.env.VITE_USE_MOCK_AUTH === "true") {
-      await new Promise((r) => setTimeout(r, 500));
-      setUser(MOCK_USER);
-      try {
-        localStorage.setItem("authUser", JSON.stringify(MOCK_USER));
-      } catch {}
-      toast({
-        title: "Welcome back!",
-        description: `Logged in as ${MOCK_USER.username}`,
-      });
-      setIsLoading(false);
-      return;
-    }
-
     try {
-      const res = await apiRequest("POST", "/auth/login", credentials);
+      const res = await apiRequest("POST", "/auth/admin/login", credentials);
       const data = (await res.json()) as User;
       setUser(data);
       try {

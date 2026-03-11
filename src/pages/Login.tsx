@@ -2,12 +2,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAuth } from "@/hooks/use-auth";
-import { useLocation } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
+import { Loader, Loader2 } from "lucide-react";
 import { useEffect } from "react";
 
 const loginSchema = z.object({
@@ -43,7 +43,7 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-muted/30 p-4">
-      <Card className="w-full max-w-md shadow-2xl">
+      <Card className="w-full relative max-w-md shadow-2xl">
         <CardHeader className="text-center">
           <div className="mx-auto w-12 h-12 bg-primary rounded-xl flex items-center justify-center text-white font-bold text-xl mb-4">
             IC
@@ -83,12 +83,18 @@ export default function Login() {
                 )}
               />
               <Button type="submit" className="w-full font-bold" disabled={isLoading}>
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Sign In
+                {isLoading ? (<span className="flex items-center justify-center gap-2">Signing In...<Loader className="mr-2 h-4 w-4 animate-spin" /></span>) : "Sign In"}
+                
               </Button>
             </form>
           </Form>
         </CardContent>
+
+        <Link href="/">
+          <a className="absolute top-4 right-4 text-sm text-muted-foreground hover:text-primary transition-colors">
+            Back to Home
+          </a>
+        </Link>
       </Card>
     </div>
   );

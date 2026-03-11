@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from "react";
 import { useRoute, Link } from "wouter";
 import NotFound from "@/pages/not-found";
 import { mockCommunities } from "@/lib/mockData";
+import { useQuery } from "@tanstack/react-query";
+import { v4 as uuidv4 } from 'uuid';
 import {
   Dialog,
   DialogContent,
@@ -9,26 +11,33 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ThumbsDown, ThumbsUp, User, ChevronDown, Eye, Loader2 } from "lucide-react";
+import { ThumbsDown, ThumbsUp, User, ChevronDown, Eye, Loader2, Loader } from "lucide-react";
+import { set } from "date-fns";
+import { apiRequest } from "@/lib/queryClient";
+import { Button } from "@/components/ui/button";
 
 export default function VisitDetails() {
-  const [match, params] = useRoute("/visits/:id");
+  
+const [match, params] = useRoute("/visits/:id");
   if (!match) return <NotFound />;
+ const { data: visitsData, isLoading: visitsLoading } = useQuery<any>({
+    queryKey: ["visits",`${params.id}`],
+  })
 
-  const id = Number((params as any).id);
-  const visit = mockCommunities.find((v) => Number(v.id) === id);
+  const userIdRef = useRef(uuidv4());
 
-  if (!visit) return <NotFound />;
-
+  const [visit, setVisit] = useState<any>(null);
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [activeImage, setActiveImage] = useState<string | null>(null);
-  const [comments, setComments] = useState<any[]>(visit.comments || []);
-  const [commentForm, setCommentForm] = useState({ name: "", phone: "", comment: "" });
+  const [comments, setComments] = useState<any[]>([]);
+  const [name, setName] = useState("");
+  const [commentText, setCommentText] = useState("");
   const [canScroll, setCanScroll] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
+  const [commenting, setCommenting] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  const commentsActive = visit.status === "visited";
+  const commentsActive = visit?.status === "visited";
 
   const getRelativeTime = (dateString: string) => {
     const date = new Date(dateString);
@@ -69,28 +78,58 @@ export default function VisitDetails() {
       }
       window.removeEventListener("resize", checkScroll);
     };
-  }, []);
-
-  const handleCommentChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target as HTMLInputElement;
-    setCommentForm((p) => ({ ...p, [name]: value }));
-  };
-
-  const handleCommentSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!commentForm.comment || !commentForm.name) {
-      alert("Please enter your name and comment");
-      return;
+    }, []);
+  
+  useEffect(() => {
+    if (visitsData) {
+      const foundVisit = Array.isArray(visitsData) ? visitsData[0] : visitsData;
+      setVisit(foundVisit);
     }
-    const newComment = {
-      name: commentForm.name,
-      phone: commentForm.phone,
-      comment: commentForm.comment,
-      date: new Date().toISOString(),
-    };
-    setComments((c) => [newComment, ...c]);
-    setCommentForm({ name: "", comment: "",phone:"" });
+  }, [visitsData]);
+
+  useEffect(() => {
+    if (visit) {
+      setComments(visit?.comments || []);
+    }
+  }, [visit]);
+
+  const handleAddComment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCommenting(true);
+    try {
+      if (!commentText.trim()) {
+        setCommenting(false);
+        return;
+      }
+
+      const newComment = {
+        name: name.trim() || "Anonymous",
+        comment: commentText.trim(),
+      };
+
+      const payload = {
+        ...newComment,
+        uuid: uuidv4(),
+        type: "visit",
+        typeId: visit._id,
+      };
+
+      await apiRequest("POST", "/comments/new", payload);
+
+      // Add comment to the beginning
+      setComments((s) => [newComment, ...s]);
+      setName("");
+      setCommentText("");
+    } catch (error) {
+      console.error("Comment submission error:", error);
+      alert("Failed to post comment. Please try again.");
+    } finally {
+      setCommenting(false);
+    }
   };
+
+  if (!visit) return <NotFound />;
+
   return (
     <div className="max-w-6xl mx-auto p-3 sm:p-4 md:p-6">
       <div className="flex items-center justify-between mb-3 sm:mb-4 gap-2">
@@ -106,7 +145,7 @@ export default function VisitDetails() {
           <div className="flex md:items-stretch md:col-span-1 max-h-[250px] sm:max-h-[350px] md:max-h-none">
             <div
               className="w-full bg-cover bg-no-repeat bg-center h-full md:min-h-[420px]"
-              style={{ backgroundImage: `url(${visit.thumbnail})` }}
+              style={{ backgroundImage: `url(${visit.thumbnail?.url})` }}
             />
           </div>
 
@@ -117,10 +156,10 @@ export default function VisitDetails() {
               {visit.community} — {visit.country}
             </p>
 
-            <p className="mt-2 sm:mt-4 text-sm text-muted-foreground">{visit.excerpt}</p>
+            <p className="mt-2 sm:mt-4 text-sm text-muted-foreground">{visit?.excerpt}</p>
 
             {/* Video (YouTube) */}
-            {visit.videoId && (
+            {visit?.videoId && (
               <div className="mt-3 sm:mt-4 md:mt-6">
                 <div className="relative" style={{ paddingTop: "56.25%" }}>
                   {!videoLoaded && (
@@ -148,24 +187,24 @@ export default function VisitDetails() {
             )}
 
             <div className="mt-3 sm:mt-4 md:mt-6 text-sm sm:text-base text-justify">
-              <p>{visit.content}</p>
+              <p>{visit?.content}</p>
             </div>
 
             <div className="mt-4 sm:mt-6 space-y-4 sm:space-y-6 md:grid md:grid-cols-2 md:gap-6">
               <div className="">
                 <h3 className="font-semibold text-sm sm:text-base">Participants</h3>
                 <div className="mt-2 sm:mt-3 space-y-2 sm:space-y-3">
-                  {visit.participants && visit.participants.length > 0 ? (
+                  {visit?.participants && visit.participants.length > 0 ? (
                     visit.participants.slice(0, 3).map((p: any, idx: number) => (
                       <div key={idx} className="flex items-center gap-3">
                         <img
-                          src={p.image}
-                          alt={p.name}
+                          src={p.photo?.url}
+                          alt={p?.name}
                           className="h-8 sm:h-10 w-8 sm:w-10 rounded-full object-cover"
                         />
                         <div className="min-w-0">
-                          <div className="font-medium text-sm truncate">{p.name}</div>
-                          <div className="text-xs sm:text-sm text-muted-foreground truncate">{p.role}</div>
+                          <div className="font-medium text-sm truncate">{p?.name}</div>
+                          <div className="text-xs sm:text-sm text-muted-foreground truncate">{p?.role}</div>
                         </div>
                       </div>
                     ))
@@ -177,7 +216,7 @@ export default function VisitDetails() {
 
               <div className="max-h-[200px] overflow-y-auto">
                 <h3 className="font-semibold text-sm sm:text-base">Gallery</h3>
-                {visit.gallery && visit.gallery.length > 0 ? (
+                {visit?.gallery && visit.gallery.length > 0 ? (
                   <div className="mt-2 sm:mt-3   grid grid-cols-2 sm:grid-cols-3 gap-2 transition-all">
                     {visit.gallery.map((img: string, i: number) => (
                       <button
@@ -189,7 +228,7 @@ export default function VisitDetails() {
                         className="overflow-hidden rounded"
                       >
                         <img
-                          src={img}
+                          src={img.url}
                           alt={`gallery-${i}`}
                           className="w-full h-16 sm:h-20 object-cover rounded cursor-pointer hover:scale-105 transition-transform"
                         />
@@ -206,8 +245,8 @@ export default function VisitDetails() {
 
             <div className="mt-4 sm:mt-6 flex flex-col gap-2">
               <div className="flex gap-4 text-xs sm:text-sm text-muted-foreground">
-                <div className="flex items-center gap-1"><ThumbsUp className="w-3 h-3 sm:w-4 sm:h-4 cursor-pointer" /><span>Likes: {visit.likes}</span></div>
-                <div className="flex items-center gap-1"><Eye className="w-3 h-3 sm:w-4 sm:h-4 cursor-pointer" /><span>Views: {visit.views}</span></div>
+                {visit?.likes && visit.likes > 0 && (<div className="flex items-center gap-1"><ThumbsUp className="w-3 h-3 sm:w-4 sm:h-4 cursor-pointer" /><span>Likes: {visit?.likes}</span></div>)}
+                {visit?.dislikes && visit.dislikes > 0 && (<div className="flex items-center gap-1"><ThumbsDown className="w-3 h-3 sm:w-4 sm:h-4 cursor-pointer" /><span>Dislikes: {visit?.dislikes}</span></div>)}
               </div>
             </div>
 
@@ -227,65 +266,55 @@ export default function VisitDetails() {
         </Link>
       {/* Comments Section */}
       <div className="mt-6 sm:mt-8">
-        <h2 className="font-display text-lg sm:text-xl font-bold mb-3 px-3 sm:px-0">Comments</h2>
+        <h2 className="font-display text-lg sm:text-xl font-bold mb-3">Comments</h2>
         {!commentsActive ? (
-          <div className="p-3 sm:p-4 mx-3 sm:mx-0 bg-muted rounded-md text-xs sm:text-sm text-muted-foreground">
+          <div className="p-3 sm:p-4 bg-muted rounded-md text-xs sm:text-sm text-muted-foreground">
             Comments will activate on the day of the event ({new Date(visit.date).toLocaleDateString()}).
           </div>
         ) : (
-          <div className="space-y-4 mx-3 sm:mx-0">
-            <form onSubmit={handleCommentSubmit} className="space-y-2 sm:space-y-3">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-2 sm:gap-3">
-                <input
-                  name="name"
-                  value={commentForm.name}
-                  onChange={handleCommentChange}
-                  placeholder="Your name"
-                  className="col-span-1 px-2 py-2 sm:p-2 border rounded text-sm"
-                />
-                <input
-                  name="phone"
-                  value={commentForm.phone}
-                  onChange={handleCommentChange}
-                  placeholder="Phone (optional)"
-                  className="col-span-1 px-2 py-2 sm:p-2 border rounded text-sm"
-                />
-                <div />
-              </div>
+          <div className="space-y-4">
+            <div className="mb-4">
+              <div className="text-sm text-muted-foreground">{comments.length} comment{comments.length !== 1 ? 's' : ''}</div>
+            </div>
 
-              <textarea
-                name="comment"
-                value={commentForm.comment}
-                onChange={handleCommentChange}
-                placeholder="Write your comment..."
-                className="w-full px-2 py-2 sm:p-2 border rounded h-24 sm:h-28 text-sm"
+            <form onSubmit={handleAddComment} className="mb-4 grid grid-cols-1 gap-3">
+              <input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Your name"
+                className="w-full px-3 py-2 rounded-md border border-border/50 bg-background text-sm"
               />
-
-              <div>
-                <button type="submit" className="px-3 sm:px-4 py-2 bg-primary text-white rounded text-sm font-medium">
-                  Post Comment
-                </button>
+              <textarea
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+                placeholder="Write a comment..."
+                className="w-full px-3 py-2 rounded-md border border-border/50 bg-background h-24 sm:h-28 resize-none text-sm"
+              />
+              <div className="flex justify-end">
+                <Button type="submit" disabled={commenting}>
+                  {!commenting ? "Post Comment" : <span className="flex items-center gap-2">Posting...<Loader className="w-4 h-4 animate-spin" /></span>}
+                </Button>
               </div>
             </form>
 
-            <div className="space-y-3 sm:space-y-4">
-              {comments.length === 0 ? (
-                <div className="text-xs sm:text-sm text-muted-foreground">No comments yet.</div>
-              ) : (
-                comments.map((c, idx) => (
-                  <div key={idx} className="p-3 sm:p-4 border rounded relative">
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="font-medium flex items-center gap-2 min-w-0 flex-1"> <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQf1fiSQO7JfDw0uv1Ae_Ye-Bo9nhGNg27dwg&s" className="w-8 sm:w-10 h-8 sm:h-10 rounded-full flex-shrink-0"/><span className="text-sm truncate">{c.name}</span></div>
-                      <div className="text-xs sm:text-sm text-muted-foreground flex-shrink-0">{getRelativeTime(c.date)}</div>
-                    </div>
-                    {c.phone && <div className="text-xs sm:text-sm text-muted-foreground mt-1">{c.phone}</div>}
-                        <p className="mt-2 text-sm">{c.comment}</p>
-                        
-                        <span className="absolute gap-2 sm:gap-4 flex items-center justify-center bottom-2 sm:bottom-3 right-2 sm:right-3 text-xs">
-                            <span className="flex items-center justify-center gap-1 text-muted-foreground"><ThumbsUp className="w-3 sm:w-4 h-3 sm:h-4"/>678</span><span className="flex items-center justify-center gap-1 text-muted-foreground"><ThumbsDown className="w-3 sm:w-4 h-3 sm:h-4" /> 24</span></span>
-                  </div>
-                ))
+            <div className="space-y-3 sm:space-y-4 max-h-[60vh] overflow-auto">
+              {comments.length === 0 && (
+                <div className="text-xs sm:text-sm text-muted-foreground">No comments yet — be the first to comment.</div>
               )}
+              {[...comments].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).map((c, i) => (
+                <div key={i} className="flex relative items-start gap-3 border-b-2 border-border/50 pb-3">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-sm">
+                    {String(c.name || "A").charAt(0).toUpperCase()}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-sm font-semibold">{c.name}</div>
+                    <div className="text-xs text-muted-foreground mb-1">{new Date(c.createdAt).toLocaleString()}</div>
+                    <div className="text-sm text-foreground">{c.comment}</div>
+                  </div>
+                  <span className="absolute flex gap-2 items-center justify-center top-0 right-0 text-xs text-muted-foreground">Likes: {c?.likes?.length || 0}</span>
+                  <ThumbsUp className="w-4 absolute bottom-1 right-1 h-4" />
+                </div>
+              ))}
             </div>
           </div>
         )}
@@ -299,7 +328,7 @@ export default function VisitDetails() {
           <div className="py-2 sm:py-4">
             {activeImage && (
               <img
-                src={activeImage}
+                src={activeImage.url}
                 alt="preview"
                 className="w-full h-auto max-h-[60vh] sm:max-h-[80vh] object-contain rounded"
               />

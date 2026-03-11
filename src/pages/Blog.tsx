@@ -7,10 +7,12 @@ import { impactStats } from "@/lib/aboutData";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useEffect, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 function CountUp({ end, duration = 1200 }: { end: number; duration?: number }) {
   const ref = useRef<HTMLDivElement | null>(null);
   const [value, setValue] = useState(0);
+  
 
   useEffect(() => {
     let rafId = 0;
@@ -49,6 +51,7 @@ function CountUp({ end, duration = 1200 }: { end: number; duration?: number }) {
     };
   }, [end, duration]);
 
+   
   return (
     <div ref={ref} className="text-lg font-bold">
       {value}+
@@ -57,8 +60,16 @@ function CountUp({ end, duration = 1200 }: { end: number; duration?: number }) {
 }
 
 export default function Blog() {
+   const { data: blogData, isLoading: loading } = useQuery<any>({
+      queryKey: ["blogs",`all`],
+   })
+  
+  const [blogs,setBlogs] = useState<any[]>([]);
     useEffect(() => {
-        window.scrollTo(0, 0);
+      window.scrollTo(0, 0);
+         if (blogData) {
+      setBlogs(blogData)
+    }
       }, [])
   return (
     <div className="min-h-screen flex flex-col">
@@ -74,22 +85,22 @@ export default function Blog() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <section className="lg:col-span-8 space-y-8">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
-                {blogsData.map((post) => (
-                  <motion.article key={post.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className="bg-white/80 rounded-xl overflow-hidden border border-border/50 shadow-sm hover:shadow-md transition-shadow">
+                {blogs.map((post) => (
+                  <motion.article key={post._id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className="bg-white/80 rounded-xl overflow-hidden border border-border/50 shadow-sm hover:shadow-md transition-shadow">
                     <div className="flex flex-col md:flex-row">
-                      <div className="md:w-44 h-40 md:h-auto overflow-hidden">
-                        <img src={post.thumbnail} alt={post.title} className="w-full h-full object-cover" />
+                      <div className="md:w-44 w-1/4 h-40 md:h-auto overflow-hidden">
+                        <img src={post.thumbnail.url} alt={post.title} className="w-full h-full object-cover" />
                       </div>
-                      <div className="p-4 flex flex-col justify-between">
+                      <div className="p-4 flex flex-col w-3/4 justify-between">
                         <div>
                           <h3 className="text-lg font-semibold mb-2 line-clamp-2">{post.title}</h3>
-                          <p className="text-sm text-muted-foreground mb-3 line-clamp-3">{post.excerpt}</p>
+                          <p className="text-sm text-justify text-muted-foreground mb-3 line-clamp-3">{post.excerpt}</p>
                         </div>
                         <div className="flex items-center justify-between mt-2">
                           <div className="text-xs text-muted-foreground">{post.author}</div>
                           <div className="flex items-center gap-3">
                             <time className="text-xs text-muted-foreground">{new Date(post.createdAt).toLocaleDateString()}</time>
-                            <Link href={`/blog/${post.id}`}><a className="text-primary text-sm font-semibold">Read →</a></Link>
+                            <Link href={`/blog/${post._id}`}><a className="text-primary text-sm font-semibold">Read →</a></Link>
                           </div>
                         </div>
                       </div>

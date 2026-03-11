@@ -33,8 +33,8 @@ import { useQuery } from "@tanstack/react-query";
 export default function AdminStaffPage() {
 
   const { data: staffData, isLoading: staffLoading } = useQuery<any>({
-    queryKey: ['staff','all'],
-  })  
+    queryKey: ['staff', 'all'],
+  })
   const [staff, setStaff] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -46,20 +46,19 @@ export default function AdminStaffPage() {
     phone: "",
     role: "",
     gender: "",
-    image:{url:"",public_id:""},
+    image: { url: "", public_id: "" },
   });
-  const [selectedImage, setSelectedImage] = useState<File|null>(null);
-  const [imagePreview, setImagePreview] = useState<string|null>(null);
-  const [saving, setSaving] = useState<boolean|null>(null);
-  const [deleting, setDeleting] = useState<string|null>(null);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [saving, setSaving] = useState<boolean | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
 
+  // synchronize query result into local state
   useEffect(() => {
     if (staffData) {
-      setStaff(staffData); 
+      setStaff(staffData);
     }
-    
-    
-  }, []);
+  }, [staffData]);
 
   const resetForm = () => {
     setFormData({
@@ -69,33 +68,33 @@ export default function AdminStaffPage() {
       phone: "",
       role: "",
       gender: "",
-      image:{url:"",public_id:""},
+      image: { url: "", public_id: "" },
     });
     setSelectedImage(null);
     setIsEditMode(false);
   };
 
-   // upload the selected image to the server
-    const uploadFileToServer = async (file: File) => {
-      
-      try {
-        const formData = new FormData();
-        formData.append("image", file);
-        const { data } = await axios.post(
-          `${import.meta.env.VITE_API_URL}/staff/upload/image`,
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
-        return data;
-      } catch (error) {
-      
-        return {url:'',public_id:''};
-      }  
-    };
+  // upload the selected image to the server
+  const uploadFileToServer = async (file: File) => {
+
+    try {
+      const formData = new FormData();
+      formData.append("image", file);
+      const { data } = await axios.post(
+        `${import.meta.env.VITE_API_URL}/staff/upload/image`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      return data;
+    } catch (error) {
+
+      return { url: '', public_id: '' };
+    }
+  };
 
   const handleAddStaff = () => {
     resetForm();
@@ -110,7 +109,7 @@ export default function AdminStaffPage() {
       phone: member.phone,
       role: member.role,
       gender: member.gender,
-      image: member.image || member.photo || {url:'',public_id:''},
+      image: member.image || member.photo || { url: '', public_id: '' },
     });
     setSelectedImage(null);
     setImagePreview(member.image?.url || member.photo?.url || null);
@@ -121,64 +120,71 @@ export default function AdminStaffPage() {
   const handleDelete = async (memberId: string) => {
     setDeleting(memberId);
     try {
-      await apiRequest('DELETE',`/staff/delete/${memberId}`);
-     setStaff(staff.filter((m) => m._id !== memberId));
-   } catch (error) {
-    console.log('====================================');
-    console.log(error);
-    console.log('====================================');
-   }finally {
-    setDeleting(null);
-   }
+      await apiRequest('DELETE', `/staff/delete/${memberId}`);
+      setStaff(staff.filter((m) => m._id !== memberId));
+    } catch (error) {
+      console.log('====================================');
+      console.log(error);
+      console.log('====================================');
+    } finally {
+      setDeleting(null);
+    }
   };
 
-  const handleSaveStaff = async() => {
+  // helper to normalize a staff item id
+  const getStaffId = (m: any) => m._id || m.id || `staff-${Math.random()}`;
+
+  const handleSaveStaff = async () => {
+    setSaving(true);
     try {
-     setSaving(true);
-     if (!formData.name || !formData.email || !formData.role) {
-      alert("Please fill in all required fields");
-      return;
-    }
+      if (!formData.name || !formData.email || !formData.role) {
+        alert("Please fill in all required fields");
+        setSaving(false);
+        return;
+      }
 
-    let photoData = {url:'',public_id:''};
-    if (selectedImage) {
-      photoData = await uploadFileToServer(selectedImage);
-    }
+      let photoData = { url: '', public_id: '' };
+      if (selectedImage) {
+        photoData = await uploadFileToServer(selectedImage);
+      }
 
-    // Use uploaded image if available, otherwise use existing image
-    const finalImage = photoData.url ? photoData : formData.image;
+      // Use uploaded image if available, otherwise use existing image
+      const finalImage = photoData.url ? photoData : formData.image;
 
-    const payload = {
-      name: formData.name,
-      email: formData.email,
-      phone: formData.phone,
-      role: formData.role,
-      gender: formData.gender,
-      image: finalImage,
-    };
+      const payload = {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        role: formData.role,
+        gender: formData.gender,
+        image: finalImage,
+      };
 
-    if (isEditMode) {
-      await apiRequest('PUT',`/staff/update/${formData._id}`, payload);
-      setStaff(
-        staff.map((m) =>
-          m._id === formData._id ? { ...m, ...payload, _id: formData._id } : m
-        )
-      );
-    } else {
-      await apiRequest('POST', '/staff/create', payload);
-      setStaff([...staff, { ...payload }]);
-    }
+      if (isEditMode) {
+        const response = await apiRequest('PUT', `/staff/update/${formData._id}`, payload);
+        setStaff((prev) =>
+          prev.map((m) =>
+            getStaffId(m) === formData._id ? { ...m, ...response, ...payload } : m,
+          ),
+        );
+        
+      } else {
+        const response = await apiRequest('POST', '/staff/create', payload);
+        setStaff((prev) => [...prev, response]);
+        
+      }
 
-    setIsDialogOpen(false);
-    resetForm();
-   } catch (error) {
-    console.log('====================================');
-    console.log(error);
-    console.log('====================================');
+      setImagePreview(null);
+      setSelectedImage(null);
+      setIsDialogOpen(false);
+      resetForm();
+    } catch (error) {
+      console.log('====================================');
+      console.log(error);
+      console.log('====================================');
     } finally {
-     setSaving(false);
-      
-   }
+      setSaving(false);
+    }
   };
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -286,14 +292,14 @@ export default function AdminStaffPage() {
                           <><Loader className="w-4 h-4 animate-spin" /> Deleting...</>
                         ) : (
                           <><Trash2 className="h-4 w-4" />
-                          <span>Delete</span>
+                            <span>Delete</span>
                           </>
                         )}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
-                
+
                 {/* Content */}
                 <div className="absolute inset-0 p-6 flex flex-col justify-between">
                   <div>
