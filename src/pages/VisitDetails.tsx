@@ -15,7 +15,6 @@ import { ThumbsDown, ThumbsUp, User, ChevronDown, Eye, Loader2, Loader, Share2 }
 import { set } from "date-fns";
 import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
-import { log } from "node:console";
 
 export default function VisitDetails() {
   
@@ -59,40 +58,42 @@ const [match, params] = useRoute("/visits/:id");
   };
 
     useEffect(() => {
-      
-        window.scrollTo(0,0);
-    const checkScroll = () => {
-      if (scrollContainerRef.current) {
-        const { scrollHeight, clientHeight, scrollTop } = scrollContainerRef.current;
-        setCanScroll(scrollHeight > clientHeight && scrollTop < scrollHeight - clientHeight - 10);
-      }
-    };
-
-    checkScroll();
-    const container = scrollContainerRef.current;
-    if (container) {
-      container.addEventListener("scroll", checkScroll);
-      window.addEventListener("resize", checkScroll);
-    }
-
-    return () => {
-      if (container) {
-        container.removeEventListener("scroll", checkScroll);
-      }
-      window.removeEventListener("resize", checkScroll);
-    };
+      window.scrollTo(0,0);
     }, []);
- 
+
+    useEffect(() => {
+      const checkScroll = () => {
+        if (scrollContainerRef.current) {
+          const { scrollHeight, clientHeight, scrollTop } = scrollContainerRef.current;
+          setCanScroll(scrollHeight > clientHeight && scrollTop < scrollHeight - clientHeight - 10);
+        }
+      };
+
+      // Check on mount and with a small delay to ensure DOM is rendered
+      setTimeout(() => {
+        checkScroll();
+      }, 100);
+
+      const container = scrollContainerRef.current;
+      if (container) {
+        container.addEventListener("scroll", checkScroll);
+        window.addEventListener("resize", checkScroll);
+      }
+
+      return () => {
+        if (container) {
+          container.removeEventListener("scroll", checkScroll);
+        }
+        window.removeEventListener("resize", checkScroll);
+      };
+    }, [visit]);
   
   useEffect(() => {
-    
     if (visitsData) {
       const foundVisit = Array.isArray(visitsData) ? visitsData[0] : visitsData;
       setVisit(foundVisit);
       create_UUID();
     }
-
-     
   }, [visitsData]);
 
   useEffect(() => {
@@ -149,7 +150,7 @@ const [match, params] = useRoute("/visits/:id");
 
   if (!visit) return <NotFound />;
 
-   const toggleCommunityLikes = async (comment: any) => { 
+   const toggleCommunentLikes = async (comment: any) => { 
       try {
         await apiRequest('POST', `/comments/${comment._id}/toggle-like`, {
           uuid: UUID,
@@ -195,10 +196,9 @@ const [match, params] = useRoute("/visits/:id");
          
       }
     }
-   
-   const logViews = async () => { 
+   const logShares = async () => { 
       try {
-        await apiRequest('POST', `/visits/${visit._id}/log-view`, {
+        await apiRequest('POST', `/visits/${visit._id}/log-share`, {
           uuid: UUID,
         });
 
@@ -206,7 +206,7 @@ const [match, params] = useRoute("/visits/:id");
           if (s._id === visit._id) {
             return {
               ...s,
-              views: [...(s.views || []), UUID],
+              shares: [...(s.shares || []), UUID],
             };
           } 
           return s;
@@ -217,6 +217,17 @@ const [match, params] = useRoute("/visits/:id");
          
       }
   }
+
+  const handleShareWithLink = async () => {
+    await logShares();
+    const visitLink = `${window.location.origin}/visits/${visit._id}`;
+    try {
+      await navigator.clipboard.writeText(visitLink);
+    } catch (error) {
+      console.error('Failed to copy link to clipboard:', error);
+    }
+  }
+   
   
 
   
@@ -233,9 +244,9 @@ const [match, params] = useRoute("/visits/:id");
       <div className="bg-white mb-6 rounded-lg h-screen sm:h-[500px] md:h-[700px] overflow-hidden shadow">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
           {/* Left: Thumbnail */}
-          <div className="flex md:items-stretch md:col-span-1 max-h-[250px] sm:max-h-[350px] md:max-h-none">
+          <div className="flex md:items-stretch md:col-span-1 h-64 sm:h-80 md:h-auto md:min-h-[420px]">
             <div
-              className="w-full bg-cover bg-no-repeat bg-center h-full md:min-h-[420px]"
+              className="w-full bg-cover bg-no-repeat bg-center"
               style={{ backgroundImage: `url(${visit.thumbnail?.url})` }}
             />
           </div>
@@ -347,7 +358,7 @@ const [match, params] = useRoute("/visits/:id");
                 
                  
                 <div className="flex items-center gap-1">
-                    <Share2 onClick={()=> logShares(visit._id)} className="w-3 h-3 sm:w-4 sm:h-4 cursor-pointer" />
+                    <Share2 onClick={()=> handleShareWithLink()} className="w-3 h-3 sm:w-4 sm:h-4 cursor-pointer" />
                     <span>Shares: {visit?.shares?.length||0}</span>
                   </div>
               </div>
@@ -355,7 +366,7 @@ const [match, params] = useRoute("/visits/:id");
 
             {/* Scroll Indicator */}
             {canScroll && (
-              <div className="absolute bottom-0 left-0 right-0 h-20 sm:h-24 bg-gradient-to-t from-black via-black/50 to-transparent hidden md:flex flex-col items-center justify-end pb-2 sm:pb-4 gap-1 animate-pulse">
+              <div className="absolute bottom-0 left-0 right-0 h-20 sm:h-24 bg-gradient-to-t from-black via-black/50 to-transparent flex flex-col items-center justify-end pb-2 sm:pb-4 gap-1 animate-pulse">
                 <span className="text-xs text-white font-medium">Scroll for more</span>
                 <ChevronDown className="w-4 sm:w-5 h-4 sm:h-5 text-white animate-bounce" />
               </div>
@@ -415,7 +426,7 @@ const [match, params] = useRoute("/visits/:id");
                     <div className="text-sm text-foreground">{c.comment}</div>
                   </div>
                   <span className="absolute flex gap-2 items-center justify-center top-0 right-0 text-xs text-muted-foreground">Likes: {c?.likes?.length || 0}</span>
-                  <ThumbsUp onClick={() => toggleCommunityLikes(c)} className={`w-4 absolute bottom-1 ${c?.likes?.includes(UUID) ? 'fill-primary text-primary' : 'text-muted-foreground'} right-1 h-4 hover:shadow-lg hover:w-5 cursor-pointer`} />
+                  <ThumbsUp onClick={() => toggleCommunentLikes(c)} className={`w-4 absolute bottom-1 ${c?.likes?.includes(UUID) ? 'fill-primary text-primary' : 'text-muted-foreground'} right-1 h-4 hover:shadow-lg hover:w-5 cursor-pointer`} />
                 </div>
               ))}
             </div>

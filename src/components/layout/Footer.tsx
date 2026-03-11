@@ -40,11 +40,11 @@ export function Footer() {
           <div>
             <h3 className="font-display font-bold text-lg mb-6 text-white">Programs</h3>
             <ul className="space-y-4">
-              <li><Link href="/programs"><a className="hover:text-primary transition-colors">Digital Skills</a></Link></li>
-              <li><Link href="/programs"><a className="hover:text-primary transition-colors">Entrepreneurship</a></Link></li>
-              <li><Link href="/programs"><a className="hover:text-primary transition-colors">Vocational Training</a></Link></li>
-              <li><Link href="/programs"><a className="hover:text-primary transition-colors">Creative Arts</a></Link></li>
-              <li><Link href="/programs"><a className="hover:text-primary transition-colors">Tech Startups</a></Link></li>
+              <li><Link href="#"><a className="hover:text-primary transition-colors">Digital Skills</a></Link></li>
+              <li><Link href="#"><a className="hover:text-primary transition-colors">Entrepreneurship</a></Link></li>
+              <li><Link href="#"><a className="hover:text-primary transition-colors">Vocational Training</a></Link></li>
+              <li><Link href="#"><a className="hover:text-primary transition-colors">Creative Arts</a></Link></li>
+              <li><Link href="#"><a className="hover:text-primary transition-colors">Tech Startups</a></Link></li>
             </ul>
           </div>
 

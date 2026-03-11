@@ -152,6 +152,16 @@ export default function BlogPost() {
         }
     }
 
+    const handleShareWithLink = async () => {
+      await logShares();
+      const blogLink = `${window.location.origin}/blog/${post._id}`;
+      try {
+        await navigator.clipboard.writeText(blogLink);
+      } catch (error) {
+        console.error('Failed to copy link to clipboard:', error);
+      }
+    }
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -188,7 +198,7 @@ export default function BlogPost() {
                         <p className="leading-relaxed text-justify text-base md:text-lg text-foreground">{post?.content}</p>
                              <div className="mt-4 sm:mt-6 flex flex-col gap-2">
               <div className="flex justify-center sm:justify-end w-full gap-4 mb-1 text-xs sm:text-sm text-muted-foreground">
-                {post?.status === 'draft'  && (
+                {post?.status === 'published'  && (
                   <div className="flex items-center gap-1">
                       <ThumbsUp onClick={() => toggleLikes(post._id)}  
                         className={`    w-3 h-3 sm:w-4 sm:h-4 bottom-1 ${post?.likes?.includes(UUID) ? "fill-primary text-primary" : "text-muted-foreground"} right-1  hover:shadow-lg hover:w-5 cursor-pointer`}
@@ -199,7 +209,7 @@ export default function BlogPost() {
                   
                  
                 <div className="flex items-center gap-1">
-                    <Share2 onClick={()=> logShares()} className="w-3 h-3 sm:w-4 sm:h-4 cursor-pointer" />
+                    <Share2 onClick={()=> handleShareWithLink()} className="w-3 h-3 sm:w-4 sm:h-4 cursor-pointer" />
                     <span>Shares: {post?.shares?.length||0}</span>
                   </div>
               </div>

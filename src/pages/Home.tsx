@@ -126,7 +126,7 @@ export default function Home() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
               { number: "50+", label: "Communities Visited", icon: MapPin },
-              { number: "2,000+", label: "Lives Impacted", icon: Users },
+              { number: "600+", label: "Lives Impacted", icon: Users },
               { number: "150+", label: "Programs Launched", icon: Lightbulb },
               { number: "30+", label: "Corporate Partners", icon: HandHeart },
             ].map((stat, i) => (
@@ -159,8 +159,8 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               {
-                title: "Technical Skills Training",
-                description: "Equipping the community with essential technical skills  to thrive and earn a living.",
+                title: "Technical Skills Exploring",
+                description: "Exploring various technical skills in various communities that earn people a living.",
                 icon: <Lightbulb className="w-10 h-10 text-primary" />,
                 image: "https://i.ytimg.com/vi/6cxFII9z5Vg/hqdefault.jpg"
               },

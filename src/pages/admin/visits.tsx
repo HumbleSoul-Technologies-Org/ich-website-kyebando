@@ -164,16 +164,16 @@ export default function AdminVisitsPage() {
   };
 
   // helper to return a unique visit identifier (handles both _id from backend and id from mock data)
-  const getVisitId = (visit: any) => visit._id || visit.id || `visit-${Math.random()}`;
+  const getVisitId = (visit: any) => visit?._id || visit?.id || `visit-${Math.random()}`;
 
   const editVisit = (visit: any) => {
     // open form populated for editing
     setFormData({
       ...visit,
-      participants: visit.participants ? visit.participants.map((p: any) => ({ name: p.name || "", phone: p.phone || "", role: p.role || "" })) : [],
-      videoId: visit.videoId || "",
-      content: visit.content || "",
-      location: visit.location ? { lat: String(visit.location.lat), long: String(visit.location.long) } : { lat: "", long: "" },
+      participants: visit?.participants ? visit?.participants.map((p: any) => ({ name: p.name || "", phone: p.phone || "", role: p.role || "" })) : [],
+      videoId: visit?.videoId || "",
+      content: visit?.content || "",
+      location: visit?.location ? { lat: String(visit?.location.lat), long: String(visit?.location.long) } : { lat: "", long: "" },
     });
     setSelectedImage(null);
     setSelectedImagePreview(null);
@@ -477,9 +477,9 @@ let thumbnailUrl = {url: formData.thumbnail?.url || "", public_id: formData.thum
       },
       };
       
-    if (selectedVisit && selectedVisit._id) {
+    if (selectedVisit && selectedVisit?._id) {
       // update existing visit
-      const response = await apiRequest("PUT", `/visits/update/${selectedVisit._id}`, payload);
+      const response = await apiRequest("PUT", `/visits/update/${selectedVisit?._id}`, payload);
       // merge server response if available
       setVisits((prev) =>
         prev.map((v) =>
@@ -507,18 +507,18 @@ let thumbnailUrl = {url: formData.thumbnail?.url || "", public_id: formData.thum
   const toggleFeatured = async (visit: any) => {
     setProcessing(true);
     try {
-      await apiRequest("POST", `/visits/featured/${visit._id}`);
-      setVisits((prev) => prev.map((v) => ({ ...v, featured: v._id === visit._id })));
+      await apiRequest("POST", `/visits/featured/${visit?._id}`);
+      setVisits((prev) => prev.map((v) => ({ ...v, featured: v._id === visit?._id })));
     } catch (error) {
       console.error(error);
     }finally { setProcessing(false); }
   };
 
   const deleteVisit = async (visit: any) => {
-    setDeleting(visit._id);
+    setDeleting(visit?._id);
     try {
-       await apiRequest("DELETE", `/visits/delete/${visit._id}`);
-        setVisits((prev) => prev.filter((v) => v._id !== visit._id));
+       await apiRequest("DELETE", `/visits/delete/${visit?._id}`);
+        setVisits((prev) => prev.filter((v) => v._id !== visit?._id));
     setOpenMenu(null);
     } catch (error) {
        
@@ -529,16 +529,16 @@ let thumbnailUrl = {url: formData.thumbnail?.url || "", public_id: formData.thum
 
   const filteredVisits = visits.filter((visit) => {
     // Filter by status
-    if (statusFilter !== "all" && visit.status !== statusFilter) {
+    if (statusFilter !== "all" && visit?.status !== statusFilter) {
       return false;
     }
 
     // Filter by search term (community, country, date)
     if (searchTerm) {
       const search = searchTerm.toLowerCase();
-      const matchCommunity = visit.community.toLowerCase().includes(search);
-      const matchCountry = visit.country.toLowerCase().includes(search);
-      const matchDate = new Date(visit.date)
+      const matchCommunity = visit?.community.toLowerCase().includes(search);
+      const matchCountry = visit?.country.toLowerCase().includes(search);
+      const matchDate = new Date(visit?.date)
         .toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
         .toLowerCase()
         .includes(search);
@@ -649,8 +649,8 @@ let thumbnailUrl = {url: formData.thumbnail?.url || "", public_id: formData.thum
                   {/* Background Image */}
                   <div className="absolute inset-0 z-0">
                     <img 
-                      src={typeof visit.thumbnail === 'string' ? visit.thumbnail : visit.thumbnail?.url} 
-                      alt={visit.community}
+                      src={typeof visit?.thumbnail === 'string' ? visit?.thumbnail : visit?.thumbnail?.url} 
+                      alt={visit?.community}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/30"></div>
@@ -661,11 +661,11 @@ let thumbnailUrl = {url: formData.thumbnail?.url || "", public_id: formData.thum
                     {/* Top Section */}
                     <div className="flex items-start justify-between">
                       <div>
-                        <h3 className="text-xl text-primary font-bold mb-1">{visit.community}</h3>
-                        <p className="text-sm text-white/80">{visit.country}</p>
+                        <h3 className="text-xl text-primary font-bold mb-1">{visit?.community}</h3>
+                        <p className="text-sm text-white/80">{visit?.country}</p>
                       </div>
-                      <Badge variant={visit.status === "visited" ? "default" : "secondary"}>
-                        {visit.status === "visited" ? "Visited" : "Upcoming"}
+                      <Badge variant={visit?.status === "visited" ? "default" : "secondary"}>
+                        {visit?.status === "visited" ? "Visited" : "Upcoming"}
                       </Badge>
                     </div>
 
@@ -674,7 +674,7 @@ let thumbnailUrl = {url: formData.thumbnail?.url || "", public_id: formData.thum
                       <div>
                         <p className="text-xs font-medium text-white/70 uppercase">Date</p>
                         <p className="text-sm">
-                          {new Date(visit.date).toLocaleDateString('en-US', { 
+                          {new Date(visit?.date).toLocaleDateString('en-US', { 
                             year: 'numeric', 
                             month: 'long', 
                             day: 'numeric' 
@@ -682,7 +682,7 @@ let thumbnailUrl = {url: formData.thumbnail?.url || "", public_id: formData.thum
                         </p>
                       </div>
 
-                      <p className="text-sm text-white/90 line-clamp-2">{visit.excerpt}</p>
+                      <p className="text-sm text-white/90 line-clamp-2">{visit?.excerpt}</p>
 
                       <div className="grid grid-cols-3 gap-3 pt-2 border-t border-white/20">
                         <div>
@@ -720,13 +720,13 @@ let thumbnailUrl = {url: formData.thumbnail?.url || "", public_id: formData.thum
                             <Edit className="w-4 h-4" /> Edit
                           </button>
                           <button onClick={() => openGallery(visit)} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-800 hover:bg-gray-100">
-                            <ImageIcon className="w-4 h-4" /> Gallery ({visit.gallery ? visit.gallery.length : 0})
+                            <ImageIcon className="w-4 h-4" /> Gallery ({visit?.gallery ? visit?.gallery.length : 0})
                           </button>
                           <button onClick={() => openParticipants(visit)} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-800 hover:bg-gray-100">
-                            <Users className="w-4 h-4" /> Participants ({visit.participants ? visit.participants.length : 0})
+                            <Users className="w-4 h-4" /> Participants ({visit?.participants ? visit?.participants.length : 0})
                           </button>
                           <button onClick={async () => { await toggleFeatured(visit) }} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-800 hover:bg-gray-100">
-                            {processing ? <><span className="flex items-center justify-center gap-2 text-primary"> Processing...<Loader className="w-4 h-4 animate-spin text-primary " /></span></>:visit.isFeatured?.includes(visit._id) ? (
+                            {processing ? <><span className="flex items-center justify-center gap-2 text-primary"> Processing...<Loader className="w-4 h-4 animate-spin text-primary " /></span></>:visit?.isFeatured?.includes(visit?._id) ? (
                               <>
                                <><Star className="w-4 h-4 text-primary fill-primary" /> Unset Featured</>  
                               </>
@@ -735,7 +735,7 @@ let thumbnailUrl = {url: formData.thumbnail?.url || "", public_id: formData.thum
                             )}
                           </button>
                           <button onClick={() => {deleteVisit(visit); setSelectedVisit(visit)}} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-600 hover:bg-gray-100">
-                            {deleting === visit._id ? (
+                            {deleting === visit?._id ? (
                               <span className="flex items-center justify-center gap-2">
                                 <Loader className="w-4 h-4 animate-spin" /> Deleting...
                               </span>
@@ -761,34 +761,34 @@ let thumbnailUrl = {url: formData.thumbnail?.url || "", public_id: formData.thum
         {selectedVisit && (
           <DialogContent className="max-h-[700px] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>{selectedVisit.community}</DialogTitle>
-              <DialogDescription>{selectedVisit.country} • {new Date(selectedVisit.date).toLocaleDateString('en-US')}</DialogDescription>
+              <DialogTitle>{selectedVisit?.community}</DialogTitle>
+              <DialogDescription>{selectedVisit?.country} • {new Date(selectedVisit?.date).toLocaleDateString('en-US')}</DialogDescription>
             </DialogHeader>
 
             <div className="grid gap-4">
-              <img src={typeof selectedVisit.thumbnail === 'string' ? selectedVisit.thumbnail : selectedVisit.thumbnail?.url} alt={selectedVisit.community} className="w-full h-56 object-cover rounded-md" />
+              <img src={typeof selectedVisit?.thumbnail === 'string' ? selectedVisit?.thumbnail : selectedVisit?.thumbnail?.url} alt={selectedVisit?.community} className="w-full h-56 object-cover rounded-md" />
 
               <div>
                 <h4 className="font-semibold mb-1">Title</h4>
-                <p className="text-sm text-muted-foreground">{selectedVisit.title}</p>
+                <p className="text-sm text-muted-foreground">{selectedVisit?.title}</p>
               </div>
               
               <div>
                 <h4 className="font-semibold mb-1">Summary</h4>
-                <p className="text-sm text-muted-foreground">{selectedVisit.excerpt}</p>
+                <p className="text-sm text-muted-foreground">{selectedVisit?.excerpt}</p>
               </div>
               <div>
                 <h4 className="font-semibold mb-1">Description</h4>
-                <p className="text-sm text-justify text-muted-foreground">{selectedVisit.content}</p>
+                <p className="text-sm text-justify text-muted-foreground">{selectedVisit?.content}</p>
               </div>
 
               <div className="grid grid-cols-2   gap-4">
                 <div className="">
                   <h5 className="text-xs font-medium text-muted-foreground">Participants</h5>
                   <ul className="mt-2 text-sm  h-40 overflow-y-auto  space-y-1">
-                    {selectedVisit.participants && selectedVisit.participants.length > 0 ? (
-                      selectedVisit.participants.map((p: any, idx: number) => (
-                        <li className="flex bg-white relative rounded-md p-2 shadow-md gap-2 items-center  " key={idx}><img src={p.photo?.url || "/user.avif"} alt={p.name} className="w-12 h-12 rounded-full object-cover" />{p.name} — {p.role} {patId===p._id ? <Loader   className="w-4 h-4 font-bold animate-spin   absolute top-2 right-2 text-red-500"/>:<X onClick={()=>{removeParticipant(selectedVisit._id,p._id)}} className="w-4 h-4 font-bold  cursor-pointer absolute top-2 right-2 text-red-500"/>}</li>
+                    {selectedVisit?.participants && selectedVisit?.participants.length > 0 ? (
+                      selectedVisit?.participants.map((p: any, idx: number) => (
+                        <li className="flex bg-white relative rounded-md p-2 shadow-md gap-2 items-center  " key={idx}><img src={p.photo?.url || "/user.avif"} alt={p.name} className="w-12 h-12 rounded-full object-cover" />{p.name} — {p.role} {patId===p._id ? <Loader   className="w-4 h-4 font-bold animate-spin   absolute top-2 right-2 text-red-500"/>:<X onClick={()=>{removeParticipant(selectedVisit?._id,p._id)}} className="w-4 h-4 font-bold  cursor-pointer absolute top-2 right-2 text-red-500"/>}</li>
                       ))
                     ) : (
                       <li className="text-muted-foreground">No participants yet</li>
@@ -799,25 +799,25 @@ let thumbnailUrl = {url: formData.thumbnail?.url || "", public_id: formData.thum
                 <div>
                   <p className="text-xs font-medium text-muted-foreground">Stats</p>
                   <div className="mt-2 text-sm space-y-1">
-                    <div>Likes: {selectedVisit.likes.length || 0}</div>
-                    <div>Views: {selectedVisit.views.length || 0}</div>
-                    <div>Video ID: {selectedVisit.videoId || '—'}</div>
-                    <div>Location: {selectedVisit.location ? `${selectedVisit.location.lat}, ${selectedVisit.location.long}` : '—'}</div>
+                    <div>Likes: {selectedVisit?.likes.length || 0}</div>
+                    <div>Views: {selectedVisit?.views.length || 0}</div>
+                    <div>Video ID: {selectedVisit?.videoId || '—'}</div>
+                    <div>Location: {selectedVisit?.location ? `${selectedVisit?.location.lat}, ${selectedVisit?.location.long}` : '—'}</div>
                   </div>
                 </div>
               </div>
 
-              {selectedVisit.gallery && selectedVisit.gallery.length > 0 && (
+              {selectedVisit?.gallery && selectedVisit?.gallery.length > 0 && (
                 <div>
                   <p className="text-xs font-medium text-muted-foreground mb-2">Gallery</p>
                   <div className="flex gap-2 overflow-x-auto">
-                    {selectedVisit.gallery.map((g: any, i: number) => {
+                    {selectedVisit?.gallery.map((g: any, i: number) => {
                       const src = typeof g === 'string' ? g : (g.image || g.url || '');
                       const title = typeof g === 'string' ? '' : g.title || '';
                       return (
                         <div key={i} className="flex-shrink-0 relative">
                           <img src={src} alt={`gallery-${i}`} className="w-32 h-20 object-cover rounded-md" />
-                           {galId===g._id ? <Loader   className="w-4 h-4 font-bold animate-spin   absolute top-1 right-1 text-red-500"/>:<X onClick={()=>{removeGalleryImage(selectedVisit._id,g._id)}} className="w-4 h-4 font-bold  cursor-pointer absolute top-1 right-1 text-red-500"/>}
+                           {galId===g._id ? <Loader   className="w-4 h-4 font-bold animate-spin   absolute top-1 right-1 text-red-500"/>:<X onClick={()=>{removeGalleryImage(selectedVisit?._id,g._id)}} className="w-4 h-4 font-bold  cursor-pointer absolute top-1 right-1 text-red-500"/>}
                         </div>
                       );
                     })}
@@ -841,7 +841,7 @@ let thumbnailUrl = {url: formData.thumbnail?.url || "", public_id: formData.thum
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Add Gallery Item</DialogTitle>
-            <DialogDescription>{selectedVisit ? selectedVisit.community : ""}</DialogDescription>
+            <DialogDescription>{selectedVisit ? selectedVisit?.community : ""}</DialogDescription>
           </DialogHeader>
 
           <form   className="grid gap-4">
@@ -890,7 +890,7 @@ let thumbnailUrl = {url: formData.thumbnail?.url || "", public_id: formData.thum
 
             <DialogFooter>
               <div className="flex gap-2">
-                <Button onClick={()=>{handleGallerySubmit(selectedVisit._id)}} type="submit" disabled={!selectedGalleryImage || saving  }>
+                <Button onClick={()=>{handleGallerySubmit(selectedVisit?._id)}} type="submit" disabled={!selectedGalleryImage || saving  }>
                   {saving ? <span className="flex items-center justify-center gap-2">Saving... <Loader className="w-4 h-4 animate-spin"/></span> : "Save"}
                 </Button>
                 <Button
@@ -970,13 +970,13 @@ let thumbnailUrl = {url: formData.thumbnail?.url || "", public_id: formData.thum
         <DialogContent className="max-h-[600px] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingParticipantId ? "Edit Participant" : "Add Participant"}</DialogTitle>
-            <DialogDescription>{selectedVisit ? selectedVisit.community : ""}</DialogDescription>
+            <DialogDescription>{selectedVisit ? selectedVisit?.community : ""}</DialogDescription>
           </DialogHeader>
 
           {/* existing participants list */}
-          {selectedVisit?.participants && selectedVisit.participants.length > 0 && (
+          {selectedVisit?.participants && selectedVisit?.participants.length > 0 && (
             <div className="space-y-2 mb-4">
-              {selectedVisit.participants.map((p: any) => (
+              {selectedVisit?.participants.map((p: any) => (
                 <div key={p._id || p.phone || Math.random()} className="flex items-center justify-between p-2 border rounded">
                   <div className="flex items-center gap-2">
                     <img
@@ -999,7 +999,7 @@ let thumbnailUrl = {url: formData.thumbnail?.url || "", public_id: formData.thum
                     </button>
                     <button
                       type="button"
-                      onClick={() => selectedVisit && removeParticipant(selectedVisit._id, p._id)}
+                      onClick={() => selectedVisit && removeParticipant(selectedVisit?._id, p._id)}
                       className="text-red-600 hover:text-red-800"
                       aria-label="Remove"
                     >

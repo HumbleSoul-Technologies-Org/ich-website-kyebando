@@ -76,8 +76,8 @@ export default function Blog() {
     useEffect(() => {
       window.scrollTo(0, 0);
       if (blogData) {
-          
-      setBlogs(blogData)
+          const filteredBlogs = blogData.filter((blog: any) => blog.status === "published");
+          setBlogs(filteredBlogs);
       }
       
       create_UUID();
