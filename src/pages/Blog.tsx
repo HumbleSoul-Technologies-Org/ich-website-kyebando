@@ -11,6 +11,7 @@ import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { v4 as uuidv4 } from 'uuid';
 import { apiRequest } from "@/lib/queryClient";
+import { User } from "lucide-react";
 
 
 
@@ -150,7 +151,7 @@ export default function Blog() {
                             <p className="text-sm text-justify text-muted-foreground mb-3 line-clamp-3">{post.excerpt}</p>
                           </div>
                           <div className="flex items-center justify-between mt-2">
-                            <div className="text-xs text-muted-foreground">{post.author}</div>
+                            <div className="text-xs items-center justify-center text-muted-foreground"><User className="inline-block w-4 h-4 mr-1 mb-1" /> {post.author}</div>
                             <div className="flex items-center gap-3">
                               <time className="text-xs text-muted-foreground">{new Date(post.createdAt).toLocaleDateString()}</time>
                               <Link onClick={()=>logViews(post._id)} href={`/blog/${post._id}`}><a className="text-primary text-sm font-semibold">Read →</a></Link>

@@ -9,6 +9,8 @@ import { motion } from "framer-motion";
 import { HandHeart, Users, Heart, CheckCircle, Clock, UserCheck, MessageSquare, ArrowRight, BookOpen, Target, Save } from "lucide-react";
 import { useEffect, useState } from "react";
 import { apiRequest } from "@/lib/queryClient";
+import { useQuery } from "@tanstack/react-query";
+import { v4 as uuidv4 } from 'uuid';
 
 export default function GetInvolved() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -153,7 +155,7 @@ export default function GetInvolved() {
                     <Label htmlFor="phone">Phone (Optional)</Label>
                     <Input
                       id="phone"
-                      placeholder="+1 234 567 890"
+                      placeholder="+256 7xx xxx xxx"
                       value={formData.phone}
                       onChange={(e) => handleInputChange("phone", e.target.value)}
                     />

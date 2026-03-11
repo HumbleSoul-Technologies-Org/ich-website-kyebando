@@ -285,16 +285,8 @@ export const timeline = [
 ];
 
 export const impactStats = [
-  {
-    number: 400,
-    label: "Youth Trained",
-    description: "In digital skills and entrepreneurship",
-  },
-  {
-    number: 273,
-    label: "Active Income Earners",
-    description: "Now self-employed or in stable jobs",
-  },
+   
+   
   {
     number: 6,
     label: "Communities Reached",
@@ -305,11 +297,7 @@ export const impactStats = [
     label: "Active Volunteers",
     description: "Dedicating time to serve",
   },
-  {
-    number: 20,
-    label: "Average Income Increase",
-    description: "Percentage growth for beneficiaries",
-  },
+   
   {
     number: 13,
     label: "Technical Skills explored",

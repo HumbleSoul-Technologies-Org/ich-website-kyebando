@@ -23,7 +23,7 @@ import { apiRequest } from "@/lib/queryClient";
 export default function Home() {
   const { data: visitsData } = useQuery<any>({ queryKey: ["visits",'all'] });
    
-  const [visits, setVisits] = useState<any[]>([]);
+  const [visits, setVisits] = useState<any[]>( []);
     const [UUID, setUUID] = useState<any | string>("");
   
 
@@ -38,13 +38,13 @@ export default function Home() {
 
   // Gallery pagination state
   const [galleryPage, setGalleryPage] = useState(0);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedImage, setSelectedImage] = useState<any | null>(null);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const imagesPerPage = 6;
 
   // Extract all gallery images from communities
-  const allGalleryImages = visits.flatMap((community) => 
-    (community.gallery || []).map((img:any) => ({ img, community: community.title }))
+  const allGalleryImages = visitsData.filter((visit: any) => visit.status === "visited").flatMap((community:any) => 
+    (community.gallery || []).map((img:any) => ({ img , community: community.title }))
   );
 
   const totalPages = Math.ceil(allGalleryImages.length / imagesPerPage);
@@ -150,10 +150,10 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
-              { number: "50+", label: "Communities Visited", icon: MapPin },
-              { number: "600+", label: "Lives Impacted", icon: Users },
-              { number: "150+", label: "Programs Launched", icon: Lightbulb },
-              { number: "30+", label: "Corporate Partners", icon: HandHeart },
+              { number: "10+", label: "Communities Visited", icon: MapPin },
+              { number: "150+", label: "Lives Impacted", icon: Users },
+              { number: "10+", label: "Programs Launched", icon: Lightbulb },
+              { number: "5+", label: "Corporate Partners", icon: HandHeart },
             ].map((stat, i) => (
               <motion.div 
                 key={i}
@@ -186,7 +186,7 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               {
-                title: "Technical Skills Exploring",
+                title: "Exploring Technical Skills ",
                 description: "Exploring various technical skills in various communities that earn people a living.",
                 icon: <Lightbulb className="w-10 h-10 text-primary" />,
                 image: "https://i.ytimg.com/vi/6cxFII9z5Vg/hqdefault.jpg"
@@ -305,18 +305,18 @@ export default function Home() {
                   }}
                   className="splide-container"
                 >
-                  {allGalleryImages.map((item, i) => (
+                  {allGalleryImages.map((item: { img: any; community: string }, i: number) => (
                     <SplideSlide key={i}>
                       <button
                         onClick={() => {
-                          setSelectedImage(item.img);
+                          setSelectedImage(item.img.url as string);
                           setIsImageModalOpen(true);
                         }}
                         className="group relative rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-500 w-full text-left"
                       >
                         <div className="relative h-64 bg-muted">
                           <img
-                            src={item.img}
+                            src={item.img.url}
                             alt="Gallery"
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 cursor-pointer"
                           />
@@ -335,7 +335,7 @@ export default function Home() {
               {/* Desktop Grid View */}
               <div className="hidden lg:block">
                 <div className="grid grid-cols-3 gap-6 mb-8">
-                  {paginatedImages.map((item, i) => (
+                  {paginatedImages.map((item:any, i:number) => (
                     <motion.div
                       key={`${galleryPage}-${i}`}
                       initial={{ opacity: 0, scale: 0.9 }}
@@ -351,7 +351,7 @@ export default function Home() {
                       >
                         <div className="relative h-64 bg-muted">
                           <img
-                            src={item.img}
+                            src={item.img?.url}
                             alt="Gallery"
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 cursor-pointer"
                           />
@@ -423,7 +423,7 @@ export default function Home() {
           <div className="relative w-full bg-black">
             {selectedImage && (
               <img
-                src={selectedImage}
+                src={selectedImage?.url}
                 alt="Gallery Preview"
                 className="w-full h-auto max-h-[80vh] object-contain"
               />
