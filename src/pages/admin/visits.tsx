@@ -449,14 +449,10 @@ export default function AdminVisitsPage() {
           },
         }
       );
-      console.log('====================================');
-      console.log(data);
-      console.log('====================================');
+     
       return data;
     } catch (error) {
-      console.log('====================================');
-      console.log(error);
-      console.log('====================================');
+       
       throw new Error("Image upload failed");
     }  
   };

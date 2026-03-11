@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useQuery } from "@tanstack/react-query";
 import { v4 as uuidv4 } from 'uuid';
 import { set } from "date-fns";
-import { ThumbsUp, User, Loader2 } from "lucide-react";
+import { ThumbsUp, User, Loader2, Share2 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 
 
@@ -84,7 +84,7 @@ export default function BlogPost() {
     }
   }
 
-  const toggleLikes = async (comment: any) => { 
+  const toggleCommentLikes = async (comment: any) => { 
     try {
       await apiRequest('POST', `/comments/${comment._id}/toggle-like`, {
         uuid: UUID,
@@ -107,6 +107,50 @@ export default function BlogPost() {
       console.log('====================================');
     }
   }
+
+   const toggleLikes = async (postId  : any) => { 
+        try {
+          await apiRequest('POST', `/blogs/${post._id}/toggle-like`, {
+            uuid: UUID,
+          });
+    
+          setPost((s: any) => {
+            if (s._id === postId) {
+              const hasLiked = s.likes?.includes(UUID);
+              return {
+                ...s,
+                likes: hasLiked ? s.likes.filter((l: string) => l !== UUID) : [...(s.likes || []), UUID],
+              };
+            }
+            return s;
+          }
+          );
+          
+        } catch (error) {
+           
+        }
+      }
+     const logShares = async () => { 
+        try {
+          await apiRequest('POST', `/blogs/${post._id}/log-share`, {
+            uuid: UUID,
+          });
+  
+          setPost((s: any) => {
+            if (s._id ===   post._id) {
+              return {
+                ...s,
+                shares: [...(s.shares || []), UUID],
+              };
+            } 
+            return s;
+          });
+    
+          
+        } catch (error) {
+           
+        }
+    }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -141,7 +185,26 @@ export default function BlogPost() {
                       <img src={post?.thumbnail.url} alt={post?.title} className="w-full h-full object-cover" />
                     </div>
                     <CardContent>
-                      <p className="leading-relaxed text-justify text-base md:text-lg text-foreground">{post?.content}</p>
+                        <p className="leading-relaxed text-justify text-base md:text-lg text-foreground">{post?.content}</p>
+                             <div className="mt-4 sm:mt-6 flex flex-col gap-2">
+              <div className="flex justify-center sm:justify-end w-full gap-4 mb-1 text-xs sm:text-sm text-muted-foreground">
+                {post?.status === 'draft'  && (
+                  <div className="flex items-center gap-1">
+                      <ThumbsUp onClick={() => toggleLikes(post._id)}  
+                        className={`    w-3 h-3 sm:w-4 sm:h-4 bottom-1 ${post?.likes?.includes(UUID) ? "fill-primary text-primary" : "text-muted-foreground"} right-1  hover:shadow-lg hover:w-5 cursor-pointer`}
+                        />
+                      <span>Likes: {post?.likes.length||0}</span>
+                    </div>
+                  )}
+                  
+                 
+                <div className="flex items-center gap-1">
+                    <Share2 onClick={()=> logShares()} className="w-3 h-3 sm:w-4 sm:h-4 cursor-pointer" />
+                    <span>Shares: {post?.shares?.length||0}</span>
+                  </div>
+              </div>
+            </div>
+
                     </CardContent>
                   </Card>
 
@@ -208,7 +271,7 @@ export default function BlogPost() {
                             <div className="text-sm text-justify text-foreground">{c.comment}</div>
                           </div>
                           <span className="absolute flex gap-2 items-center justify-center top-0 right-0 text-xs text-muted-foreground">Likes: {c?.likes?.length || 0}</span>
-                          <ThumbsUp onClick={() => toggleLikes(c)} className={`w-4 absolute bottom-1 ${c?.likes?.includes(UUID) ? 'fill-primary text-primary' : 'text-muted-foreground'} right-1 h-4 hover:shadow-lg hover:w-5 cursor-pointer`} />
+                          <ThumbsUp onClick={() => toggleCommentLikes(c)} className={`w-4 absolute bottom-1 ${c?.likes?.includes(UUID) ? 'fill-primary text-primary' : 'text-muted-foreground'} right-1 h-4 hover:shadow-lg hover:w-5 cursor-pointer`} />
                         </div>
                       ))}
                     </div>

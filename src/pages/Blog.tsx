@@ -9,6 +9,10 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { v4 as uuidv4 } from 'uuid';
+import { apiRequest } from "@/lib/queryClient";
+
+
 
 function CountUp({ end, duration = 1200 }: { end: number; duration?: number }) {
   const ref = useRef<HTMLDivElement | null>(null);
@@ -65,14 +69,40 @@ export default function Blog() {
       queryKey: ["blogs",`all`],
    })
   
+  const [UUID, setUUID] = useState<any|string>("");
+  
+  
   const [blogs,setBlogs] = useState<any[]>([]);
     useEffect(() => {
       window.scrollTo(0, 0);
       if (blogData) {
           
       setBlogs(blogData)
+      }
+      
+      create_UUID();
+    }, [blogData])
+  
+   const create_UUID = async() => {
+       const savedUUID = localStorage.getItem("visitor_uuid");
+      if (savedUUID) {
+        setUUID(savedUUID);
+      } else {
+        const newUUID = uuidv4();
+        localStorage.setItem("visitor_uuid", newUUID);
+        setUUID(newUUID);
+      }
     }
-      }, [blogData])
+
+   const logViews = async (postId: any) => { 
+        try {
+          await apiRequest('POST', `/blogs/${postId}/log-view`, {
+            uuid: UUID,
+          });
+        } catch (error) {
+           
+        }
+    }
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -123,7 +153,7 @@ export default function Blog() {
                             <div className="text-xs text-muted-foreground">{post.author}</div>
                             <div className="flex items-center gap-3">
                               <time className="text-xs text-muted-foreground">{new Date(post.createdAt).toLocaleDateString()}</time>
-                              <Link href={`/blog/${post._id}`}><a className="text-primary text-sm font-semibold">Read →</a></Link>
+                              <Link onClick={()=>logViews(post._id)} href={`/blog/${post._id}`}><a className="text-primary text-sm font-semibold">Read →</a></Link>
                             </div>
                           </div>
                         </div>
