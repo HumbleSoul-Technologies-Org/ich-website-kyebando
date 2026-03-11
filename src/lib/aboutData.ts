@@ -286,42 +286,42 @@ export const timeline = [
 
 export const impactStats = [
   {
-    number: 2580,
+    number: 400,
     label: "Youth Trained",
     description: "In digital skills and entrepreneurship",
   },
   {
-    number: 1240,
+    number: 273,
     label: "Active Income Earners",
     description: "Now self-employed or in stable jobs",
   },
   {
-    number: 34,
+    number: 6,
     label: "Communities Reached",
     description: "Across Uganda and Kenya",
   },
   {
-    number: 156,
+    number: 10,
     label: "Active Volunteers",
     description: "Dedicating time to serve",
   },
   {
-    number: 45,
+    number: 20,
     label: "Average Income Increase",
     description: "Percentage growth for beneficiaries",
   },
   {
-    number: 180,
-    label: "Talents Mentored",
+    number: 13,
+    label: "Technical Skills explored",
     description: "In arts, music, and sports",
   },
   {
-    number: 28,
+    number: 4,
     label: "Partner Organizations",
     description: "Supporting our mission",
   },
   {
-    number: 98,
+    number: 60,
     label: "Program Satisfaction",
     description: "Percent rating us excellent",
   },

@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
+import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,7 @@ export default function AdminVisitsPage() {
     queryKey: ["visits","all"],
   })
 
+  const { toast } = useToast();
   const [visits, setVisits] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -146,10 +148,19 @@ export default function AdminVisitsPage() {
       galleryFileInputRef.current.value = "";
     }
     setOpenMenu(null);
+    toast({
+      title: "Image added",
+      description: "Gallery image has been added successfully",
+    });
      } catch (error) {
       console.log('====================================');
       console.log(error);
       console.log('====================================');
+      toast({
+        title: "Failed to add image",
+        description: "Could not add image to gallery",
+        variant: "destructive",
+      });
      }finally {
       setSaving(false);
      }
@@ -287,6 +298,10 @@ export default function AdminVisitsPage() {
               }
             : prev,
         );
+        toast({
+          title: "Participant updated",
+          description: "Participant has been updated successfully",
+        });
       } else {
         // create a new participant
         const response = await apiRequest("POST", `/visits/add/participant/${visitId}`, payload);
@@ -301,6 +316,10 @@ export default function AdminVisitsPage() {
         setSelectedVisit((prev: any) =>
           prev ? { ...prev, participants: [...(prev.participants || []), newParticipant] } : prev,
         );
+        toast({
+          title: "Participant added",
+          description: "Participant has been added successfully",
+        });
       }
 
       // reset form state
@@ -315,6 +334,11 @@ export default function AdminVisitsPage() {
       }
     } catch (error) {
       console.error(error);
+      toast({
+        title: "Failed to save participant",
+        description: "Could not save participant details",
+        variant: "destructive",
+      });
     } finally {
       setSaving(false);
     }
@@ -335,8 +359,16 @@ export default function AdminVisitsPage() {
             : v,
         ),
       );
+      toast({
+        title: "Participant removed",
+        description: "Participant has been removed successfully",
+      });
     } catch (error) {
-      
+      toast({
+        title: "Failed to remove participant",
+        description: "Could not remove participant",
+        variant: "destructive",
+      });
     } finally { setPatId(null); }
    }
 
@@ -369,10 +401,19 @@ export default function AdminVisitsPage() {
             : v,
         ),
       );
+      toast({
+        title: "Image removed",
+        description: "Gallery image has been removed successfully",
+      });
     } catch (error) {
       console.log('====================================');
       console.log(error);
       console.log('====================================');
+      toast({
+        title: "Failed to remove image",
+        description: "Could not remove gallery image",
+        variant: "destructive",
+      });
     } finally { setGalId(null); }
    }
 
@@ -487,10 +528,18 @@ let thumbnailUrl = {url: formData.thumbnail?.url || "", public_id: formData.thum
         ),
       );
       setSelectedVisit((prev: any) => (prev ? { ...prev, ...response, ...payload } : prev));
+      toast({
+        title: "Visit updated",
+        description: "Visit has been updated successfully",
+      });
     } else {
       // create new visit
       const response = await apiRequest("POST", "/visits/create", payload);
       setVisits((prev) => [response, ...prev]);
+      toast({
+        title: "Visit created",
+        description: "New visit has been created successfully",
+      });
     }
 
     setFormOpen(false);
@@ -499,6 +548,11 @@ let thumbnailUrl = {url: formData.thumbnail?.url || "", public_id: formData.thum
       console.log('====================================');
       console.log(error);
       console.log('====================================');
+      toast({
+        title: "Failed to save visit",
+        description: "Could not save visit details",
+        variant: "destructive",
+      });
     } finally {
       setSaving(false);
     }
@@ -509,8 +563,17 @@ let thumbnailUrl = {url: formData.thumbnail?.url || "", public_id: formData.thum
     try {
       await apiRequest("POST", `/visits/featured/${visit?._id}`);
       setVisits((prev) => prev.map((v) => ({ ...v, featured: v._id === visit?._id })));
+      toast({
+        title: "Featured status updated",
+        description: visit.featured ? "Removed from featured" : "Added to featured",
+      });
     } catch (error) {
       console.error(error);
+      toast({
+        title: "Failed to update featured status",
+        description: "Could not update featured status",
+        variant: "destructive",
+      });
     }finally { setProcessing(false); }
   };
 
@@ -520,8 +583,16 @@ let thumbnailUrl = {url: formData.thumbnail?.url || "", public_id: formData.thum
        await apiRequest("DELETE", `/visits/delete/${visit?._id}`);
         setVisits((prev) => prev.filter((v) => v._id !== visit?._id));
     setOpenMenu(null);
+    toast({
+      title: "Visit deleted",
+      description: "Visit has been deleted successfully",
+    });
     } catch (error) {
-       
+      toast({
+        title: "Failed to delete visit",
+        description: "Could not delete visit",
+        variant: "destructive",
+      });
     }finally { setDeleting(null); }
   };
 

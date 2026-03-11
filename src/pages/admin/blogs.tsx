@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
+import { useToast } from "@/hooks/use-toast";
 import {
   Card,
   CardContent,
@@ -45,6 +46,7 @@ export default function AdminBlogsPage() {
       queryKey: ["blogs", "all"],
     });
 
+  const { toast } = useToast();
   const [blogs, setBlogs] = useState<any[]>(blogsData || []);
   const [saving, setSaving] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -223,16 +225,29 @@ export default function AdminBlogsPage() {
         setSelectedBlog((prev: any) =>
           prev ? { ...prev, ...response, ...payload } : prev,
         );
+        toast({
+          title: "Blog updated",
+          description: "Blog post has been updated successfully",
+        });
       } else {
         // create
         const response = await apiRequest("POST", "/blogs/create", payload);
         setBlogs((prev) => [response, ...prev]);
+        toast({
+          title: "Blog created",
+          description: "New blog post has been created successfully",
+        });
       }
 
       setFormOpen(false);
       setOpenMenu(null);
     } catch (error) {
       console.error(error);
+      toast({
+        title: "Failed to save blog",
+        description: "Could not save blog post",
+        variant: "destructive",
+      });
     } finally {
       setSaving(false);
     }
@@ -248,8 +263,17 @@ export default function AdminBlogsPage() {
           setSelectedBlog(null);
           setDialogOpen(false);
         }
+        toast({
+          title: "Blog deleted",
+          description: "Blog post has been deleted successfully",
+        });
       } catch (error) {
         console.error(error);
+        toast({
+          title: "Failed to delete blog",
+          description: "Could not delete blog post",
+          variant: "destructive",
+        });
       } finally {
         setDeleting(null);
       }
@@ -266,6 +290,10 @@ export default function AdminBlogsPage() {
       setBlogs((prev) =>
         prev.map((b) => (getBlogId(b) === blogId ? updatedBlog : b)),
       );
+      toast({
+        title: "Blog published",
+        description: "Blog post has been published successfully",
+      });
     } catch (error) {
       console.error(error);
     } finally {

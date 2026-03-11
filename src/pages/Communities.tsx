@@ -2,7 +2,6 @@ import { motion, view } from "framer-motion";
 import { useState, useMemo, useEffect, useRef } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { mockCommunities } from "@/lib/mockData";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   MapPin,
@@ -89,7 +88,7 @@ export default function Communities() {
     const checkScroll = () => {
       if (upcomingVisitsRef.current) {
         const { scrollHeight, clientHeight, scrollTop } = upcomingVisitsRef.current;
-        setCanScrollUpcoming(scrollHeight > clientHeight && scrollTop < scrollHeight - clientHeight - 10);
+        setCanScrollUpcoming(scrollHeight > clientHeight && scrollTop < 10);
       }
     };
 

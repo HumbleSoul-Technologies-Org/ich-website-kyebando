@@ -89,11 +89,11 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
     //   label: "Notifications",
     //   icon: <Bell className="w-5 h-5" />,
     // },
-    {
-      href: "/admin/settings",
-      label: "Settings",
-      icon: <Settings className="w-5 h-5" />,
-    },
+    // {
+    //   href: "/admin/settings",
+    //   label: "Settings",
+    //   icon: <Settings className="w-5 h-5" />,
+    // },
   ];
 
   const sitePages = [
@@ -117,11 +117,11 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
       label: "Communities",
       icon: <Building2 className="w-5 h-5" />,
     },
-    {
-      href: "/talent",
-      label: "Talent Discovery",
-      icon: <Sparkles className="w-5 h-5" />,
-    },
+    // {
+    //   href: "/talent",
+    //   label: "Talent Discovery",
+    //   icon: <Sparkles className="w-5 h-5" />,
+    // },
     {
       href: "/get-involved",
       label: "Get Involved",

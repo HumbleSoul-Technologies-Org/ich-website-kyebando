@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
+import { useToast } from "@/hooks/use-toast";
 import {
   Card,
   CardContent,
@@ -20,6 +21,7 @@ import { motion } from "framer-motion";
 
 export default function AdminMessagesPage() {
   const [messages, setMessages] = useState<any[]>([]);
+  const { toast } = useToast();
   const [selectedConversation, setSelectedConversation] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [messageFilter, setMessageFilter] = useState<
@@ -81,11 +83,20 @@ export default function AdminMessagesPage() {
           msg._id === msgId ? { ...msg, isRead: true } : msg,
         )
       );
+      toast({
+        title: "Message marked as read",
+        description: "Message has been marked as read",
+      });
       
     } catch (error) {
       console.log('====================================');
       console.log(error);
       console.log('====================================');
+      toast({
+        title: "Failed to mark message as read",
+        description: "Could not mark message as read",
+        variant: "destructive",
+      });
     }
   }
 
@@ -97,11 +108,20 @@ export default function AdminMessagesPage() {
           msg._id === msgId ? { ...msg, isArchived: !msg.isArchived } : msg,
         )
       );
-      setSelectedConversation(null)
+      setSelectedConversation(null);
+      toast({
+        title: "Archive status updated",
+        description: "Message archive status has been updated",
+      });
     } catch (error) {
       console.log('====================================');
       console.log(error);
       console.log('====================================');
+      toast({
+        title: "Failed to update archive status",
+        description: "Could not update archive status",
+        variant: "destructive",
+      });
     }
   }
 
@@ -117,10 +137,19 @@ export default function AdminMessagesPage() {
         )
       );
       setReplyText("");
+      toast({
+        title: "Reply sent",
+        description: "Your reply has been sent successfully",
+      });
     } catch (error) {
       console.log('====================================');
       console.log(error);
       console.log('====================================');
+      toast({
+        title: "Failed to send reply",
+        description: "Could not send your reply",
+        variant: "destructive",
+      });
     } finally {
       setReplyLoading(false);
     }
@@ -130,10 +159,19 @@ export default function AdminMessagesPage() {
       await apiRequest('DELETE', `/messages/${msgId}/delete`);
       setMessages((prev) => prev.filter((msg) => msg._id !== msgId));
       setSelectedConversation(null);
+      toast({
+        title: "Message deleted",
+        description: "Message has been deleted successfully",
+      });
     } catch (error) {
       console.log('====================================' );
       console.log(error);
       console.log('====================================' );
+      toast({
+        title: "Failed to delete message",
+        description: "Could not delete message",
+        variant: "destructive",
+      });
     }
   }
   return (

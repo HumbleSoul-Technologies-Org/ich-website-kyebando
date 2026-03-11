@@ -4,6 +4,7 @@ import NotFound from "@/pages/not-found";
 import { mockCommunities } from "@/lib/mockData";
 import { useQuery } from "@tanstack/react-query";
 import { v4 as uuidv4 } from 'uuid';
+import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
   DialogContent,
@@ -24,6 +25,7 @@ const [match, params] = useRoute("/visits/:id");
     queryKey: ["visits",`${params.id}`],
   })
 
+  const { toast } = useToast();
   const userIdRef = useRef(uuidv4());
 
   const [visit, setVisit] = useState<any>(null);
@@ -65,7 +67,7 @@ const [match, params] = useRoute("/visits/:id");
       const checkScroll = () => {
         if (scrollContainerRef.current) {
           const { scrollHeight, clientHeight, scrollTop } = scrollContainerRef.current;
-          setCanScroll(scrollHeight > clientHeight && scrollTop < scrollHeight - clientHeight - 10);
+          setCanScroll(scrollHeight > clientHeight && scrollTop < 10);
         }
       };
 
@@ -159,6 +161,17 @@ const [match, params] = useRoute("/visits/:id");
         setComments((s) => s.map((c) => {
           if (c._id === comment._id) {
             const hasLiked = c.likes?.includes(UUID);
+            if (!hasLiked) {
+              toast({
+                title: "Comment liked",
+                description: "You liked this comment",
+              });
+            } else {
+              toast({
+                title: "Like removed",
+                description: "You unliked this comment",
+              });
+            }
             return {
               ...c,
               likes: hasLiked ? c.likes.filter((l: string) => l !== UUID) : [...(c.likes || []), UUID],
@@ -183,6 +196,17 @@ const [match, params] = useRoute("/visits/:id");
         setVisit((s: any) => {
           if (s._id === visitId) {
             const hasLiked = s.likes?.includes(UUID);
+            if (!hasLiked) {
+              toast({
+                title: "Post liked",
+                description: "You liked this visit",
+              });
+            } else {
+              toast({
+                title: "Like removed",
+                description: "You unliked this visit",
+              });
+            }
             return {
               ...s,
               likes: hasLiked ? s.likes.filter((l: string) => l !== UUID) : [...(s.likes || []), UUID],
@@ -223,8 +247,17 @@ const [match, params] = useRoute("/visits/:id");
     const visitLink = `${window.location.origin}/visits/${visit._id}`;
     try {
       await navigator.clipboard.writeText(visitLink);
+      toast({
+        title: "Link copied",
+        description: "Visit link copied to clipboard",
+      });
     } catch (error) {
       console.error('Failed to copy link to clipboard:', error);
+      toast({
+        title: "Failed to copy",
+        description: "Could not copy link to clipboard",
+        variant: "destructive",
+      });
     }
   }
    

@@ -4,10 +4,10 @@ import { useState,useEffect } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
-import { blogsData } from "@/lib/mockData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useQuery } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
 import { v4 as uuidv4 } from 'uuid';
 import { set } from "date-fns";
 import { ThumbsUp, User, Loader2, Share2 } from "lucide-react";
@@ -20,6 +20,7 @@ export default function BlogPost() {
   // const post = blogsData.find((p) => p.id === id);
   const [post, setPost] = useState<any>(null);
 
+  const { toast } = useToast();
   const [comments, setComments] = useState<any[]>(post?.comments || []);
   const [name, setName] = useState("");
   const [commentText, setCommentText] = useState("");
@@ -93,6 +94,17 @@ export default function BlogPost() {
       setComments((s) => s.map((c) => {
         if (c._id === comment._id) {
           const hasLiked = c.likes?.includes(UUID);
+          if (!hasLiked) {
+            toast({
+              title: "Comment liked",
+              description: "You liked this comment",
+            });
+          } else {
+            toast({
+              title: "Like removed",
+              description: "You unliked this comment",
+            });
+          }
           return {
             ...c,
             likes: hasLiked ? c.likes.filter((l: string) => l !== UUID) : [...(c.likes || []), UUID],
@@ -117,6 +129,17 @@ export default function BlogPost() {
           setPost((s: any) => {
             if (s._id === postId) {
               const hasLiked = s.likes?.includes(UUID);
+              if (!hasLiked) {
+                toast({
+                  title: "Post liked",
+                  description: "You liked this blog post",
+                });
+              } else {
+                toast({
+                  title: "Like removed",
+                  description: "You unliked this blog post",
+                });
+              }
               return {
                 ...s,
                 likes: hasLiked ? s.likes.filter((l: string) => l !== UUID) : [...(s.likes || []), UUID],
@@ -157,8 +180,17 @@ export default function BlogPost() {
       const blogLink = `${window.location.origin}/blog/${post._id}`;
       try {
         await navigator.clipboard.writeText(blogLink);
+        toast({
+          title: "Link copied",
+          description: "Blog link copied to clipboard",
+        });
       } catch (error) {
         console.error('Failed to copy link to clipboard:', error);
+        toast({
+          title: "Failed to copy",
+          description: "Could not copy link to clipboard",
+          variant: "destructive",
+        });
       }
     }
 

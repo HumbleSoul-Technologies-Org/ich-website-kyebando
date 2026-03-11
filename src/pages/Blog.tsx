@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Link } from "wouter";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { blogsData, testimonials } from "@/lib/mockData";
+import {    testimonials } from "@/lib/mockData";
 import { impactStats } from "@/lib/aboutData";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

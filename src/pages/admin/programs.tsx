@@ -3,7 +3,7 @@ import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { mockCommunities } from "@/lib/mockData";
+// import { mockCommunities } from "@/lib/mockData";
 import { Plus, Search, MoreVertical, Eye, Edit, Trash2 } from "lucide-react";
 import {
   Dialog,
@@ -24,7 +24,7 @@ export default function AdminProgramsPage() {
 
   useEffect(() => {
     // Use mock communities as programs
-    setPrograms(mockCommunities);
+    setPrograms([]);
     setIsLoading(false);
   }, []);
 

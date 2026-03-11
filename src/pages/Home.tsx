@@ -5,30 +5,36 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { mockCommunities,testimonials,patners } from "@/lib/mockData";
+import { testimonials,patners } from "@/lib/mockData";
 import { Splide, SplideSlide } from "@splidejs/react-splide";
 import "@splidejs/react-splide/css";
+import { useQuery } from "@tanstack/react-query";
+import { v4 as uuidv4 } from "uuid";
+
+
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function Home() {
-  const fadeIn = {
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.6 }
-  };
+  const { data: visitsData } = useQuery<any>({ queryKey: ["visits",'all'] });
+   
+  const [visits, setVisits] = useState<any[]>([]);
+    const [UUID, setUUID] = useState<any | string>("");
+  
 
-  const stagger = {
-    animate: {
-      transition: {
-        staggerChildren: 0.1
-      }
+  useEffect(() => {
+    if (visitsData && visitsData.length > 0) {
+      const filteredVisits = visitsData.filter((visit: any) => visit.status === "upcoming");
+      setVisits(filteredVisits);
+      create_UUID();
     }
-  };
+    
+   }, [visitsData]);
 
   // Gallery pagination state
   const [galleryPage, setGalleryPage] = useState(0);
@@ -37,8 +43,8 @@ export default function Home() {
   const imagesPerPage = 6;
 
   // Extract all gallery images from communities
-  const allGalleryImages = mockCommunities.flatMap((community) => 
-    (community.gallery || []).map((img) => ({ img, community: community.title }))
+  const allGalleryImages = visits.flatMap((community) => 
+    (community.gallery || []).map((img:any) => ({ img, community: community.title }))
   );
 
   const totalPages = Math.ceil(allGalleryImages.length / imagesPerPage);
@@ -52,6 +58,25 @@ export default function Home() {
   const handlePrevPage = () => {
     if (galleryPage > 0) setGalleryPage(galleryPage - 1);
   };
+
+   const create_UUID = async () => {
+      const savedUUID = localStorage.getItem("visitor_uuid");
+      if (savedUUID) {
+        setUUID(savedUUID);
+      } else {
+        const newUUID = uuidv4();
+        localStorage.setItem("visitor_uuid", newUUID);
+        setUUID(newUUID);
+      }
+    };
+
+  const logViews = async (visitId: any) => {
+      try {
+        await apiRequest("POST", `/visits/${visitId}/log-view`, {
+          uuid: UUID,
+        });
+      } catch (error) {}
+    };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -148,6 +173,8 @@ export default function Home() {
         </div>
       </section>
 
+     
+
       {/* Feature Section */}
       <section className="py-24 bg-white">
         <div className="container mx-auto px-4">
@@ -213,11 +240,11 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {mockCommunities
+            {visits
               .filter(community => community.status === "upcoming")
               .slice(0, 4)
               .map((visit, i) => (
-              <Link key={visit.id} href={`/visits/${visit.id}`}>
+              <Link key={visit._id}  onClick={() => logViews(visit._id)} href={`/visits/${visit._id}`}>
                 <motion.div 
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -227,17 +254,19 @@ export default function Home() {
                 >
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent z-10" />
                   <img 
-                    src={visit.thumbnail} 
-                    alt={visit.title} 
+                    src={visit?.thumbnail?.url} 
+                    alt={visit?.title} 
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                   />
-                  <div className="absolute bottom-0 left-0 right-0 p-6 z-20 text-white">
-                    <h3 className="font-display text-xl font-bold text-white mb-1">{visit.community}</h3>
-                    <p className="text-sm text-white/80 mb-3">{visit.country}</p>
+                    <div className="absolute bottom-0 left-0 right-0 p-6 z-20 text-white">
+                      <p className="text-xs text-primary line-clamp-2 mb-4">{visit?.community}</p>
+                      
+                    <p className="text-sm text-white/80 mb-3">{visit?.country}</p>
                     <p className="text-sm font-semibold text-primary mb-4">
-                      {new Date(visit.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      {new Date(visit?.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                     </p>
-                    <p className="text-xs text-white/80 line-clamp-2 mb-4">{visit.excerpt}</p>
+                    <h3 className="font-display line-clamp-1 text-xl font-bold text-white mb-1">{visit?.title}</h3>
+                      
                     <Button variant="outline" size="sm" className="w-full rounded-lg text-xs">
                       Learn More
                     </Button>

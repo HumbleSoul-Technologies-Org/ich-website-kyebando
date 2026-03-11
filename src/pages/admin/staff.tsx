@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
+import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,6 +36,7 @@ export default function AdminStaffPage() {
   const { data: staffData, isLoading: staffLoading } = useQuery<any>({
     queryKey: ['staff', 'all'],
   })
+  const { toast } = useToast();
   const [staff, setStaff] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -122,10 +124,19 @@ export default function AdminStaffPage() {
     try {
       await apiRequest('DELETE', `/staff/delete/${memberId}`);
       setStaff(staff.filter((m) => m._id !== memberId));
+      toast({
+        title: "Staff member deleted",
+        description: "Staff member has been removed successfully",
+      });
     } catch (error) {
       console.log('====================================');
       console.log(error);
       console.log('====================================');
+      toast({
+        title: "Failed to delete staff member",
+        description: "Could not delete staff member",
+        variant: "destructive",
+      });
     } finally {
       setDeleting(null);
     }
@@ -167,11 +178,17 @@ export default function AdminStaffPage() {
             getStaffId(m) === formData._id ? { ...m, ...response, ...payload } : m,
           ),
         );
-        
+        toast({
+          title: "Staff updated",
+          description: "Staff member has been updated successfully",
+        });
       } else {
         const response = await apiRequest('POST', '/staff/create', payload);
         setStaff((prev) => [...prev, response]);
-        
+        toast({
+          title: "Staff created",
+          description: "New staff member has been added successfully",
+        });
       }
 
       setImagePreview(null);
@@ -182,6 +199,11 @@ export default function AdminStaffPage() {
       console.log('====================================');
       console.log(error);
       console.log('====================================');
+      toast({
+        title: "Failed to save staff member",
+        description: "Could not save staff member details",
+        variant: "destructive",
+      });
     } finally {
       setSaving(false);
     }

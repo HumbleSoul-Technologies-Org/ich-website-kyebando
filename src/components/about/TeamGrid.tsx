@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronDown } from "lucide-react";
 
-export function TeamGrid() {
+export function TeamGrid({staff}: {staff: any[]}) {
   const [showAll, setShowAll] = useState(false);
   const displayedMembers = showAll ? staff : staff.slice(0, 6);
 
@@ -22,7 +22,7 @@ export function TeamGrid() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {displayedMembers.map((member, index) => (
+          {staff.map((member, index) => (
             <motion.div
               key={member.id}
               initial={{ opacity: 0, y: 20 }}
@@ -33,7 +33,7 @@ export function TeamGrid() {
               <Card className="h-96 w-80 border-0 overflow-hidden hover:shadow-lg transition-shadow group">
                 <div className="relative h-48 bg-gradient-to-br from-primary/20 to-secondary/20 overflow-hidden">
                   <img
-                    src={member.image}
+                    src={member?.photo?.url}
                     alt={member.name}
                     className="w-full h-full object-fill group-hover:scale-110 transition-transform duration-300"
                   />

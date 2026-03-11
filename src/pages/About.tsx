@@ -11,12 +11,19 @@ import { FAQAccordion } from "@/components/about/FAQAccordion";
 import { ContactInfo } from "@/components/about/ContactInfo";
 import { NewsletterSignup } from "@/components/about/NewsletterSignup";
 import { motion } from "framer-motion";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 export default function About() {
+  const { data: staffData } = useQuery<any>({ queryKey: ["staff", 'all'] });
+  
+  const [staff, setStaff] = useState([]);
   useEffect(() => { 
     window.scrollTo(0, 0);
-  }, [])
+    if (staffData) {
+      setStaff(staffData);
+    }
+  }, [staffData]);
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -47,7 +54,7 @@ export default function About() {
         <ValuesGrid />
         <ImpactStats />
         <Timeline />
-        <TeamGrid />
+        <TeamGrid staff={staff} />
         {/* <PartnersGrid /> */}
         <FAQAccordion />
         <ContactInfo />
