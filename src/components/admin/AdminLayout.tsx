@@ -1,10 +1,12 @@
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Menu, X, Bell } from "lucide-react";
 import { notifications as mockNotifications } from "@/lib/mockData";
-
+import { useQuery } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { Link } from "wouter";
 interface AdminLayoutProps {
   children: React.ReactNode;
   showNavbar?: boolean;
@@ -13,7 +15,18 @@ interface AdminLayoutProps {
 export function AdminLayout({ children, showNavbar = true }: AdminLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const notifications = mockNotifications;
+  const [notifications, setNotifications] = useState<any[]>([]);
+  // const notifications = mockNotifications;
+
+  const { data: notificationsData } = useQuery<any>({
+    queryKey: ["notifications"],
+  })
+
+  useEffect(() => { 
+    if (notificationsData) {
+      setNotifications(notificationsData);
+    }
+  }, [notificationsData]);
 
   const timeAgo = (iso: string) => {
     try {
@@ -32,6 +45,16 @@ export function AdminLayout({ children, showNavbar = true }: AdminLayoutProps) {
       return iso;
     }
   };
+
+  const readNotifications = async (notId: string) => { 
+    try {
+      await apiRequest('POST', `/notifications/${notId}/seen`);
+    } catch (error) {
+      console.log('====================================');
+      console.log(error);
+      console.log('====================================');
+    }
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -89,14 +112,14 @@ export function AdminLayout({ children, showNavbar = true }: AdminLayoutProps) {
           </div>
           <div className="p-4 overflow-y-auto h-screen">
             {notifications.map((n) => (
-              <div key={n.id} className="mb-3 border-b pb-3">
+              <Link href={`${n.linkTo}`} onClick={()=>readNotifications(n._id)} key={n._id} className="mb-3 cursor-pointer border rounded-lg p-3 block hover:bg-muted-foreground/10 transition-colors">
                 <div className="font-medium">{n.title}</div>
                 <div className="text-sm text-muted-foreground">{n.description}</div>
                 <div className="flex items-end justify-end mt-2">
-                  <div className="text-xs text-muted-foreground">{n.date ? timeAgo(n.date) : ''}</div>
+                  <div className="text-xs text-muted-foreground">{n.createdAt ? timeAgo(n.createdAt) : ''}</div>
                   {/* <div className="text-xs text-muted-foreground">{n.date ? new Date(n.date).toLocaleString() : ''}</div> */}
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>

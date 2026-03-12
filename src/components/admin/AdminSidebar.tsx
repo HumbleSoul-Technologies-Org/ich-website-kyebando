@@ -1,20 +1,14 @@
 import { Link, useLocation } from "wouter";
 import {
   LayoutDashboard,
-  BarChart3,
   Building2,
   BookOpen,
   MessageSquare,
-  Bell,
-  Users,
   UserCheck,
   MapPin,
-  Settings,
   LogOut,
   Home,
   Info,
-  Briefcase,
-  Sparkles,
   Hand,
   Newspaper,
 } from "lucide-react";
@@ -54,16 +48,7 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
       label: "Dashboard",
       icon: <LayoutDashboard className="w-5 h-5" />,
     },
-    // {
-    //   href: "/admin/analytics",
-    //   label: "Analytics",
-    //   icon: <BarChart3 className="w-5 h-5" />,
-    // },
-    // {
-    //   href: "/admin/programs",
-    //   label: "Programs",
-    //   icon: <BookOpen className="w-5 h-5" />,
-    // },
+    
     {
       href: "/admin/visits",
       label: "Visits",

@@ -1,11 +1,29 @@
 import { useEffect, useState, useRef } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { useToast } from "@/hooks/use-toast";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, MoreVertical, Edit, Star, View,  Trash2, Image as ImageIcon, Users, Loader2, Loader, X } from "lucide-react";
+import {
+  Search,
+  MoreVertical,
+  Edit,
+  Star,
+  View,
+  Trash2,
+  Image as ImageIcon,
+  Users,
+  Loader2,
+  Loader,
+  X,
+} from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { useQuery } from "@tanstack/react-query";
@@ -18,22 +36,23 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import axios from "axios";
- 
+
 import { apiRequest } from "@/lib/queryClient";
 import { set } from "date-fns";
 
 export default function AdminVisitsPage() {
-
   const { data: visitsData, isLoading: visitsLoading } = useQuery<any>({
-    queryKey: ["visits","all"],
-  })
+    queryKey: ["visits", "all"],
+  });
 
   const { toast } = useToast();
   const [visits, setVisits] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | "visited" | "upcoming">("all");
+  const [statusFilter, setStatusFilter] = useState<
+    "all" | "visited" | "upcoming"
+  >("all");
   const [openMenu, setOpenMenu] = useState<number | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedVisit, setSelectedVisit] = useState<any | null>(null);
@@ -45,40 +64,55 @@ export default function AdminVisitsPage() {
     date: "",
     excerpt: "",
     content: "",
-    thumbnail: {url:'',public_id:''},
+    thumbnail: { url: "", public_id: "" },
     videoId: "",
     status: "upcoming",
     participants: [],
     location: { lat: "", long: "" },
-    
   });
   const [useCurrentLocation, setUseCurrentLocation] = useState(false);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const [selectedImagePreview, setSelectedImagePreview] = useState<string | null>(null);
+  const [selectedImagePreview, setSelectedImagePreview] = useState<
+    string | null
+  >(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [galleryOpen, setGalleryOpen] = useState(false);
-  const [galleryForm, setGalleryForm] = useState<{   image: { url: string; public_id: string } }>({   image: { url: "", public_id: "" } });
+  const [galleryForm, setGalleryForm] = useState<{
+    image: { url: string; public_id: string };
+  }>({ image: { url: "", public_id: "" } });
   const galleryFileInputRef = useRef<HTMLInputElement | null>(null);
-  const [selectedGalleryImage, setSelectedGalleryImage] = useState<string | null>(null);
+  const [selectedGalleryImage, setSelectedGalleryImage] = useState<
+    string | null
+  >(null);
   const [galleryDragActive, setGalleryDragActive] = useState(false);
+  const [participantDragActive, setParticipantDragActive] = useState(false);
   const [participantsOpen, setParticipantsOpen] = useState(false);
-  const [participantForm, setParticipantForm] = useState<{ name: string; phone: string; role: string;   photo: { url: string; public_id: string } }>({ name: "", phone: "", role: "" , photo: { url: "" ,public_id:''} });
+  const [participantForm, setParticipantForm] = useState<{
+    name: string;
+    phone: string;
+    role: string;
+    photo: { url: string; public_id: string };
+  }>({ name: "", phone: "", role: "", photo: { url: "", public_id: "" } });
   // when editing an existing participant we store its id here
-  const [editingParticipantId, setEditingParticipantId] = useState<string | null>(null);
+  const [editingParticipantId, setEditingParticipantId] = useState<
+    string | null
+  >(null);
   const participantImageInputRef = useRef<HTMLInputElement | null>(null);
-  const [selectedParticipantImage, setSelectedParticipantImage] = useState<string | null>(null);
+  const [selectedParticipantImage, setSelectedParticipantImage] = useState<
+    string | null
+  >(null);
   const [participantPhoto, setParticipantPhoto] = useState<File | null>(null);
   const [galleryImage, setGalleryImage] = useState<File | null>(null);
-  const [patId, setPatId] = useState<String | null>('');
-  const [galId, setGalId] = useState<String | null>('');
-  const [deleting, setDeleting] = useState<String | null>('');
+  const [patId, setPatId] = useState<String | null>("");
+  const [galId, setGalId] = useState<String | null>("");
+  const [deleting, setDeleting] = useState<String | null>("");
   const [processing, setProcessing] = useState(false);
 
-  useEffect(() => { 
-    if (visitsData) { 
+  useEffect(() => {
+    if (visitsData) {
       setVisits(visitsData);
     }
-  }, [visitsData])
+  }, [visitsData]);
 
   const handleThumbnailUpload = (file: File) => {
     const reader = new FileReader();
@@ -107,7 +141,10 @@ export default function AdminVisitsPage() {
 
   const onGalleryFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
-    if (f) { handleGalleryUpload(f); setGalleryImage(f)};
+    if (f) {
+      handleGalleryUpload(f);
+      setGalleryImage(f);
+    }
   };
 
   const handleGalleryDrag = (e: React.DragEvent<HTMLDivElement>) => {
@@ -124,7 +161,7 @@ export default function AdminVisitsPage() {
     e.preventDefault();
     e.stopPropagation();
     setGalleryDragActive(false);
-    
+
     const files = e.dataTransfer?.files;
     if (files && files[0]) {
       handleGalleryUpload(files[0]);
@@ -135,37 +172,35 @@ export default function AdminVisitsPage() {
   const handleGallerySubmit = async (visitId: string) => {
     // e.preventDefault();
     setSaving(true);
-     try {
-       const image = await uploadFileToServer(galleryImage as File);
-       await apiRequest("POST", `/visits/add/gallery/${visitId}`, { image });
-       setGalleryForm({ image: { url: "", public_id: "" } });
-       setSelectedVisit((prev: any) => (prev ? { ...prev, gallery: [...(prev.gallery || []), image] } : prev));
-       setGalleryOpen(false);
-    setGalleryForm({ image: { url: "", public_id: "" } });
-    setSelectedGalleryImage(null);
-    setGalleryDragActive(false);
-    if (galleryFileInputRef.current) {
-      galleryFileInputRef.current.value = "";
-    }
-    setOpenMenu(null);
-    toast({
-      title: "Image added",
-      description: "Gallery image has been added successfully",
-    });
-     } catch (error) {
-      console.log('====================================');
-      console.log(error);
-      console.log('====================================');
+    try {
+      const image = await uploadFileToServer(galleryImage as File);
+      await apiRequest("POST", `/visits/add/gallery/${visitId}`, { image });
+      setGalleryForm({ image: { url: "", public_id: "" } });
+      setSelectedVisit((prev: any) =>
+        prev ? { ...prev, gallery: [...(prev.gallery || []), image] } : prev,
+      );
+      setGalleryOpen(false);
+      setGalleryForm({ image: { url: "", public_id: "" } });
+      setSelectedGalleryImage(null);
+      setGalleryDragActive(false);
+      if (galleryFileInputRef.current) {
+        galleryFileInputRef.current.value = "";
+      }
+      setOpenMenu(null);
+      toast({
+        title: "Image added",
+        description: "Gallery image has been added successfully",
+      });
+    } catch (error) {
+      
       toast({
         title: "Failed to add image",
         description: "Could not add image to gallery",
         variant: "destructive",
       });
-     }finally {
+    } finally {
       setSaving(false);
-     }
-
-     
+    }
   };
 
   const viewDetails = (visit: any) => {
@@ -175,16 +210,28 @@ export default function AdminVisitsPage() {
   };
 
   // helper to return a unique visit identifier (handles both _id from backend and id from mock data)
-  const getVisitId = (visit: any) => visit?._id || visit?.id || `visit-${Math.random()}`;
+  const getVisitId = (visit: any) =>
+    visit?._id || visit?.id || `visit-${Math.random()}`;
 
   const editVisit = (visit: any) => {
     // open form populated for editing
     setFormData({
       ...visit,
-      participants: visit?.participants ? visit?.participants.map((p: any) => ({ name: p.name || "", phone: p.phone || "", role: p.role || "" })) : [],
+      participants: visit?.participants
+        ? visit?.participants.map((p: any) => ({
+            name: p.name || "",
+            phone: p.phone || "",
+            role: p.role || "",
+          }))
+        : [],
       videoId: visit?.videoId || "",
       content: visit?.content || "",
-      location: visit?.location ? { lat: String(visit?.location.lat), long: String(visit?.location.long) } : { lat: "", long: "" },
+      location: visit?.location
+        ? {
+            lat: String(visit?.location.lat),
+            long: String(visit?.location.long),
+          }
+        : { lat: "", long: "" },
     });
     setSelectedImage(null);
     setSelectedImagePreview(null);
@@ -209,24 +256,55 @@ export default function AdminVisitsPage() {
     reader.onload = () => {
       const dataUrl = String(reader.result || "");
       setSelectedParticipantImage(dataUrl);
-      setParticipantPhoto(file);
-      console.log("participantPhoto set to:", file); // Log to confirm it's saved
     };
     reader.readAsDataURL(file);
   };
 
-  const onParticipantImageInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onParticipantImageInputChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const f = e.target.files?.[0];
-    if (f) handleParticipantImageUpload(f);
+    if (f) {
+      handleParticipantImageUpload(f);
+      setParticipantPhoto(f);
+    }
+  };
+
+  const handleParticipantDrag = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setParticipantDragActive(true);
+    } else if (e.type === "dragleave") {
+      setParticipantDragActive(false);
+    }
+  };
+
+  const handleParticipantDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setParticipantDragActive(false);
+
+    const files = e.dataTransfer?.files;
+    if (files && files[0]) {
+      handleParticipantImageUpload(files[0]);
+      setParticipantPhoto(files[0]);
+    }
   };
 
   const openParticipants = (visit: any) => {
     setSelectedVisit(visit);
     // prepare form for adding a new participant
-    setParticipantForm({ name: "", phone: "", role: "",   photo: { url: "", public_id: "" } });
+    setParticipantForm({
+      name: "",
+      phone: "",
+      role: "",
+      photo: { url: "", public_id: "" },
+    });
     setEditingParticipantId(null);
     setSelectedParticipantImage(null);
     setParticipantPhoto(null);
+    setParticipantDragActive(false);
     if (participantImageInputRef.current) {
       participantImageInputRef.current.value = "";
     }
@@ -234,8 +312,7 @@ export default function AdminVisitsPage() {
     setOpenMenu(null);
   };
 
-  const handleParticipantSubmit = async (visitId: string  ) => {
-    
+  const handleParticipantSubmit = async (visitId: string) => {
     setSaving(true);
     try {
       // require an image on new participants
@@ -256,12 +333,6 @@ export default function AdminVisitsPage() {
         };
         setParticipantForm((p) => ({ ...p, photo: photoData }));
       }
-      // Always upload attempt removed - only upload if a new file is selected
-      // const photoUrl = await uploadFileToServer(participantPhoto as File);
-      
-      // console.log('====================================');
-      // console.log(photoUrl);
-      // console.log('====================================');
 
       const payload: any = {
         name: participantForm.name || "",
@@ -304,17 +375,29 @@ export default function AdminVisitsPage() {
         });
       } else {
         // create a new participant
-        const response = await apiRequest("POST", `/visits/add/participant/${visitId}`, payload);
-        const newParticipant = { ...payload, ...response };
+          await apiRequest(
+          "POST",
+          `/visits/add/participant/${visitId}`,
+          payload,
+        );
+        const newParticipant = { ...payload };
         setVisits((prev) =>
           prev.map((v) =>
             getVisitId(v) === visitId
-              ? { ...v, participants: [...(v.participants || []), newParticipant] }
+              ? {
+                  ...v,
+                  participants: [...(v.participants || []), newParticipant],
+                }
               : v,
           ),
         );
         setSelectedVisit((prev: any) =>
-          prev ? { ...prev, participants: [...(prev.participants || []), newParticipant] } : prev,
+          prev
+            ? {
+                ...prev,
+                participants: [...(prev.participants || []), newParticipant],
+              }
+            : prev,
         );
         toast({
           title: "Participant added",
@@ -326,8 +409,8 @@ export default function AdminVisitsPage() {
       setParticipantsOpen(false);
       setOpenMenu(null);
       setParticipantPhoto(null);
-      console.log("participantPhoto reset to null"); // Confirm reset
       setSelectedParticipantImage(null);
+      setParticipantDragActive(false);
       setEditingParticipantId(null);
       if (participantImageInputRef.current) {
         participantImageInputRef.current.value = "";
@@ -347,15 +430,27 @@ export default function AdminVisitsPage() {
   const removeParticipant = async (visitId: string, participantId: string) => {
     setPatId(participantId);
     try {
-      await apiRequest("POST", `/visits/remove/participant/${visitId}`, { participantId });
+      await apiRequest("POST", `/visits/remove/participant/${visitId}`, {
+        participantId,
+      });
       setSelectedVisit((prev: any) => {
         if (!prev) return prev;
-        return { ...prev, participants: prev.participants.filter((p: any) => p._id !== participantId) };
+        return {
+          ...prev,
+          participants: prev.participants.filter(
+            (p: any) => p._id !== participantId,
+          ),
+        };
       });
       setVisits((prev) =>
         prev.map((v) =>
           getVisitId(v) === visitId
-            ? { ...v, participants: v.participants.filter((p: any) => p._id !== participantId) }
+            ? {
+                ...v,
+                participants: v.participants.filter(
+                  (p: any) => p._id !== participantId,
+                ),
+              }
             : v,
         ),
       );
@@ -369,8 +464,10 @@ export default function AdminVisitsPage() {
         description: "Could not remove participant",
         variant: "destructive",
       });
-    } finally { setPatId(null); }
-   }
+    } finally {
+      setPatId(null);
+    }
+  };
 
   // prepare form for editing an existing participant
   const editParticipant = (participant: any) => {
@@ -389,15 +486,23 @@ export default function AdminVisitsPage() {
   const removeGalleryImage = async (visitId: string, galleryId: string) => {
     setGalId(galleryId);
     try {
-      await apiRequest("POST", `/visits/remove/image/${visitId}`, { galleryId });
+      await apiRequest("POST", `/visits/remove/image/${visitId}`, {
+        galleryId,
+      });
       setSelectedVisit((prev: any) => {
         if (!prev) return prev;
-        return { ...prev, gallery: prev.gallery.filter((g: any) => g._id !== galleryId) };
+        return {
+          ...prev,
+          gallery: prev.gallery.filter((g: any) => g._id !== galleryId),
+        };
       });
       setVisits((prev) =>
         prev.map((v) =>
           getVisitId(v) === visitId
-            ? { ...v, gallery: v.gallery.filter((g: any) => g._id !== galleryId) }
+            ? {
+                ...v,
+                gallery: v.gallery.filter((g: any) => g._id !== galleryId),
+              }
             : v,
         ),
       );
@@ -406,16 +511,18 @@ export default function AdminVisitsPage() {
         description: "Gallery image has been removed successfully",
       });
     } catch (error) {
-      console.log('====================================');
+      console.log("====================================");
       console.log(error);
-      console.log('====================================');
+      console.log("====================================");
       toast({
         title: "Failed to remove image",
         description: "Could not remove gallery image",
         variant: "destructive",
       });
-    } finally { setGalId(null); }
-   }
+    } finally {
+      setGalId(null);
+    }
+  };
 
   const openCreateForm = () => {
     setSelectedVisit(null); // clear any previously selected visit
@@ -426,7 +533,7 @@ export default function AdminVisitsPage() {
       date: "",
       content: "",
       excerpt: "",
-      thumbnail: {url:'',public_id:''},
+      thumbnail: { url: "", public_id: "" },
       status: "upcoming",
       participants: [],
       // ensure no _id on new entry
@@ -452,8 +559,6 @@ export default function AdminVisitsPage() {
     });
   };
 
-  
-
   const handleUseCurrentLocationChange = (checked: boolean) => {
     setUseCurrentLocation(checked);
     if (checked) {
@@ -464,90 +569,104 @@ export default function AdminVisitsPage() {
       }
       navigator.geolocation.getCurrentPosition(
         (pos) => {
-          handleFormChange('locationLat', String(pos.coords.latitude));
-          handleFormChange('locationLong', String(pos.coords.longitude));
+          handleFormChange("locationLat", String(pos.coords.latitude));
+          handleFormChange("locationLong", String(pos.coords.longitude));
         },
         (err) => {
-          alert('Could not get current location: ' + err.message);
+          alert("Could not get current location: " + err.message);
           setUseCurrentLocation(false);
-        }
+        },
       );
     }
   };
 
-   // upload the selected image to the server
+  // upload the selected image to the server
   const uploadFileToServer = async (file: File) => {
-    
     try {
       const formData = new FormData();
       formData.append("image", file);
       const { data } = await axios.post(
         `${import.meta.env.VITE_API_URL}/visits/upload/image`,
         formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
       );
-     
+
       return data;
-    } catch (error) {
-       
-      throw new Error("Image upload failed");
-    }  
+    } catch (error: any) {
+      console.error("Image upload error:", error);
+      const errorMessage = error.response?.data?.message || error.message || "Image upload failed";
+      throw new Error(errorMessage);
+    }
   };
 
-  const handleFormSubmit = async(e: any) => {
+  const handleFormSubmit = async (e: any) => {
     e.preventDefault();
     setSaving(true);
     try {
-       
-let thumbnailUrl = {url: formData.thumbnail?.url || "", public_id: formData.thumbnail?.public_id || ""};
-      
+      let thumbnailUrl = {
+        url: formData.thumbnail?.url || "",
+        public_id: formData.thumbnail?.public_id || "",
+      };
+
       if (selectedImage) {
         thumbnailUrl = await uploadFileToServer(selectedImage as File);
       }
       const payload = {
-      ...formData,
+        ...formData,
         videoId: formData.videoId || "",
-      thumbnail: { url: thumbnailUrl.url||formData.thumbnail?.url,public_id: thumbnailUrl.public_id||"" } ,
-      location: {
-        lat: formData.location && formData.location.lat ? Number(formData.location.lat) : 0,
-        long: formData.location && formData.location.long ? Number(formData.location.long) : 0,
-      },
+        thumbnail: {
+          url: thumbnailUrl.url || formData.thumbnail?.url,
+          public_id: thumbnailUrl.public_id || "",
+        },
+        location: {
+          lat:
+            formData.location && formData.location.lat
+              ? Number(formData.location.lat)
+              : 0,
+          long:
+            formData.location && formData.location.long
+              ? Number(formData.location.long)
+              : 0,
+        },
       };
-      
-    if (selectedVisit && selectedVisit?._id) {
-      // update existing visit
-      const response = await apiRequest("PUT", `/visits/update/${selectedVisit?._id}`, payload);
-      // merge server response if available
-      setVisits((prev) =>
-        prev.map((v) =>
-          getVisitId(v) === getVisitId(selectedVisit) ? { ...v, ...response, ...payload } : v,
-        ),
-      );
-      setSelectedVisit((prev: any) => (prev ? { ...prev, ...response, ...payload } : prev));
-      toast({
-        title: "Visit updated",
-        description: "Visit has been updated successfully",
-      });
-    } else {
-      // create new visit
-      const response = await apiRequest("POST", "/visits/create", payload);
-      setVisits((prev) => [response, ...prev]);
-      toast({
-        title: "Visit created",
-        description: "New visit has been created successfully",
-      });
-    }
 
-    setFormOpen(false);
-    setOpenMenu(null);
+      if (selectedVisit && selectedVisit?._id) {
+        // update existing visit
+        const response = await apiRequest(
+          "PUT",
+          `/visits/update/${selectedVisit?._id}`,
+          payload,
+        );
+        // merge server response if available
+        setVisits((prev) =>
+          prev.map((v) =>
+            getVisitId(v) === getVisitId(selectedVisit)
+              ? { ...v, ...response, ...payload }
+              : v,
+          ),
+        );
+        setSelectedVisit((prev: any) =>
+          prev ? { ...prev, ...response, ...payload } : prev,
+        );
+        toast({
+          title: "Visit updated",
+          description: "Visit has been updated successfully",
+        });
+      } else {
+        // create new visit
+        const response = await apiRequest("POST", "/visits/create", payload);
+        setVisits((prev) => [response, ...prev]);
+        toast({
+          title: "Visit created",
+          description: "New visit has been created successfully",
+        });
+      }
+
+      setFormOpen(false);
+      setOpenMenu(null);
     } catch (error) {
-      console.log('====================================');
+      console.log("====================================");
       console.log(error);
-      console.log('====================================');
+      console.log("====================================");
       toast({
         title: "Failed to save visit",
         description: "Could not save visit details",
@@ -562,10 +681,14 @@ let thumbnailUrl = {url: formData.thumbnail?.url || "", public_id: formData.thum
     setProcessing(true);
     try {
       await apiRequest("POST", `/visits/featured/${visit?._id}`);
-      setVisits((prev) => prev.map((v) => ({ ...v, featured: v._id === visit?._id })));
+      setVisits((prev) =>
+        prev.map((v) => ({ ...v, featured: v._id === visit?._id })),
+      );
       toast({
         title: "Featured status updated",
-        description: visit.featured ? "Removed from featured" : "Added to featured",
+        description: visit.featured
+          ? "Removed from featured"
+          : "Added to featured",
       });
     } catch (error) {
       console.error(error);
@@ -574,29 +697,31 @@ let thumbnailUrl = {url: formData.thumbnail?.url || "", public_id: formData.thum
         description: "Could not update featured status",
         variant: "destructive",
       });
-    }finally { setProcessing(false); }
+    } finally {
+      setProcessing(false);
+    }
   };
 
   const deleteVisit = async (visit: any) => {
     setDeleting(visit?._id);
     try {
-       await apiRequest("DELETE", `/visits/delete/${visit?._id}`);
-        setVisits((prev) => prev.filter((v) => v._id !== visit?._id));
-    setOpenMenu(null);
-    toast({
-      title: "Visit deleted",
-      description: "Visit has been deleted successfully",
-    });
+      await apiRequest("DELETE", `/visits/delete/${visit?._id}`);
+      setVisits((prev) => prev.filter((v) => v._id !== visit?._id));
+      setOpenMenu(null);
+      toast({
+        title: "Visit deleted",
+        description: "Visit has been deleted successfully",
+      });
     } catch (error) {
       toast({
         title: "Failed to delete visit",
         description: "Could not delete visit",
         variant: "destructive",
       });
-    }finally { setDeleting(null); }
+    } finally {
+      setDeleting(null);
+    }
   };
-
-   
 
   const filteredVisits = visits.filter((visit) => {
     // Filter by status
@@ -610,10 +735,14 @@ let thumbnailUrl = {url: formData.thumbnail?.url || "", public_id: formData.thum
       const matchCommunity = visit?.community.toLowerCase().includes(search);
       const matchCountry = visit?.country.toLowerCase().includes(search);
       const matchDate = new Date(visit?.date)
-        .toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+        .toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        })
         .toLowerCase()
         .includes(search);
-      
+
       return matchCommunity || matchCountry || matchDate;
     }
 
@@ -638,10 +767,14 @@ let thumbnailUrl = {url: formData.thumbnail?.url || "", public_id: formData.thum
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold">Visits</h1>
-              <p className="text-muted-foreground mt-1">Track community visits and engagements</p>
+              <p className="text-muted-foreground mt-1">
+                Track community visits and engagements
+              </p>
             </div>
             <div>
-              <Button onClick={openCreateForm} size="sm">Add Visit</Button>
+              <Button onClick={openCreateForm} size="sm">
+                Add Visit
+              </Button>
             </div>
           </div>
         </div>
@@ -675,14 +808,16 @@ let thumbnailUrl = {url: formData.thumbnail?.url || "", public_id: formData.thum
                   onClick={() => setStatusFilter("visited")}
                   size="sm"
                 >
-                  Visited ({visits.filter(v => v.status === "visited").length})
+                  Visited ({visits.filter((v) => v.status === "visited").length}
+                  )
                 </Button>
                 <Button
                   variant={statusFilter === "upcoming" ? "default" : "outline"}
                   onClick={() => setStatusFilter("upcoming")}
                   size="sm"
                 >
-                  Upcoming ({visits.filter(v => v.status === "upcoming").length})
+                  Upcoming (
+                  {visits.filter((v) => v.status === "upcoming").length})
                 </Button>
               </div>
             </div>
@@ -693,10 +828,11 @@ let thumbnailUrl = {url: formData.thumbnail?.url || "", public_id: formData.thum
         <div>
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">
-              {filteredVisits.length} Result{filteredVisits.length !== 1 ? "s" : ""}
+              {filteredVisits.length} Result
+              {filteredVisits.length !== 1 ? "s" : ""}
             </h2>
           </div>
-          
+
           {filteredVisits.length === 0 ? (
             <Card>
               <CardContent className="pt-6">
@@ -713,14 +849,18 @@ let thumbnailUrl = {url: formData.thumbnail?.url || "", public_id: formData.thum
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredVisits.map((visit) => (
-                <div 
-                  key={getVisitId(visit)} 
+                <div
+                  key={getVisitId(visit)}
                   className="relative rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 h-96 group"
                 >
                   {/* Background Image */}
                   <div className="absolute inset-0 z-0">
-                    <img 
-                      src={typeof visit?.thumbnail === 'string' ? visit?.thumbnail : visit?.thumbnail?.url} 
+                    <img
+                      src={
+                        typeof visit?.thumbnail === "string"
+                          ? visit?.thumbnail
+                          : visit?.thumbnail?.url
+                      }
                       alt={visit?.community}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
@@ -732,10 +872,18 @@ let thumbnailUrl = {url: formData.thumbnail?.url || "", public_id: formData.thum
                     {/* Top Section */}
                     <div className="flex items-start justify-between">
                       <div>
-                        <h3 className="text-xl text-primary font-bold mb-1">{visit?.community}</h3>
-                        <p className="text-sm text-white/80">{visit?.country}</p>
+                        <h3 className="text-xl text-primary font-bold mb-1">
+                          {visit?.community}
+                        </h3>
+                        <p className="text-sm text-white/80">
+                          {visit?.country}
+                        </p>
                       </div>
-                      <Badge variant={visit?.status === "visited" ? "default" : "secondary"}>
+                      <Badge
+                        variant={
+                          visit?.status === "visited" ? "default" : "secondary"
+                        }
+                      >
                         {visit?.status === "visited" ? "Visited" : "Upcoming"}
                       </Badge>
                     </div>
@@ -743,31 +891,49 @@ let thumbnailUrl = {url: formData.thumbnail?.url || "", public_id: formData.thum
                     {/* Bottom Section */}
                     <div className="space-y-4">
                       <div>
-                        <p className="text-xs font-medium text-white/70 uppercase">Date</p>
+                        <p className="text-xs font-medium text-white/70 uppercase">
+                          Date
+                        </p>
                         <p className="text-sm">
-                          {new Date(visit?.date).toLocaleDateString('en-US', { 
-                            year: 'numeric', 
-                            month: 'long', 
-                            day: 'numeric' 
+                          {new Date(visit?.date).toLocaleDateString("en-US", {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
                           })}
                         </p>
                       </div>
 
-                      <p className="text-sm text-white/90 line-clamp-2">{visit?.excerpt}</p>
+                      <p className="text-sm text-white/90 line-clamp-2">
+                        {visit?.excerpt}
+                      </p>
 
                       <div className="grid grid-cols-3 gap-3 pt-2 border-t border-white/20">
                         <div>
-                          <p className="text-xs font-medium text-white/70">Participants</p>
-                          <p className="text-lg font-semibold">{visit?.participants.length}</p>
+                          <p className="text-xs font-medium text-white/70">
+                            Participants
+                          </p>
+                          <p className="text-lg font-semibold">
+                            {visit?.participants.length}
+                          </p>
                         </div>
                         <div>
-                          <p className="text-xs font-medium text-white/70">Likes</p>
-                          <p className="text-lg font-semibold">{visit?.likes.length || 0}</p>
+                          <p className="text-xs font-medium text-white/70">
+                            Likes
+                          </p>
+                          <p className="text-lg font-semibold">
+                            {visit?.likes.length || 0}
+                          </p>
                         </div>
                         <div>
-                          <p className="text-xs font-medium text-white/70">Views</p>
-                          <p className="text-lg font-semibold">{visit?.views.length || 0}</p>
+                          <p className="text-xs font-medium text-white/70">
+                            Views
+                          </p>
+                          <p className="text-lg font-semibold">
+                            {visit?.views.length || 0}
+                          </p>
                         </div>
+                        
+                        
                       </div>
                     </div>
                   </div>
@@ -775,7 +941,13 @@ let thumbnailUrl = {url: formData.thumbnail?.url || "", public_id: formData.thum
                   <div className="absolute bottom-4 right-4 z-20 text-sm">
                     <div className="relative">
                       <button
-                        onClick={() => setOpenMenu(openMenu === getVisitId(visit) ? null : getVisitId(visit))}
+                        onClick={() =>
+                          setOpenMenu(
+                            openMenu === getVisitId(visit)
+                              ? null
+                              : getVisitId(visit),
+                          )
+                        }
                         className="p-2 bg-white/10 hover:bg-white/20 rounded-full"
                         aria-label="Actions"
                       >
@@ -784,31 +956,76 @@ let thumbnailUrl = {url: formData.thumbnail?.url || "", public_id: formData.thum
 
                       {openMenu === getVisitId(visit) && (
                         <div className="absolute bottom-10 right-0 mt-2 w-44 bg-white rounded-md shadow-lg ring-1 ring-black/5 overflow-hidden text-left">
-                          <button onClick={() => viewDetails(visit)} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-800 hover:bg-gray-100">
+                          <button
+                            onClick={() => viewDetails(visit)}
+                            className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-800 hover:bg-gray-100"
+                          >
                             <View className="w-4 h-4" /> View Details
                           </button>
-                          <button onClick={() => {editVisit(visit); setSelectedVisit(visit);}} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-800 hover:bg-gray-100">
+                          <button
+                            onClick={() => {
+                              editVisit(visit);
+                              setSelectedVisit(visit);
+                            }}
+                            className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-800 hover:bg-gray-100"
+                          >
                             <Edit className="w-4 h-4" /> Edit
                           </button>
-                          <button onClick={() => openGallery(visit)} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-800 hover:bg-gray-100">
-                            <ImageIcon className="w-4 h-4" /> Gallery ({visit?.gallery ? visit?.gallery.length : 0})
+                          <button
+                            onClick={() => openGallery(visit)}
+                            className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-800 hover:bg-gray-100"
+                          >
+                            <ImageIcon className="w-4 h-4" /> Gallery (
+                            {visit?.gallery ? visit?.gallery.length : 0})
                           </button>
-                          <button onClick={() => openParticipants(visit)} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-800 hover:bg-gray-100">
-                            <Users className="w-4 h-4" /> Participants ({visit?.participants ? visit?.participants.length : 0})
+                          <button
+                            onClick={() => openParticipants(visit)}
+                            className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-800 hover:bg-gray-100"
+                          >
+                            <Users className="w-4 h-4" /> Participants (
+                            {visit?.participants
+                              ? visit?.participants.length
+                              : 0}
+                            )
                           </button>
-                          <button onClick={async () => { await toggleFeatured(visit) }} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-800 hover:bg-gray-100">
-                            {processing ? <><span className="flex items-center justify-center gap-2 text-primary"> Processing...<Loader className="w-4 h-4 animate-spin text-primary " /></span></>:visit?.isFeatured?.includes(visit?._id) ? (
+                          <button
+                            onClick={async () => {
+                              await toggleFeatured(visit);
+                            }}
+                            className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-800 hover:bg-gray-100"
+                          >
+                            {processing ? (
                               <>
-                               <><Star className="w-4 h-4 text-primary fill-primary" /> Unset Featured</>  
+                                <span className="flex items-center justify-center gap-2 text-primary">
+                                  {" "}
+                                  Processing...
+                                  <Loader className="w-4 h-4 animate-spin text-primary " />
+                                </span>
+                              </>
+                            ) : visit?.isFeatured?.includes(visit?._id) ? (
+                              <>
+                                <>
+                                  <Star className="w-4 h-4 text-primary fill-primary" />{" "}
+                                  Unset Featured
+                                </>
                               </>
                             ) : (
-                               <><Star className="w-4 h-4   " /> Set Featured</>
+                              <>
+                                <Star className="w-4 h-4   " /> Set Featured
+                              </>
                             )}
                           </button>
-                          <button onClick={() => {deleteVisit(visit); setSelectedVisit(visit)}} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-600 hover:bg-gray-100">
+                          <button
+                            onClick={() => {
+                              deleteVisit(visit);
+                              setSelectedVisit(visit);
+                            }}
+                            className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-600 hover:bg-gray-100"
+                          >
                             {deleting === visit?._id ? (
                               <span className="flex items-center justify-center gap-2">
-                                <Loader className="w-4 h-4 animate-spin" /> Deleting...
+                                <Loader className="w-4 h-4 animate-spin" />{" "}
+                                Deleting...
                               </span>
                             ) : (
                               <>
@@ -826,69 +1043,139 @@ let thumbnailUrl = {url: formData.thumbnail?.url || "", public_id: formData.thum
           )}
         </div>
       </div>
-      
+
       {/* Visit Details Dialog */}
-      <Dialog open={dialogOpen} onOpenChange={(open) => { if (!open) setSelectedVisit(null); setDialogOpen(open); }}>
+      <Dialog
+        open={dialogOpen}
+        onOpenChange={(open) => {
+          if (!open) setSelectedVisit(null);
+          setDialogOpen(open);
+        }}
+      >
         {selectedVisit && (
           <DialogContent className="max-h-[700px] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{selectedVisit?.community}</DialogTitle>
-              <DialogDescription>{selectedVisit?.country} • {new Date(selectedVisit?.date).toLocaleDateString('en-US')}</DialogDescription>
+              <DialogDescription>
+                {selectedVisit?.country} •{" "}
+                {new Date(selectedVisit?.date).toLocaleDateString("en-US")}
+              </DialogDescription>
             </DialogHeader>
 
             <div className="grid gap-4">
-              <img src={typeof selectedVisit?.thumbnail === 'string' ? selectedVisit?.thumbnail : selectedVisit?.thumbnail?.url} alt={selectedVisit?.community} className="w-full h-56 object-cover rounded-md" />
+              <img
+                src={
+                  typeof selectedVisit?.thumbnail === "string"
+                    ? selectedVisit?.thumbnail
+                    : selectedVisit?.thumbnail?.url
+                }
+                alt={selectedVisit?.community}
+                className="w-full h-56 object-cover rounded-md"
+              />
 
               <div>
                 <h4 className="font-semibold mb-1">Title</h4>
-                <p className="text-sm text-muted-foreground">{selectedVisit?.title}</p>
+                <p className="text-sm text-muted-foreground">
+                  {selectedVisit?.title}
+                </p>
               </div>
-              
+
               <div>
                 <h4 className="font-semibold mb-1">Summary</h4>
-                <p className="text-sm text-muted-foreground">{selectedVisit?.excerpt}</p>
+                <p className="text-sm text-muted-foreground">
+                  {selectedVisit?.excerpt}
+                </p>
               </div>
               <div>
                 <h4 className="font-semibold mb-1">Description</h4>
-                <p className="text-sm text-justify text-muted-foreground">{selectedVisit?.content}</p>
+                <p className="text-sm text-justify text-muted-foreground">
+                  {selectedVisit?.content}
+                </p>
               </div>
 
               <div className="grid grid-cols-2   gap-4">
                 <div className="">
-                  <h5 className="text-xs font-medium text-muted-foreground">Participants</h5>
+                  <h5 className="text-xs font-medium text-muted-foreground">
+                    Participants
+                  </h5>
                   <ul className="mt-2 text-sm  h-40 overflow-y-auto  space-y-1">
-                    {selectedVisit?.participants && selectedVisit?.participants.length > 0 ? (
+                    {selectedVisit?.participants &&
+                    selectedVisit?.participants.length > 0 ? (
                       selectedVisit?.participants.map((p: any, idx: number) => (
-                        <li className="flex bg-white relative rounded-md p-2 shadow-md gap-2 items-center  " key={idx}><img src={p.photo?.url || "/user.avif"} alt={p.name} className="w-12 h-12 rounded-full object-cover" />{p.name} — {p.role} {patId===p._id ? <Loader   className="w-4 h-4 font-bold animate-spin   absolute top-2 right-2 text-red-500"/>:<X onClick={()=>{removeParticipant(selectedVisit?._id,p._id)}} className="w-4 h-4 font-bold  cursor-pointer absolute top-2 right-2 text-red-500"/>}</li>
+                        <li
+                          className="flex bg-white relative rounded-md p-2 shadow-md gap-2 items-center  "
+                          key={idx}
+                        >
+                          <img
+                            src={p.photo?.url || "/user.avif"}
+                            alt={p.name}
+                            className="w-12 h-12 rounded-full object-cover"
+                          />
+                          {p.name} — {p.role}{" "}
+                          {patId === p._id ? (
+                            <Loader className="w-4 h-4 font-bold animate-spin   absolute top-2 right-2 text-red-500" />
+                          ) : (
+                            <X
+                              onClick={() => {
+                                removeParticipant(selectedVisit?._id, p._id);
+                              }}
+                              className="w-4 h-4 font-bold  cursor-pointer absolute top-2 right-2 text-red-500"
+                            />
+                          )}
+                        </li>
                       ))
                     ) : (
-                      <li className="text-muted-foreground">No participants yet</li>
+                      <li className="text-muted-foreground">
+                        No participants yet
+                      </li>
                     )}
-                    
                   </ul>
                 </div>
                 <div>
-                  <p className="text-xs font-medium text-muted-foreground">Stats</p>
+                  <p className="text-xs font-medium text-muted-foreground">
+                    Stats
+                  </p>
                   <div className="mt-2 text-sm space-y-1">
                     <div>Likes: {selectedVisit?.likes.length || 0}</div>
                     <div>Views: {selectedVisit?.views.length || 0}</div>
-                    <div>Video ID: {selectedVisit?.videoId || '—'}</div>
-                    <div>Location: {selectedVisit?.location ? `${selectedVisit?.location.lat}, ${selectedVisit?.location.long}` : '—'}</div>
+                    <div>Video ID: {selectedVisit?.videoId || "—"}</div>
+                    <div>
+                      Location:{" "}
+                      {selectedVisit?.location
+                        ? `${selectedVisit?.location.lat}, ${selectedVisit?.location.long}`
+                        : "—"}
+                    </div>
                   </div>
                 </div>
               </div>
 
               {selectedVisit?.gallery && selectedVisit?.gallery.length > 0 && (
                 <div>
-                  <p className="text-xs font-medium text-muted-foreground mb-2">Gallery</p>
+                  <p className="text-xs font-medium text-muted-foreground mb-2">
+                    Gallery
+                  </p>
                   <div className="flex gap-2 overflow-x-auto">
                     {selectedVisit?.gallery.map((g: any, i: number) => {
-                      const src = typeof g === 'string' ? g : (g.image || g.url || '');
-                      const title = typeof g === 'string' ? '' : g.title || '';
+                      const src =
+                        typeof g === "string" ? g : g.image || g.url || "";
+                      const title = typeof g === "string" ? "" : g.title || "";
                       return (
                         <div key={i} className="flex-shrink-0 relative">
-                          <img src={src} alt={`gallery-${i}`} className="w-32 h-20 object-cover rounded-md" />
-                           {galId===g._id ? <Loader   className="w-4 h-4 font-bold animate-spin   absolute top-1 right-1 text-red-500"/>:<X onClick={()=>{removeGalleryImage(selectedVisit?._id,g._id)}} className="w-4 h-4 font-bold  cursor-pointer absolute top-1 right-1 text-red-500"/>}
+                          <img
+                            src={src}
+                            alt={`gallery-${i}`}
+                            className="w-32 h-20 object-cover rounded-md"
+                          />
+                          {galId === g._id ? (
+                            <Loader className="w-4 h-4 font-bold animate-spin   absolute top-1 right-1 text-red-500" />
+                          ) : (
+                            <X
+                              onClick={() => {
+                                removeGalleryImage(selectedVisit?._id, g._id);
+                              }}
+                              className="w-4 h-4 font-bold  cursor-pointer absolute top-1 right-1 text-red-500"
+                            />
+                          )}
                         </div>
                       );
                     })}
@@ -899,8 +1186,23 @@ let thumbnailUrl = {url: formData.thumbnail?.url || "", public_id: formData.thum
 
             <DialogFooter>
               <div className="flex gap-2">
-                <Button onClick={() => { editVisit(selectedVisit); setDialogOpen(false); }}>Edit</Button>
-                <Button variant="outline" onClick={() => { toggleFeatured(selectedVisit); setDialogOpen(false); }}>Set Featured</Button>
+                <Button
+                  onClick={() => {
+                    editVisit(selectedVisit);
+                    setDialogOpen(false);
+                  }}
+                >
+                  Edit
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    toggleFeatured(selectedVisit);
+                    setDialogOpen(false);
+                  }}
+                >
+                  Set Featured
+                </Button>
               </div>
             </DialogFooter>
           </DialogContent>
@@ -912,10 +1214,12 @@ let thumbnailUrl = {url: formData.thumbnail?.url || "", public_id: formData.thum
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Add Gallery Item</DialogTitle>
-            <DialogDescription>{selectedVisit ? selectedVisit?.community : ""}</DialogDescription>
+            <DialogDescription>
+              {selectedVisit ? selectedVisit?.community : ""}
+            </DialogDescription>
           </DialogHeader>
 
-          <form   className="grid gap-4">
+          <form className="grid gap-4">
             {/* Dropzone */}
             <div
               onDragEnter={handleGalleryDrag}
@@ -940,9 +1244,13 @@ let thumbnailUrl = {url: formData.thumbnail?.url || "", public_id: formData.thum
                 <ImageIcon className="w-8 h-8 text-muted-foreground" />
                 <div>
                   <p className="font-medium text-sm">
-                    {galleryDragActive ? "Drop image here" : "Drag image or click to upload"}
+                    {galleryDragActive
+                      ? "Drop image here"
+                      : "Drag image or click to upload"}
                   </p>
-                  <p className="text-xs text-muted-foreground">PNG, JPG, GIF up to 10MB</p>
+                  <p className="text-xs text-muted-foreground">
+                    PNG, JPG, GIF up to 10MB
+                  </p>
                 </div>
               </div>
             </div>
@@ -950,7 +1258,9 @@ let thumbnailUrl = {url: formData.thumbnail?.url || "", public_id: formData.thum
             {/* Preview */}
             {selectedGalleryImage && (
               <div className="rounded-lg overflow-hidden">
-                <p className="text-sm font-medium text-muted-foreground mb-2">Preview</p>
+                <p className="text-sm font-medium text-muted-foreground mb-2">
+                  Preview
+                </p>
                 <img
                   src={selectedGalleryImage}
                   alt="gallery-preview"
@@ -961,13 +1271,22 @@ let thumbnailUrl = {url: formData.thumbnail?.url || "", public_id: formData.thum
 
             <DialogFooter>
               <div className="flex gap-2">
-                <Button onClick={()=>{handleGallerySubmit(selectedVisit?._id)}} type="submit" disabled={!selectedGalleryImage || saving  }>
-                  {saving ? <span className="flex items-center justify-center gap-2">Saving... <Loader className="w-4 h-4 animate-spin"/></span> : "Save"}
-                </Button>
                 <Button
-                  variant="outline"
-                  onClick={() => setGalleryOpen(false)}
+                  onClick={() => {
+                    handleGallerySubmit(selectedVisit?._id);
+                  }}
+                  type="submit"
+                  disabled={!selectedGalleryImage || saving}
                 >
+                  {saving ? (
+                    <span className="flex items-center justify-center gap-2">
+                      Saving... <Loader className="w-4 h-4 animate-spin" />
+                    </span>
+                  ) : (
+                    "Save"
+                  )}
+                </Button>
+                <Button variant="outline" onClick={() => setGalleryOpen(false)}>
                   Cancel
                 </Button>
               </div>
@@ -980,47 +1299,121 @@ let thumbnailUrl = {url: formData.thumbnail?.url || "", public_id: formData.thum
       <Dialog open={formOpen} onOpenChange={(open) => setFormOpen(open)}>
         <DialogContent className="max-h-[800px] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{formData.id ? "Edit Visit" : "Add Visit"}</DialogTitle>
-            <DialogDescription>{formData.community || "Create a new community visit"}</DialogDescription>
+            <DialogTitle>
+              {formData.id ? "Edit Visit" : "Add Visit"}
+            </DialogTitle>
+            <DialogDescription>
+              {formData.community || "Create a new community visit"}
+            </DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleFormSubmit} className="grid gap-4">
-            <Input placeholder="Community" value={formData.community} onChange={(e) => handleFormChange('community', e.target.value)} />
-            <Input placeholder="Title" value={formData.title} onChange={(e) => handleFormChange('title', e.target.value)} />
-            <Input placeholder="Country" value={formData.country} onChange={(e) => handleFormChange('country', e.target.value)} />
-            <Input type="date" value={formData.date} onChange={(e) => handleFormChange('date', e.target.value)} />
+            <Input
+              placeholder="Community"
+              value={formData.community}
+              onChange={(e) => handleFormChange("community", e.target.value)}
+            />
+            <Input
+              placeholder="Title"
+              value={formData.title}
+              onChange={(e) => handleFormChange("title", e.target.value)}
+            />
+            <Input
+              placeholder="Country"
+              value={formData.country}
+              onChange={(e) => handleFormChange("country", e.target.value)}
+            />
+            <Input
+              type="date"
+              value={formData.date}
+              onChange={(e) => handleFormChange("date", e.target.value)}
+            />
             <div className="flex items-center gap-2">
-              <Input placeholder="Thumbnail URL or upload" value={formData.thumbnail.url} onChange={(e) => handleFormChange('thumbnail', e.target.value)} />
-              <input ref={fileInputRef} type="file" accept="image/*" onChange={onFileInputChange} className="hidden" />
-              <Button type="button" onClick={() => fileInputRef.current?.click()}>Upload</Button>
+              <Input
+                placeholder="Thumbnail URL or upload"
+                value={formData.thumbnail.url}
+                onChange={(e) => handleFormChange("thumbnail", e.target.value)}
+              />
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={onFileInputChange}
+                className="hidden"
+              />
+              <Button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                Upload
+              </Button>
             </div>
-            
 
             {/* Preview for uploaded image */}
             {(selectedImagePreview || formData.thumbnail?.url) && (
               <div className="pt-2">
-                <p className="text-sm font-medium text-muted-foreground mb-2">Thumbnail Preview</p>
-                <img src={selectedImagePreview || formData.thumbnail?.url} alt="thumbnail-preview" className="w-48 h-32 object-cover rounded-md" />
+                <p className="text-sm font-medium text-muted-foreground mb-2">
+                  Thumbnail Preview
+                </p>
+                <img
+                  src={selectedImagePreview || formData.thumbnail?.url}
+                  alt="thumbnail-preview"
+                  className="w-48 h-32 object-cover rounded-md"
+                />
               </div>
             )}
-            <Input placeholder="Video ID" value={formData.videoId} onChange={(e) => handleFormChange('videoId', e.target.value)} />
-            <Textarea placeholder="Excerpt / Summary" value={formData.excerpt} onChange={(e) => handleFormChange('excerpt', e.target.value)} />
+            <Input
+              placeholder="Video ID"
+              value={formData.videoId}
+              onChange={(e) => handleFormChange("videoId", e.target.value)}
+            />
+            <Textarea
+              placeholder="Excerpt / Summary"
+              value={formData.excerpt}
+              onChange={(e) => handleFormChange("excerpt", e.target.value)}
+            />
 
-            <Textarea className="min-h-[300px] max-h-[300px]" placeholder="Full content / Description" value={formData.content} onChange={(e) => handleFormChange('content', e.target.value)} />
+            <Textarea
+              className="min-h-[300px] max-h-[300px]"
+              placeholder="Full content / Description"
+              value={formData.content}
+              onChange={(e) => handleFormChange("content", e.target.value)}
+            />
             <div className="flex items-center gap-3">
               <div className="flex-1 grid grid-cols-2 gap-2">
-                <Input placeholder="Location Lat" value={formData.location?.lat} onChange={(e) => handleFormChange('locationLat', e.target.value)} />
-                <Input placeholder="Location Long" value={formData.location?.long} onChange={(e) => handleFormChange('locationLong', e.target.value)} />
+                <Input
+                  placeholder="Location Lat"
+                  value={formData.location?.lat}
+                  onChange={(e) =>
+                    handleFormChange("locationLat", e.target.value)
+                  }
+                />
+                <Input
+                  placeholder="Location Long"
+                  value={formData.location?.long}
+                  onChange={(e) =>
+                    handleFormChange("locationLong", e.target.value)
+                  }
+                />
               </div>
               <div className="flex items-center gap-2">
-                <Switch checked={useCurrentLocation} onCheckedChange={(v: any) => handleUseCurrentLocationChange(!!v)} />
+                <Switch
+                  checked={useCurrentLocation}
+                  onCheckedChange={(v: any) =>
+                    handleUseCurrentLocationChange(!!v)
+                  }
+                />
                 <span className="text-sm">Use current location</span>
               </div>
             </div>
-            
+
             <div>
               <label className="block text-sm mb-1">Status</label>
-              <select value={formData.status} onChange={(e) => handleFormChange('status', e.target.value)} className="w-full rounded-md border p-2">
+              <select
+                value={formData.status}
+                onChange={(e) => handleFormChange("status", e.target.value)}
+                className="w-full rounded-md border p-2"
+              >
                 <option value="upcoming">Upcoming</option>
                 <option value="visited">Visited</option>
               </select>
@@ -1028,8 +1421,18 @@ let thumbnailUrl = {url: formData.thumbnail?.url || "", public_id: formData.thum
 
             <DialogFooter>
               <div className="flex gap-2">
-                <Button type="submit">{saving ? <span className="flex items-center justify-center gap-2">Saving... <Loader className="w-4 h-4 animate-spin"/></span> : "Save"}</Button>
-                <Button variant="outline" onClick={() => setFormOpen(false)}>Cancel</Button>
+                <Button type="submit">
+                  {saving ? (
+                    <span className="flex items-center justify-center gap-2">
+                      Saving... <Loader className="w-4 h-4 animate-spin" />
+                    </span>
+                  ) : (
+                    "Save"
+                  )}
+                </Button>
+                <Button variant="outline" onClick={() => setFormOpen(false)}>
+                  Cancel
+                </Button>
               </div>
             </DialogFooter>
           </form>
@@ -1037,75 +1440,168 @@ let thumbnailUrl = {url: formData.thumbnail?.url || "", public_id: formData.thum
       </Dialog>
 
       {/* Participants Dialog */}
-      <Dialog open={participantsOpen} onOpenChange={(open) => setParticipantsOpen(open)}>
+      <Dialog
+        open={participantsOpen}
+        onOpenChange={(open) => setParticipantsOpen(open)}
+      >
         <DialogContent className="max-h-[600px] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editingParticipantId ? "Edit Participant" : "Add Participant"}</DialogTitle>
-            <DialogDescription>{selectedVisit ? selectedVisit?.community : ""}</DialogDescription>
+            <DialogTitle>
+              {editingParticipantId ? "Edit Participant" : "Add Participant"}
+            </DialogTitle>
+            <DialogDescription>
+              {selectedVisit ? selectedVisit?.community : ""}
+            </DialogDescription>
           </DialogHeader>
 
           {/* existing participants list */}
-          {selectedVisit?.participants && selectedVisit?.participants.length > 0 && (
-            <div className="space-y-2 mb-4">
-              {selectedVisit?.participants.map((p: any) => (
-                <div key={p._id || p.phone || Math.random()} className="flex items-center justify-between p-2 border rounded">
-                  <div className="flex items-center gap-2">
-                    <img
-                      src={p.photo?.url || "/user.avif"}
-                      className="w-10 h-10 rounded-full object-cover"
-                    />
-                    <div>
-                      <div className="font-medium">{p.name}</div>
-                      <div className="text-xs text-muted-foreground">{p.role}</div>
+          {selectedVisit?.participants &&
+            selectedVisit?.participants.length > 0 && (
+              <div className="space-y-2 mb-4">
+                {selectedVisit?.participants.map((p: any) => (
+                  <div
+                    key={p._id || p.phone || Math.random()}
+                    className="flex items-center justify-between p-2 border rounded"
+                  >
+                    <div className="flex items-center gap-2">
+                      <img
+                        src={p.photo?.url || "/user.avif"}
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+                      <div>
+                        <div className="font-medium">{p.name}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {p.role}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex gap-1">
+                      <button
+                        type="button"
+                        onClick={() => editParticipant(p)}
+                        className="text-gray-600 hover:text-gray-800"
+                        aria-label="Edit"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          selectedVisit &&
+                          removeParticipant(selectedVisit?._id, p._id)
+                        }
+                        className="text-red-600 hover:text-red-800"
+                        aria-label="Remove"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
                   </div>
-                  <div className="flex gap-1">
-                    <button
-                      type="button"
-                      onClick={() => editParticipant(p)}
-                      className="text-gray-600 hover:text-gray-800"
-                      aria-label="Edit"
-                    >
-                      <Edit className="w-4 h-4" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => selectedVisit && removeParticipant(selectedVisit?._id, p._id)}
-                      className="text-red-600 hover:text-red-800"
-                      aria-label="Remove"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
 
-          <form  className="grid gap-4">
-            <Input placeholder="Name" value={participantForm.name} onChange={(e) => setParticipantForm((p) => ({ ...p, name: e.target.value }))} />
+          <form className="grid gap-4">
+            <Input
+              placeholder="Name"
+              value={participantForm.name}
+              onChange={(e) =>
+                setParticipantForm((p) => ({ ...p, name: e.target.value }))
+              }
+            />
             {/* email field removed as per request */}
-            <Input placeholder="Phone" value={participantForm.phone} onChange={(e) => setParticipantForm((p) => ({ ...p, phone: e.target.value }))} />
-            <Input placeholder="Role" value={participantForm.role} onChange={(e) => setParticipantForm((p) => ({ ...p, role: e.target.value }))} />
-             
+            <Input
+              placeholder="Phone"
+              value={participantForm.phone}
+              onChange={(e) =>
+                setParticipantForm((p) => ({ ...p, phone: e.target.value }))
+              }
+            />
+            <Input
+              placeholder="Role"
+              value={participantForm.role}
+              onChange={(e) =>
+                setParticipantForm((p) => ({ ...p, role: e.target.value }))
+              }
+            />
 
             <div className="flex items-center gap-2">
-              <input ref={participantImageInputRef} type="file" accept="image/*" onChange={onParticipantImageInputChange} className="hidden" />
-              <Button type="button" onClick={() => participantImageInputRef.current?.click()}>Upload Image</Button>
-              <p className="text-sm text-muted-foreground">Profile photo</p>
+              <input
+                ref={participantImageInputRef}
+                type="file"
+                accept="image/*"
+                onChange={onParticipantImageInputChange}
+                className="hidden"
+              />
             </div>
 
-            {(selectedParticipantImage ) && (
-              <div>
-                <p className="text-sm font-medium text-muted-foreground mb-2">Image Preview</p>
-                <img src={selectedParticipantImage}   className="w-40 h-40 object-cover rounded-md" />
+            {/* Drag-Drop Zone */}
+            <div
+              onDragEnter={handleParticipantDrag}
+              onDragLeave={handleParticipantDrag}
+              onDragOver={handleParticipantDrag}
+              onDrop={handleParticipantDrop}
+              onClick={() => participantImageInputRef.current?.click()}
+              className={`relative border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-all ${
+                participantDragActive
+                  ? "border-primary bg-primary/10"
+                  : "border-muted-foreground/30 hover:border-primary hover:bg-primary/5"
+              }`}
+            >
+              <div className="flex flex-col items-center gap-2">
+                <ImageIcon className="w-8 h-8 text-muted-foreground" />
+                <div>
+                  <p className="font-medium text-sm">
+                    {participantDragActive
+                      ? "Drop image here"
+                      : "Drag image or click to upload"}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    PNG, JPG, GIF up to 10MB
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {selectedParticipantImage && (
+              <div className="rounded-lg overflow-hidden">
+                <p className="text-sm font-medium text-muted-foreground mb-2">
+                  Preview
+                </p>
+                <img
+                  src={selectedParticipantImage}
+                  className="w-full h-48 object-contain rounded-md"
+                />
               </div>
             )}
 
             <DialogFooter>
               <div className="flex gap-2">
-                <Button onClick={() => handleParticipantSubmit(selectedVisit?._id)} type="submit">{saving ? <span className="flex items-center justify-center gap-2">{editingParticipantId ? "Updating..." : "Adding..."} <Loader className="w-4 h-4 animate-spin"/></span> : editingParticipantId ? "Update" : "Save"}</Button>
-                <Button variant="outline" onClick={() => setParticipantsOpen(false)}>Cancel</Button>
+                <Button
+                  onClick={() => handleParticipantSubmit(selectedVisit?._id)}
+                  type="submit"
+                  disabled={
+                    (!editingParticipantId && (!selectedParticipantImage || saving)) ||
+                    (editingParticipantId && saving)
+                  }
+                >
+                  {saving ? (
+                    <span className="flex items-center justify-center gap-2">
+                      {editingParticipantId ? "Updating..." : "Adding..."}{" "}
+                      <Loader className="w-4 h-4 animate-spin" />
+                    </span>
+                  ) : editingParticipantId ? (
+                    "Update"
+                  ) : (
+                    "Save"
+                  )}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setParticipantsOpen(false)}
+                >
+                  Cancel
+                </Button>
               </div>
             </DialogFooter>
           </form>

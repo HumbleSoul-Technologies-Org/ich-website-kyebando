@@ -29,7 +29,7 @@ export default function Home() {
 
   useEffect(() => {
     if (visitsData && visitsData.length > 0) {
-      const filteredVisits = visitsData.filter((visit: any) => visit.status === "upcoming");
+      const filteredVisits = visitsData.filter((visit: any) => visit.status === "upcoming") || [];
       setVisits(filteredVisits);
       create_UUID();
     }
@@ -43,9 +43,9 @@ export default function Home() {
   const imagesPerPage = 6;
 
   // Extract all gallery images from communities
-  const allGalleryImages = visitsData.filter((visit: any) => visit.status === "visited").flatMap((community:any) => 
+  const allGalleryImages = visitsData?.filter((visit: any) => visit.status === "visited").flatMap((community:any) => 
     (community.gallery || []).map((img:any) => ({ img , community: community.title }))
-  );
+  )|| [];
 
   const totalPages = Math.ceil(allGalleryImages.length / imagesPerPage);
   const startIdx = galleryPage * imagesPerPage;
