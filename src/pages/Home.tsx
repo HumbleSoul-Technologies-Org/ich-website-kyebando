@@ -131,9 +131,9 @@ export default function Home() {
                   Join the Movement <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
               </Link>
-              <Link href="/programs">
+              <Link href="/communities">
                 <Button variant="outline" size="lg" className="text-lg px-8 py-6 rounded-xl border-2 hover:bg-secondary/5 transition-all">
-                  Explore Programs
+                  Explore Communities
                 </Button>
               </Link>
             </motion.div>

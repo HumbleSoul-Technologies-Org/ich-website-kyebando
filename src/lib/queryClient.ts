@@ -45,10 +45,22 @@ export async function apiRequest(
 ): Promise<Response> {
   checkRateLimit();
 
+  // prepare headers/body properly; support FormData by letting the browser set multipart boundary
+  const headers: Record<string, string> = {};
+  let body: BodyInit | undefined;
+
+  if (data instanceof FormData) {
+    // leave headers empty, fetch will add appropriate content-type including boundary
+    body = data;
+  } else if (data !== undefined) {
+    headers["Content-Type"] = "application/json";
+    body = JSON.stringify(data);
+  }
+
   const res = await fetch(`${BASE_URL}${url}`, {
     method,
-    headers: data ? { "Content-Type": "application/json" } : {},
-    body: data ? JSON.stringify(data) : undefined,
+    headers,
+    body,
     // Don't include credentials by default - let the backend handle CORS properly
     // credentials: "include",
   });

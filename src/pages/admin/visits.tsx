@@ -20,7 +20,6 @@ import {
   Trash2,
   Image as ImageIcon,
   Users,
-  Loader2,
   Loader,
   X,
   MessageCircle,
@@ -36,7 +35,6 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import axios from "axios";
 
 import { apiRequest } from "@/lib/queryClient";
 import { set } from "date-fns";
@@ -86,7 +84,14 @@ export default function AdminVisitsPage() {
     string | null
   >(null);
   const [galleryDragActive, setGalleryDragActive] = useState(false);
+  // participant image upload states
   const [participantDragActive, setParticipantDragActive] = useState(false);
+  const participantImageInputRef = useRef<HTMLInputElement | null>(null);
+  const [selectedParticipantImage, setSelectedParticipantImage] = useState<
+    string | null
+  >(null);
+  const [participantPhoto, setParticipantPhoto] = useState<File | null>(null);
+
   const [participantsOpen, setParticipantsOpen] = useState(false);
   const [commentsOpen, setCommentsOpen] = useState(false);
   const [selectedVisitForComments, setSelectedVisitForComments] = useState<
@@ -96,22 +101,12 @@ export default function AdminVisitsPage() {
     name: string;
     phone: string;
     role: string;
-    photo: { url: string; public_id: string };
-  }>({ name: "", phone: "", role: "", photo: { url: "", public_id: "" } });
-  // when editing an existing participant we store its id here
-  const [editingParticipantId, setEditingParticipantId] = useState<
-    string | null
-  >(null);
-  const participantImageInputRef = useRef<HTMLInputElement | null>(null);
-  const [selectedParticipantImage, setSelectedParticipantImage] = useState<
-    string | null
-  >(null);
-  const [participantPhoto, setParticipantPhoto] = useState<File | null>(null);
+  }>({ name: "", phone: "", role: "" });
   const [galleryImage, setGalleryImage] = useState<File | null>(null);
-  const [patId, setPatId] = useState<String | null>("");
   const [galId, setGalId] = useState<String | null>("");
   const [deleting, setDeleting] = useState<String | null>("");
   const [processing, setProcessing] = useState<String | null>("");
+  // const [processing, setProcessing] = useState<String | null>("");
 
   useEffect(() => {
     if (visitsData) {
@@ -256,11 +251,24 @@ export default function AdminVisitsPage() {
     setOpenMenu(null);
   };
 
+  const openParticipants = (visit: any) => {
+    setSelectedVisit(visit);
+    setParticipantForm({ name: "", phone: "", role: "" });
+    setParticipantPhoto(null);
+    setSelectedParticipantImage(null);
+    setParticipantDragActive(false);
+    if (participantImageInputRef.current) {
+      participantImageInputRef.current.value = "";
+    }
+    setParticipantsOpen(true);
+    setOpenMenu(null);
+  };
+
+  // image upload helpers for participant form
   const handleParticipantImageUpload = (file: File) => {
     const reader = new FileReader();
     reader.onload = () => {
-      const dataUrl = String(reader.result || "");
-      setSelectedParticipantImage(dataUrl);
+      setSelectedParticipantImage(String(reader.result || ""));
     };
     reader.readAsDataURL(file);
   };
@@ -297,24 +305,48 @@ export default function AdminVisitsPage() {
     }
   };
 
-  const openParticipants = (visit: any) => {
-    setSelectedVisit(visit);
-    // prepare form for adding a new participant
-    setParticipantForm({
-      name: "",
-      phone: "",
-      role: "",
-      photo: { url: "", public_id: "" },
-    });
-    setEditingParticipantId(null);
-    setSelectedParticipantImage(null);
-    setParticipantPhoto(null);
-    setParticipantDragActive(false);
-    if (participantImageInputRef.current) {
-      participantImageInputRef.current.value = "";
+  const handleParticipantSubmit = async (visitId: string) => {
+    if (!visitId) return;
+    setSaving(true);
+    try {
+      const payload: any = {
+        name: participantForm.name,
+        phone: participantForm.phone,
+        role: participantForm.role,
+      };
+      if (participantPhoto) {
+        const photoData = await uploadFileToServer(participantPhoto);
+        payload.photo = photoData;
+      }
+      await apiRequest("POST", `/visits/add/participant/${visitId}`, payload);
+      setVisits((prev) =>
+        prev.map((v) =>
+          getVisitId(v) === visitId
+            ? { ...v, participants: [...(v.participants || []), payload] }
+            : v
+        )
+      );
+      // reset image states
+      setParticipantPhoto(null);
+      setSelectedParticipantImage(null);
+      setParticipantDragActive(false);
+
+      toast({
+        title: "Participant added",
+        description: "Participant has been added successfully",
+      });
+      setParticipantForm({ name: "", phone: "", role: "" });
+      setParticipantsOpen(false);
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "Failed to save participant",
+        description: "Could not save participant",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
     }
-    setParticipantsOpen(true);
-    setOpenMenu(null);
   };
 
   const openComments = (visit: any) => {
@@ -336,123 +368,12 @@ export default function AdminVisitsPage() {
     }
   }
 
-  const handleParticipantSubmit = async (visitId: string) => {
-    setSaving(true);
-    try {
-      // require an image on new participants
-      if (!editingParticipantId && !participantPhoto) {
-        alert("Please select a profile photo before saving");
-        setSaving(false);
-        return;
-      }
 
-      // prepare photo data using existing form value or a new upload
-      let photoData = participantForm.photo || { url: "", public_id: "" };
-      if (participantPhoto) {
-        const photoUrl = await uploadFileToServer(participantPhoto as File);
-        console.log("cloudinary upload result:", photoUrl);
-        photoData = {
-          url: photoUrl.url || photoUrl.secure_url || "",
-          public_id: photoUrl.public_id || photoUrl.asset_id || "",
-        };
-        setParticipantForm((p) => ({ ...p, photo: photoData }));
-      }
 
-      const payload: any = {
-        name: participantForm.name || "",
-        phone: participantForm.phone || "",
-        role: participantForm.role || "",
-        photo: photoData,
-      };
-
-      console.log("participant payload:", payload);
-
-      if (editingParticipantId) {
-        // update existing participant on server (backend may reuse add endpoint)
-        await apiRequest("POST", `/visits/add/participant/${visitId}`, payload);
-        // update local state copies without overriding photo if not returned
-        setVisits((prev) =>
-          prev.map((v) =>
-            getVisitId(v) === visitId
-              ? {
-                  ...v,
-                  participants: v.participants.map((p: any) =>
-                    p._id === editingParticipantId ? { ...p, ...payload } : p,
-                  ),
-                }
-              : v,
-          ),
-        );
-        setSelectedVisit((prev: any) =>
-          prev
-            ? {
-                ...prev,
-                participants: prev.participants.map((p: any) =>
-                  p._id === editingParticipantId ? { ...p, ...payload } : p,
-                ),
-              }
-            : prev,
-        );
-        toast({
-          title: "Participant updated",
-          description: "Participant has been updated successfully",
-        });
-      } else {
-        // create a new participant
-          await apiRequest(
-          "POST",
-          `/visits/add/participant/${visitId}`,
-          payload,
-        );
-        const newParticipant = { ...payload };
-        setVisits((prev) =>
-          prev.map((v) =>
-            getVisitId(v) === visitId
-              ? {
-                  ...v,
-                  participants: [...(v.participants || []), newParticipant],
-                }
-              : v,
-          ),
-        );
-        setSelectedVisit((prev: any) =>
-          prev
-            ? {
-                ...prev,
-                participants: [...(prev.participants || []), newParticipant],
-              }
-            : prev,
-        );
-        toast({
-          title: "Participant added",
-          description: "Participant has been added successfully",
-        });
-      }
-
-      // reset form state
-      setParticipantsOpen(false);
-      setOpenMenu(null);
-      setParticipantPhoto(null);
-      setSelectedParticipantImage(null);
-      setParticipantDragActive(false);
-      setEditingParticipantId(null);
-      if (participantImageInputRef.current) {
-        participantImageInputRef.current.value = "";
-      }
-    } catch (error) {
-      console.error(error);
-      toast({
-        title: "Failed to save participant",
-        description: "Could not save participant details",
-        variant: "destructive",
-      });
-    } finally {
-      setSaving(false);
-    }
-  };
+  // old participant removal/edit helpers removed - only simple creation is supported now
 
   const removeParticipant = async (visitId: string, participantId: string) => {
-    setPatId(participantId);
+    setProcessing(participantId);
     try {
       await apiRequest("POST", `/visits/remove/participant/${visitId}`, {
         participantId,
@@ -489,24 +410,10 @@ export default function AdminVisitsPage() {
         variant: "destructive",
       });
     } finally {
-      setPatId(null);
+      setProcessing(null);
     }
   };
 
-  // prepare form for editing an existing participant
-  const editParticipant = (participant: any) => {
-    setEditingParticipantId(participant._id || null);
-    setParticipantForm({
-      name: participant.name || "",
-      phone: participant.phone || "",
-      role: participant.role || "",
-      photo: participant.photo || { url: "", public_id: "" },
-    });
-    setSelectedParticipantImage(participant.photo?.url || null);
-    setParticipantPhoto(null); // user can choose new file later
-    setParticipantsOpen(true);
-    setOpenMenu(null);
-  };
   const removeGalleryImage = async (visitId: string, galleryId: string) => {
     setGalId(galleryId);
     try {
@@ -609,16 +516,12 @@ export default function AdminVisitsPage() {
     try {
       const formData = new FormData();
       formData.append("image", file);
-      const { data } = await axios.post(
-        `${import.meta.env.VITE_API_URL}/visits/upload/image`,
-        formData,
-      );
-
+      const res = await apiRequest("POST", "/visits/upload/image", formData);
+      const data = await res.json();
       return data;
-    } catch (error: any) {
-      console.error("Image upload error:", error);
-      const errorMessage = error.response?.data?.message || error.message || "Image upload failed";
-      throw new Error(errorMessage);
+    } catch (error) {
+      console.error("uploadFileToServer error:", error);
+      return { url: "", public_id: "" };
     }
   };
 
@@ -1134,7 +1037,7 @@ export default function AdminVisitsPage() {
                     selectedVisit?.participants.length > 0 ? (
                       selectedVisit?.participants.map((p: any, idx: number) => (
                         <li
-                          className="flex bg-white relative rounded-md p-2 shadow-md gap-2 items-center  "
+                          className="flex bg-white relative rounded-md p-2 shadow-md gap-2 items-center"
                           key={idx}
                         >
                           <img
@@ -1142,15 +1045,13 @@ export default function AdminVisitsPage() {
                             alt={p.name}
                             className="w-12 h-12 rounded-full object-cover"
                           />
-                          {p.name} — {p.role}{" "}
-                          {patId === p._id ? (
-                            <Loader className="w-4 h-4 font-bold animate-spin   absolute top-2 right-2 text-red-500" />
+                          {p.name} — {p.role}
+                          {processing === p._id ? (
+                            <Loader className="w-4 h-4 font-bold animate-spin   absolute top-1 right-1 text-red-500" />
                           ) : (
                             <X
-                              onClick={() => {
-                                removeParticipant(selectedVisit?._id, p._id);
-                              }}
-                              className="w-4 h-4 font-bold  cursor-pointer absolute top-2 right-2 text-red-500"
+                              onClick={() => removeParticipant(selectedVisit?._id, p?._id)}
+                              className="w-4 h-4 text-red-600 absolute top-1 right-1 cursor-pointer"
                             />
                           )}
                         </li>
@@ -1477,60 +1378,13 @@ export default function AdminVisitsPage() {
       >
         <DialogContent className="max-h-[600px] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>
-              {editingParticipantId ? "Edit Participant" : "Add Participant"}
-            </DialogTitle>
+            <DialogTitle>Add Participant</DialogTitle>
             <DialogDescription>
               {selectedVisit ? selectedVisit?.community : ""}
             </DialogDescription>
           </DialogHeader>
 
-          {/* existing participants list */}
-          {selectedVisit?.participants &&
-            selectedVisit?.participants.length > 0 && (
-              <div className="space-y-2 mb-4">
-                {selectedVisit?.participants.map((p: any) => (
-                  <div
-                    key={p._id || p.phone || Math.random()}
-                    className="flex items-center justify-between p-2 border rounded"
-                  >
-                    <div className="flex items-center gap-2">
-                      <img
-                        src={p.photo?.url || "/user.avif"}
-                        className="w-10 h-10 rounded-full object-cover"
-                      />
-                      <div>
-                        <div className="font-medium">{p.name}</div>
-                        <div className="text-xs text-muted-foreground">
-                          {p.role}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex gap-1">
-                      <button
-                        type="button"
-                        onClick={() => editParticipant(p)}
-                        className="text-gray-600 hover:text-gray-800"
-                        aria-label="Edit"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          selectedVisit &&
-                          removeParticipant(selectedVisit?._id, p._id)
-                        }
-                        className="text-red-600 hover:text-red-800"
-                        aria-label="Remove"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+
 
           <form className="grid gap-4">
             <Input
@@ -1556,17 +1410,7 @@ export default function AdminVisitsPage() {
               }
             />
 
-            <div className="flex items-center gap-2">
-              <input
-                ref={participantImageInputRef}
-                type="file"
-                accept="image/*"
-                onChange={onParticipantImageInputChange}
-                className="hidden"
-              />
-            </div>
-
-            {/* Drag-Drop Zone */}
+            {/* image dropzone */}
             <div
               onDragEnter={handleParticipantDrag}
               onDragLeave={handleParticipantDrag}
@@ -1579,6 +1423,13 @@ export default function AdminVisitsPage() {
                   : "border-muted-foreground/30 hover:border-primary hover:bg-primary/5"
               }`}
             >
+              <input
+                ref={participantImageInputRef}
+                type="file"
+                accept="image/*"
+                onChange={onParticipantImageInputChange}
+                className="hidden"
+              />
               <div className="flex flex-col items-center gap-2">
                 <ImageIcon className="w-8 h-8 text-muted-foreground" />
                 <div>
@@ -1606,23 +1457,19 @@ export default function AdminVisitsPage() {
               </div>
             )}
 
+
+
+
+
+
+
             <DialogFooter>
               <div className="flex gap-2">
                 <Button
                   onClick={() => handleParticipantSubmit(selectedVisit?._id)}
-                  type="submit"
-                  
+                  disabled={saving || !participantForm.name}
                 >
-                  {saving ? (
-                    <span className="flex items-center justify-center gap-2">
-                      {editingParticipantId ? "Updating..." : "Adding..."}{" "}
-                      <Loader className="w-4 h-4 animate-spin" />
-                    </span>
-                  ) : editingParticipantId ? (
-                    "Update"
-                  ) : (
-                    "Save"
-                  )}
+                  {saving ? "Saving..." : "Save"}
                 </Button>
                 <Button
                   variant="outline"
