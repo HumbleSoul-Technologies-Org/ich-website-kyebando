@@ -23,6 +23,7 @@ import {
   Loader2,
   Loader,
   X,
+  MessageCircle,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
@@ -87,6 +88,10 @@ export default function AdminVisitsPage() {
   const [galleryDragActive, setGalleryDragActive] = useState(false);
   const [participantDragActive, setParticipantDragActive] = useState(false);
   const [participantsOpen, setParticipantsOpen] = useState(false);
+  const [commentsOpen, setCommentsOpen] = useState(false);
+  const [selectedVisitForComments, setSelectedVisitForComments] = useState<
+    any | null
+  >(null);
   const [participantForm, setParticipantForm] = useState<{
     name: string;
     phone: string;
@@ -106,7 +111,7 @@ export default function AdminVisitsPage() {
   const [patId, setPatId] = useState<String | null>("");
   const [galId, setGalId] = useState<String | null>("");
   const [deleting, setDeleting] = useState<String | null>("");
-  const [processing, setProcessing] = useState(false);
+  const [processing, setProcessing] = useState<String | null>("");
 
   useEffect(() => {
     if (visitsData) {
@@ -311,6 +316,25 @@ export default function AdminVisitsPage() {
     setParticipantsOpen(true);
     setOpenMenu(null);
   };
+
+  const openComments = (visit: any) => {
+    setSelectedVisitForComments(visit);
+    setCommentsOpen(true);
+    setOpenMenu(null);
+  };
+
+  const deleteComment = async (commentId: string) => { 
+    try {
+      setProcessing(commentId);
+      await apiRequest("POST", `/comments/remove/comment/${commentId}`);
+    } catch (error) {
+      console.log('====================================');
+      console.log(error);
+      console.log('====================================');
+    } finally { 
+      setProcessing(null);
+    }
+  }
 
   const handleParticipantSubmit = async (visitId: string) => {
     setSaving(true);
@@ -678,7 +702,7 @@ export default function AdminVisitsPage() {
   };
 
   const toggleFeatured = async (visit: any) => {
-    setProcessing(true);
+    setProcessing(visit?._id);
     try {
       await apiRequest("POST", `/visits/featured/${visit?._id}`);
       setVisits((prev) =>
@@ -698,7 +722,7 @@ export default function AdminVisitsPage() {
         variant: "destructive",
       });
     } finally {
-      setProcessing(false);
+      setProcessing(null);
     }
   };
 
@@ -1014,6 +1038,13 @@ export default function AdminVisitsPage() {
                                 <Star className="w-4 h-4   " /> Set Featured
                               </>
                             )}
+                          </button>
+                          <button
+                            onClick={() => openComments(visit)}
+                            className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-800 hover:bg-gray-100"
+                          >
+                            <MessageCircle className="w-4 h-4" /> Comments (
+                            {visit?.comments ? visit?.comments.length : 0})
                           </button>
                           <button
                             onClick={() => {
@@ -1580,10 +1611,7 @@ export default function AdminVisitsPage() {
                 <Button
                   onClick={() => handleParticipantSubmit(selectedVisit?._id)}
                   type="submit"
-                  disabled={
-                    (!editingParticipantId && (!selectedParticipantImage || saving)) ||
-                    (editingParticipantId && saving)
-                  }
+                  
                 >
                   {saving ? (
                     <span className="flex items-center justify-center gap-2">
@@ -1605,6 +1633,85 @@ export default function AdminVisitsPage() {
               </div>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Comments Dialog */}
+      <Dialog
+        open={commentsOpen}
+        onOpenChange={(open) => setCommentsOpen(open)}
+      >
+        <DialogContent className="max-h-[600px] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Comments</DialogTitle>
+            <DialogDescription>
+              {selectedVisitForComments
+                ? selectedVisitForComments?.community
+                : ""}
+            </DialogDescription>
+          </DialogHeader>
+
+          {/* comments list */}
+          {selectedVisitForComments?.comments &&
+            selectedVisitForComments?.comments.length > 0 ? (
+            <div className="space-y-4">
+              {selectedVisitForComments?.comments.map((comment: any,i:number) => (
+                <div
+                  key={i}
+                  className="p-3 relative border rounded-lg bg-gray-50"
+                >
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <div className="flex items-center gap-2">
+                      <img
+                        src={  "/user.avif"}
+                        alt={comment.name}
+                        className="w-8 h-8 rounded-full object-cover"
+                      />
+                      <div>
+                        <p className="font-medium text-sm">{comment.name || "Anonymous"}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {comment.createdAt
+                            ? new Date(comment.createdAt).toLocaleDateString(
+                                "en-US",
+                                {
+                                  year: "numeric",
+                                  month: "short",
+                                  day: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                }
+                              )
+                            : "Just now"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-sm text-justify text-gray-700 whitespace-pre-wrap">
+                    {comment.comment }
+                  </p>
+                  {processing === comment._id ? (
+                    <div className="absolute top-2 right-2">
+                      <Loader className="w-4 h-4 animate-spin text-red-500" />
+                    </div>
+                      ) : <Trash2 onClick={() => deleteComment(comment._id)} className="w-4 h-4 absolute top-2 right-2 cursor-pointer text-red-600"/>}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <MessageCircle className="w-12 h-12 text-muted-foreground/50 mx-auto mb-2" />
+              <p className="text-muted-foreground">No comments yet</p>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setCommentsOpen(false)}
+            >
+              Close
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </AdminLayout>

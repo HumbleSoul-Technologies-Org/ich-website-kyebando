@@ -27,7 +27,6 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { blogsData } from "@/lib/mockData";
 import {
   Dialog,
   DialogContent,
@@ -73,6 +72,11 @@ export default function AdminBlogsPage() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [publishing, setPublishing] = useState<string | null>(null);
+  const [commentsOpen, setCommentsOpen] = useState(false);
+  const [selectedBlogForComments, setSelectedBlogForComments] = useState<
+    any | null
+  >(null);
+  const [deletingComment, setDeletingComment] = useState<string | null>(null);
   // const [blogsLoading, setblogsLoading] = useState<boolean | null>(false);
 
   // Close menu when clicking outside
@@ -189,6 +193,12 @@ export default function AdminBlogsPage() {
     setOpenMenu(null);
   };
 
+  const openComments = (blog: any) => {
+    setSelectedBlogForComments(blog);
+    setCommentsOpen(true);
+    setOpenMenu(null);
+  };
+
   const handleFormSubmit = async (e: any) => {
     e.preventDefault();
     setSaving(true);
@@ -299,6 +309,50 @@ export default function AdminBlogsPage() {
     } finally {
       setPublishing(null);
       setOpenMenu(null);
+    }
+  };
+
+  const deleteComment = async (commentId: string) => {
+    setDeletingComment(commentId);
+    try {
+      const blogId = getBlogId(selectedBlogForComments);
+      await apiRequest("DELETE", `/blogs/${blogId}/comments/${commentId}`);
+      
+      // Update the selected blog for comments
+      setSelectedBlogForComments((prev: any) =>
+        prev
+          ? {
+              ...prev,
+              comments: prev.comments.filter((c: any) => c._id !== commentId),
+            }
+          : prev,
+      );
+      
+      // Update the blogs list
+      setBlogs((prev) =>
+        prev.map((b) =>
+          getBlogId(b) === blogId
+            ? {
+                ...b,
+                comments: b.comments.filter((c: any) => c._id !== commentId),
+              }
+            : b,
+        ),
+      );
+      
+      toast({
+        title: "Comment deleted",
+        description: "Comment has been deleted successfully",
+      });
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "Failed to delete comment",
+        description: "Could not delete comment",
+        variant: "destructive",
+      });
+    } finally {
+      setDeletingComment(null);
     }
   };
 
@@ -466,15 +520,8 @@ export default function AdminBlogsPage() {
 
                         <div className="pt-2 border-t border-white/20">
                           <p className="text-xs text-white/70">
-                            {blog?.publishDate
-                              ? new Date(blog.publishDate).toLocaleDateString(
-                                  "en-US",
-                                  {
-                                    year: "numeric",
-                                    month: "long",
-                                    day: "numeric",
-                                  },
-                                )
+                            {blog?.publishedOn
+                              ? <span>Published on: {new Date(blog.publishedOn).toLocaleDateString()}</span>
                               : "Not published"}
                           </p>
                           {blog.tags && blog.tags.length > 0 && (
@@ -565,7 +612,8 @@ export default function AdminBlogsPage() {
                             >
                               <Edit className="w-4 h-4" /> Edit
                             </button>
-                            <button
+                            {blog.status !== "published" && (
+                              <button
                               onClick={(e) => {
                                 e.stopPropagation();
                                 publishBlog(blog);
@@ -578,6 +626,16 @@ export default function AdminBlogsPage() {
                                 <CheckCircle className="w-4 h-4" />
                               )}
                               Publish
+                            </button>)}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openComments(blog);
+                              }}
+                              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-800 hover:bg-gray-100"
+                            >
+                              <MessageCircle className="w-4 h-4" /> Comments (
+                              {blog?.comments ? blog?.comments.length : 0})
                             </button>
                             <button
                               onClick={(e) => {
@@ -619,8 +677,8 @@ export default function AdminBlogsPage() {
               <DialogTitle>{selectedBlog.title}</DialogTitle>
               <DialogDescription>
                 {selectedBlog.author} •{" "}
-                {selectedBlog.publishDate
-                  ? new Date(selectedBlog.publishDate).toLocaleDateString(
+                {selectedBlog.publishedOn
+                  ? new Date(selectedBlog.publishedOn).toLocaleDateString(
                       "en-US",
                     )
                   : "Not published"}
@@ -814,6 +872,92 @@ export default function AdminBlogsPage() {
               </div>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Comments Dialog */}
+      <Dialog
+        open={commentsOpen}
+        onOpenChange={(open) => setCommentsOpen(open)}
+      >
+        <DialogContent className="max-h-[600px] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Comments</DialogTitle>
+            <DialogDescription>
+              {selectedBlogForComments ? selectedBlogForComments?.title : ""}
+            </DialogDescription>
+          </DialogHeader>
+
+          {/* comments list */}
+          {selectedBlogForComments?.comments &&
+            selectedBlogForComments?.comments.length > 0 ? (
+            <div className="space-y-4">
+              {selectedBlogForComments?.comments.map((comment: any) => (
+                <div
+                  key={comment._id || Math.random()}
+                  className="p-3 border rounded-lg bg-gray-50"
+                >
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <div className="flex items-center gap-2 flex-1">
+                      <img
+                        src={comment.user?.avatar || "/user.avif"}
+                        alt={comment.user?.name || comment.name}
+                        className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">
+                          {comment.user?.name || comment.name || "Anonymous"}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {comment.createdAt
+                            ? new Date(comment.createdAt).toLocaleDateString(
+                                "en-US",
+                                {
+                                  year: "numeric",
+                                  month: "short",
+                                  day: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                }
+                              )
+                            : "Just now"}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => deleteComment(comment._id)}
+                      disabled={deletingComment === comment._id}
+                      className="text-red-600 hover:text-red-800 hover:bg-red-50 p-1 rounded flex-shrink-0"
+                      aria-label="Delete comment"
+                    >
+                      {deletingComment === comment._id ? (
+                        <Loader className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="w-4 h-4" />
+                      )}
+                    </button>
+                  </div>
+                  <p className="text-sm text-gray-700 whitespace-pre-wrap break-words">
+                    {comment.text || comment.content}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <MessageCircle className="w-12 h-12 text-muted-foreground/50 mx-auto mb-2" />
+              <p className="text-muted-foreground">No comments yet</p>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setCommentsOpen(false)}
+            >
+              Close
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </AdminLayout>

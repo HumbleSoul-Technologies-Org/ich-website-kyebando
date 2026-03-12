@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
+import { useQuery } from "@tanstack/react-query";
+import { useState,useEffect } from "react";
 
 // simple button component that triggers logout helper and closes sidebar
 function LogoutButton({ onClose }: { onClose: () => void }) {
@@ -42,13 +44,33 @@ interface AdminSidebarProps {
 export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
   const [location] = useLocation();
 
+  const [messages, setMessages] = useState<any[]>([]);
+  const {data:messagesData} = useQuery<any[]>({
+    queryKey: ["messages",'all'],
+  });
+
+  useEffect(() => {
+    if (messagesData) {
+      setMessages(messagesData);
+    }
+   }, [messagesData]);
+   
   const adminItems = [
     {
       href: "/admin",
       label: "Dashboard",
       icon: <LayoutDashboard className="w-5 h-5" />,
     },
-    
+    // {
+    //   href: "/admin/analytics",
+    //   label: "Analytics",
+    //   icon: <BarChart3 className="w-5 h-5" />,
+    // },
+    // {
+    //   href: "/admin/programs",
+    //   label: "Programs",
+    //   icon: <BookOpen className="w-5 h-5" />,
+    // },
     {
       href: "/admin/visits",
       label: "Visits",
@@ -69,11 +91,7 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
       label: "Messages",
       icon: <MessageSquare className="w-5 h-5" />,
     },
-    // {
-    //   href: "/admin/notifications",
-    //   label: "Notifications",
-    //   icon: <Bell className="w-5 h-5" />,
-    // },
+     
     // {
     //   href: "/admin/settings",
     //   label: "Settings",
@@ -161,6 +179,8 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
               <p className="text-xs font-semibold text-muted-foreground uppercase px-3 mb-3">
                 Admin
               </p>
+
+             
               <div className="space-y-2">
                 {adminItems.map((item) => (
                   <Link key={item.href} href={item.href}>
@@ -172,8 +192,12 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
                           : "text-muted-foreground hover:bg-muted-foreground/10"
                       }`}
                     >
-                      {item.icon}
-                      <span className="font-medium">{item.label}</span>
+                      
+                      {item.icon}<span className="font-medium">{item.label}</span> {item.label === "Messages" && messages.filter((m) => !m.isRead).length > 0  && (
+                        <span className="ml-auto inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-secondary rounded-full">
+                         
+                        </span>
+                      )}
                     </a>
                   </Link>
                 ))}
