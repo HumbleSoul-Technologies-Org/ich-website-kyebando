@@ -59,6 +59,8 @@ export default function Communities() {
   const upcomingVisitsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    document.title = "Community Impact - Innovation Community Hub";
+     window.scrollTo({ top: 0, behavior: "smooth" });
     if (visitsData) {
       const mapped = visitsData.map((v: any) => ({
         id: v._id,
@@ -80,7 +82,7 @@ export default function Communities() {
       setIsLoading(false);
     }
 
-    window.scrollTo({ top: 0, behavior: "smooth" });
+   
     create_UUID();
   }, [visitsData]);
 

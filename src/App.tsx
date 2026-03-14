@@ -18,6 +18,8 @@ import TalentDiscovery from "@/pages/TalentDiscovery";
 import GetInvolved from "@/pages/GetInvolved";
 import Login from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
+import PrivacyPolicy from "@/pages/PrivacyPolicy";
+import TermsOfService from "@/pages/TermsOfService";
 import { RequireAuth } from "@/components/auth/RequireAuth"; // route guard
 
 // Admin Pages
@@ -132,6 +134,8 @@ function Router() {
       <Route path="/blog/:id" component={BlogPost} />
       <Route path="/blog" component={Blog} />
       <Route path="/contact" component={GetInvolved} />
+      <Route path="/privacy-policy" component={PrivacyPolicy} />
+      <Route path="/terms-of-service" component={TermsOfService} />
 
       <Route component={NotFound} />
     </Switch>

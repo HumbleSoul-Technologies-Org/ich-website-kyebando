@@ -63,6 +63,7 @@ export default function GetInvolved() {
   };
 
   useEffect(() => {
+    document.title = "Contact Us - Innovation Community Hub";
     window.scrollTo(0, 0);
   }, []);
 

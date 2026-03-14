@@ -74,7 +74,8 @@ export default function Blog() {
   
   
   const [blogs,setBlogs] = useState<any[]>([]);
-    useEffect(() => {
+  useEffect(() => {
+      document.title = "News, Impact & Feedback - Innovation Community Hub";
       window.scrollTo(0, 0);
       if (blogData) {
           const filteredBlogs = blogData.filter((blog: any) => blog.status === "published");
