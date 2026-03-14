@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -11,58 +11,70 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { messages as mockMessages } from "@/lib/mockData";
 import { Send, Search, MailOpen, Archive, Loader2, Trash2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { set } from "date-fns";
 import { apiRequest } from "@/lib/queryClient";
 import { motion } from "framer-motion";
 
 
+// --- Types --------------------------------------------------------------
+
+type MessageReply = {
+  reply?: string;
+  repliedOn?: string;
+};
+
+type Message = {
+  _id: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  subject?: string;
+  message: string;
+  createdAt: string;
+  isRead: boolean;
+  isArchived: boolean;
+  reply?: MessageReply;
+};
+
 export default function AdminMessagesPage() {
-  const [messages, setMessages] = useState<any[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const { toast } = useToast();
-  const [selectedConversation, setSelectedConversation] = useState<any>(null);
+  const [selectedConversation, setSelectedConversation] = useState<Message | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [messageFilter, setMessageFilter] = useState<
-      "new" | "read" | "replied" | "archived"
-  >("new");
+  const [messageFilter, setMessageFilter] = useState<"new" | "read" | "replied" | "archived">("new");
   const [replyText, setReplyText] = useState("");
   const [replyLoading, setReplyLoading] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
 
-  const { data: messageData, isLoading: loadingMessages } = useQuery<any>({
-    queryKey: ["messages","all"],
-  })
+  const { data: messageData, isLoading: loadingMessages } = useQuery<Message[]>({
+    queryKey: ["messages", "all"],
+  });
 
   useEffect(() => {
-     if (messageData) {
+    if (messageData) {
       setMessages(messageData);
-     }
+    }
   }, [messageData]);
 
-  const filteredMessages = messages.filter((msg) => {
-    // Filter by search term
-    if (
-      searchTerm &&
-      !msg.name.toLowerCase().includes(searchTerm.toLowerCase())
-    ) {
-      return false;
-    }
+  const filteredMessages = useMemo(() => {
+    return messages.filter((msg) => {
+      // Search by name or subject
+      if (searchTerm) {
+        const search = searchTerm.toLowerCase();
+        const matchName = msg.name?.toLowerCase().includes(search);
+        const matchSubject = msg.subject?.toLowerCase().includes(search);
+        if (!matchName && !matchSubject) return false;
+      }
 
-    // Filter by message status
-    if (messageFilter === "new") {
-      return !msg.isRead;
-    } else if (messageFilter === "read") {
-      return msg.isRead && !msg.isArchived;
-    } else if (messageFilter === "replied") {
-      return msg.reply?.reply && msg.reply.reply.length > 0;
-    } else if (messageFilter === "archived") {
-      return msg.isArchived;
-    }
+      // Filter by status tags
+      if (messageFilter === "new") return !msg.isRead;
+      if (messageFilter === "read") return msg.isRead && !msg.isArchived;
+      if (messageFilter === "replied") return !!msg.reply?.reply?.length;
+      if (messageFilter === "archived") return msg.isArchived;
 
-    return true;
-  });
+      return true;
+    });
+  }, [messages, searchTerm, messageFilter]);
 
   if (loadingMessages) {
     return (
@@ -125,16 +137,23 @@ export default function AdminMessagesPage() {
     }
   }
 
-  const handleSendReply = async () => { 
-    try {
-      if (!replyText.trim() || !selectedConversation) return;
-      setReplyLoading(true);
+  const handleSendReply = async () => {
+    if (!replyText.trim() || !selectedConversation) {
+      return;
+    }
 
-      await apiRequest('POST', `/messages/${selectedConversation._id}/reply`, { reply: replyText });
+    setReplyLoading(true);
+    try {
+      await apiRequest("POST", `/messages/${selectedConversation._id}/reply`, {
+        reply: replyText,
+      });
+
       setMessages((prev) =>
         prev.map((msg) =>
-          msg._id === selectedConversation._id ? { ...msg, reply: { ...msg.reply, reply: replyText } } : msg,
-        )
+          msg._id === selectedConversation._id
+            ? { ...msg, reply: { ...msg.reply, reply: replyText } }
+            : msg,
+        ),
       );
       setReplyText("");
       toast({
@@ -142,9 +161,9 @@ export default function AdminMessagesPage() {
         description: "Your reply has been sent successfully",
       });
     } catch (error) {
-      console.log('====================================');
+      console.log("====================================");
       console.log(error);
-      console.log('====================================');
+      console.log("====================================");
       toast({
         title: "Failed to send reply",
         description: "Could not send your reply",
@@ -153,7 +172,7 @@ export default function AdminMessagesPage() {
     } finally {
       setReplyLoading(false);
     }
-  }
+  };
   const handleDeleteMessage = async (msgId: string) => {
     try {
       await apiRequest('DELETE', `/messages/${msgId}/delete`);
@@ -359,11 +378,13 @@ export default function AdminMessagesPage() {
                         <p className="text-sm">
                           {selectedConversation.reply.reply}
                         </p>
-                        <p className="text-xs mt-2 opacity-80">
-                          {new Date(
-                            selectedConversation.reply.repliedOn,
-                          ).toLocaleString()}
-                        </p>
+                        {selectedConversation.reply?.repliedOn ? (
+                          <p className="text-xs mt-2 opacity-80">
+                            {new Date(
+                              selectedConversation.reply.repliedOn,
+                            ).toLocaleString()}
+                          </p>
+                        ) : null}
                       </motion.div>
                     </div>
                   )}

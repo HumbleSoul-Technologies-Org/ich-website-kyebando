@@ -7,15 +7,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { motion } from "framer-motion";
 import { HandHeart, Users, Heart, CheckCircle, Clock, UserCheck, MessageSquare, ArrowRight, BookOpen, Target, Save } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { apiRequest } from "@/lib/queryClient";
 import { useQuery } from "@tanstack/react-query";
 import { v4 as uuidv4 } from 'uuid';
+import { useToast } from "@/hooks/use-toast";
 
 export default function GetInvolved() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [messageSent, setMessageSent] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+
+  const { toast } = useToast();
 
   // Form state for all input fields
   const [formData, setFormData] = useState({
@@ -25,6 +28,39 @@ export default function GetInvolved() {
     role: "",
     message: "",
   });
+
+  const validateForm = () => {
+    const errors: string[] = [];
+
+    if (!formData.name.trim()) {
+      errors.push("Name is required.");
+    }
+
+    if (!formData.email.trim()) {
+      errors.push("Email is required.");
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      errors.push("Please enter a valid email address.");
+    }
+
+    if (!formData.role) {
+      errors.push("Please select a role.");
+    }
+
+    if (!formData.message.trim()) {
+      errors.push("Message is required.");
+    }
+
+    if (errors.length) {
+      toast({
+        title: "Fix the form fields",
+        description: errors.join(" "),
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    return true;
+  };
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -50,7 +86,13 @@ export default function GetInvolved() {
   };
 
   
-  const sendMessage = async () => {
+  const sendMessage = async (event?: FormEvent) => {
+    event?.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
     try {
       setIsSubmitting(true);
       await apiRequest('POST', '/messages/volunteers/create', formData);
@@ -125,7 +167,7 @@ export default function GetInvolved() {
                 <>
                   <h2 className="font-display text-3xl font-bold mb-8">Get Started</h2>
 
-              <form className="space-y-6">
+              <form className="space-y-6" onSubmit={sendMessage}>
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="name">Full Name</Label>
@@ -188,7 +230,7 @@ export default function GetInvolved() {
                 </div>
 
                 <Button
-                  onClick={sendMessage}
+                  type="submit"
                   disabled={isSubmitting}
                   size="lg"
                   className="w-full md:w-auto font-bold"

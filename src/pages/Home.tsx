@@ -232,7 +232,7 @@ export default function Home() {
       </section>
 
       {/* Upcoming Visits Section */}
-      <section className="py-24 bg-background">
+     { visits && visits.length > 0 && ( <section className="py-24 bg-background">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-2xl mx-auto mb-16">
             <h2 className="font-display text-3xl md:text-4xl font-bold mb-4">Upcoming Visits</h2>
@@ -276,10 +276,11 @@ export default function Home() {
             ))}
           </div>
         </div>
-      </section>
+      </section>)}
 
       {/* Gallery Section */}
-      <section className="py-24 bg-white">
+      {allGalleryImages && allGalleryImages.length > 0 && (
+         <section className="py-24 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-2xl mx-auto mb-16">
             <h2 className="font-display text-3xl md:text-4xl font-bold mb-4">Gallery Showcasing Our Journey</h2>
@@ -414,6 +415,7 @@ export default function Home() {
         </div>
       </section>
 
+     )}
       {/* Image Modal */}
       <Dialog open={isImageModalOpen} onOpenChange={setIsImageModalOpen}>
         <DialogContent className="w-full max-w-2xl sm:max-w-4xl p-0 border-0 rounded-lg overflow-hidden">

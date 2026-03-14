@@ -53,13 +53,29 @@ export default function BlogPost() {
       setUUID(newUUID);
     }
   }
-  
+
+  const validateComment = () => {
+    if (!commentText.trim()) {
+      toast({
+        title: "Comment is required",
+        description: "Please type something before posting.",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    return true;
+  };
   
  async function handleAddComment(e: React.FormEvent) {
     e.preventDefault();
+
+    if (!validateComment()) {
+      return;
+    }
+
     setCommenting(true);
     try {
-      if (!commentText.trim()) return;
       const newComment = {
         name: name.trim() || "Anonymous",
         comment: commentText.trim(),

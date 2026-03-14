@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useRoute, Link } from "wouter";
 import NotFound from "@/pages/not-found";
-import { mockCommunities } from "@/lib/mockData";
 import { useQuery } from "@tanstack/react-query";
 import { v4 as uuidv4 } from 'uuid';
 import { useToast } from "@/hooks/use-toast";
@@ -115,15 +114,28 @@ const [match, params] = useRoute("/visits/:id");
       }
     }
 
+  const validateComment = () => {
+    if (!commentText.trim()) {
+      toast({
+        title: "Comment is required",
+        description: "Please enter a comment before posting.",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    return true;
+  };
+
   const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validateComment()) {
+      return;
+    }
+
     setCommenting(true);
     try {
-      if (!commentText.trim()) {
-        setCommenting(false);
-        return;
-      }
-
       const newComment = {
         name: name.trim() || "Anonymous",
         comment: commentText.trim(),

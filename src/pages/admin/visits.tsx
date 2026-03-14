@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -37,26 +37,80 @@ import {
 } from "@/components/ui/dialog";
 
 import { apiRequest } from "@/lib/queryClient";
-import { set } from "date-fns";
+
+// --- Types ------------------------------------------------------------------
+
+type VisitStatus = "visited" | "upcoming";
+
+type VisitThumbnail = { url: string; public_id?: string } | string | null;
+
+type VisitLocation = { lat: number; long: number };
+
+type VisitComment = {
+  _id?: string;
+  name?: string;
+  comment?: string;
+  createdAt?: string;
+};
+
+type VisitParticipant = {
+  _id?: string;
+  name?: string;
+  phone?: string;
+  role?: string;
+  photo?: { url?: string };
+};
+
+type VisitGalleryItem = {
+  _id?: string;
+  image?: string;
+  url?: string;
+  title?: string;
+};
+
+type Visit = {
+  _id?: string;
+  id?: string;
+  community?: string;
+  title?: string;
+  country?: string;
+  date?: string;
+  excerpt?: string;
+  content?: string;
+  thumbnail?: VisitThumbnail;
+  videoId?: string;
+  status?: VisitStatus | string;
+  participants?: VisitParticipant[];
+  location?: { lat?: number; long?: number };
+  gallery?: VisitGalleryItem[];
+  likes?: string[];
+  views?: string[];
+  comments?: VisitComment[];
+  isFeatured?: boolean;
+};
+
+type VisitFormValues = Omit<Visit, "location" | "thumbnail"> & {
+  thumbnail: { url: string; public_id: string };
+  location: { lat: string; long: string };
+};
 
 export default function AdminVisitsPage() {
-  const { data: visitsData, isLoading: visitsLoading } = useQuery<any>({
+  // Main component for managing community visits in the admin panel
+  // Features: CRUD operations, gallery management, participant management, comments, featured status
+  const { data: visitsData, isLoading: visitsLoading } = useQuery<Visit[]>({
     queryKey: ["visits", "all"],
   });
 
   const { toast } = useToast();
-  const [visits, setVisits] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [visits, setVisits] = useState<Visit[]>([]);
   const [saving, setSaving] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<
-    "all" | "visited" | "upcoming"
-  >("all");
-  const [openMenu, setOpenMenu] = useState<number | null>(null);
+  const [statusFilter, setStatusFilter] = useState<"all" | "visited" | "upcoming">("all");
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [selectedVisit, setSelectedVisit] = useState<any | null>(null);
+  const [selectedVisit, setSelectedVisit] = useState<Visit | null>(null);
   const [formOpen, setFormOpen] = useState(false);
-  const [formData, setFormData] = useState<any>({
+  const [formData, setFormData] = useState<VisitFormValues>({
     community: "",
     title: "",
     country: "",
@@ -95,7 +149,7 @@ export default function AdminVisitsPage() {
   const [participantsOpen, setParticipantsOpen] = useState(false);
   const [commentsOpen, setCommentsOpen] = useState(false);
   const [selectedVisitForComments, setSelectedVisitForComments] = useState<
-    any | null
+    Visit | null
   >(null);
   const [participantForm, setParticipantForm] = useState<{
     name: string;
@@ -174,11 +228,22 @@ export default function AdminVisitsPage() {
     setSaving(true);
     try {
       const image = await uploadFileToServer(galleryImage as File);
-      await apiRequest("POST", `/visits/add/gallery/${visitId}`, { image });
-      setGalleryForm({ image: { url: "", public_id: "" } });
-      setSelectedVisit((prev: any) =>
-        prev ? { ...prev, gallery: [...(prev.gallery || []), image] } : prev,
+      const res = await apiRequest("POST", `/visits/add/gallery/${visitId}`, { image });
+      const galleryItem = await res.json();
+      setSelectedVisit((prev: Visit | null) =>
+        prev ? { ...prev, gallery: [...(prev.gallery || []), galleryItem] } : prev,
       );
+      setVisits((prev) =>
+        prev.map((v) =>
+          getVisitId(v) === visitId
+            ? {
+                ...v,
+                gallery: [...(v.gallery || []), galleryItem],
+              }
+            : v,
+        ),
+      );
+      setGalleryForm({ image: { url: "", public_id: "" } });
       setGalleryOpen(false);
       setGalleryForm({ image: { url: "", public_id: "" } });
       setSelectedGalleryImage(null);
@@ -203,22 +268,21 @@ export default function AdminVisitsPage() {
     }
   };
 
-  const viewDetails = (visit: any) => {
+  const viewDetails = (visit: Visit) => {
     setSelectedVisit(visit);
     setDialogOpen(true);
     setOpenMenu(null);
   };
 
   // helper to return a unique visit identifier (handles both _id from backend and id from mock data)
-  const getVisitId = (visit: any) =>
-    visit?._id || visit?.id || `visit-${Math.random()}`;
+  const getVisitId = (visit: Visit) => visit?._id || visit?.id || `visit-${Math.random()}`;
 
-  const editVisit = (visit: any) => {
+  const editVisit = (visit: Visit) => {
     // open form populated for editing
     setFormData({
       ...visit,
       participants: visit?.participants
-        ? visit?.participants.map((p: any) => ({
+        ? visit.participants.map((p: VisitParticipant) => ({
             name: p.name || "",
             phone: p.phone || "",
             role: p.role || "",
@@ -226,10 +290,15 @@ export default function AdminVisitsPage() {
         : [],
       videoId: visit?.videoId || "",
       content: visit?.content || "",
+      thumbnail: visit?.thumbnail
+        ? typeof visit.thumbnail === "string"
+          ? { url: visit.thumbnail, public_id: "" }
+          : { url: visit.thumbnail.url || "", public_id: visit.thumbnail.public_id || "" }
+        : { url: "", public_id: "" },
       location: visit?.location
         ? {
-            lat: String(visit?.location.lat),
-            long: String(visit?.location.long),
+            lat: String(visit?.location.lat || ""),
+            long: String(visit?.location.long || ""),
           }
         : { lat: "", long: "" },
     });
@@ -239,7 +308,7 @@ export default function AdminVisitsPage() {
     setOpenMenu(null);
   };
 
-  const openGallery = (visit: any) => {
+  const openGallery = (visit: Visit) => {
     setSelectedVisit(visit);
     setGalleryForm({ image: { url: "", public_id: "" } });
     setSelectedGalleryImage(null);
@@ -251,7 +320,7 @@ export default function AdminVisitsPage() {
     setOpenMenu(null);
   };
 
-  const openParticipants = (visit: any) => {
+  const openParticipants = (visit: Visit) => {
     setSelectedVisit(visit);
     setParticipantForm({ name: "", phone: "", role: "" });
     setParticipantPhoto(null);
@@ -309,22 +378,28 @@ export default function AdminVisitsPage() {
     if (!visitId) return;
     setSaving(true);
     try {
-      const payload: any = {
+      const payload: Partial<VisitParticipant> & { photo?: any } = {
         name: participantForm.name,
         phone: participantForm.phone,
         role: participantForm.role,
       };
+
       if (participantPhoto) {
         const photoData = await uploadFileToServer(participantPhoto);
         payload.photo = photoData;
       }
-      await apiRequest("POST", `/visits/add/participant/${visitId}`, payload);
+
+      const res = await apiRequest("POST", `/visits/add/participant/${visitId}`, payload);
+      const participant = await res.json();
       setVisits((prev) =>
         prev.map((v) =>
           getVisitId(v) === visitId
-            ? { ...v, participants: [...(v.participants || []), payload] }
-            : v
-        )
+            ? {
+                ...v,
+                participants: [...(v.participants || []), participant as VisitParticipant],
+              }
+            : v,
+        ),
       );
       // reset image states
       setParticipantPhoto(null);
@@ -349,24 +424,24 @@ export default function AdminVisitsPage() {
     }
   };
 
-  const openComments = (visit: any) => {
+  const openComments = (visit: Visit) => {
     setSelectedVisitForComments(visit);
     setCommentsOpen(true);
     setOpenMenu(null);
   };
 
-  const deleteComment = async (commentId: string) => { 
+  const deleteComment = async (commentId: string) => {
     try {
       setProcessing(commentId);
       await apiRequest("POST", `/comments/remove/comment/${commentId}`);
     } catch (error) {
-      console.log('====================================');
+      console.log("====================================");
       console.log(error);
-      console.log('====================================');
-    } finally { 
+      console.log("====================================");
+    } finally {
       setProcessing(null);
     }
-  }
+  };
 
 
 
@@ -378,12 +453,12 @@ export default function AdminVisitsPage() {
       await apiRequest("POST", `/visits/remove/participant/${visitId}`, {
         participantId,
       });
-      setSelectedVisit((prev: any) => {
+      setSelectedVisit((prev) => {
         if (!prev) return prev;
         return {
           ...prev,
-          participants: prev.participants.filter(
-            (p: any) => p._id !== participantId,
+          participants: prev.participants?.filter(
+            (p) => p._id !== participantId,
           ),
         };
       });
@@ -392,8 +467,8 @@ export default function AdminVisitsPage() {
           getVisitId(v) === visitId
             ? {
                 ...v,
-                participants: v.participants.filter(
-                  (p: any) => p._id !== participantId,
+                participants: v.participants?.filter(
+                  (p) => p._id !== participantId,
                 ),
               }
             : v,
@@ -420,11 +495,11 @@ export default function AdminVisitsPage() {
       await apiRequest("POST", `/visits/remove/image/${visitId}`, {
         galleryId,
       });
-      setSelectedVisit((prev: any) => {
+      setSelectedVisit((prev) => {
         if (!prev) return prev;
         return {
           ...prev,
-          gallery: prev.gallery.filter((g: any) => g._id !== galleryId),
+          gallery: prev.gallery?.filter((g) => g._id !== galleryId),
         };
       });
       setVisits((prev) =>
@@ -432,7 +507,7 @@ export default function AdminVisitsPage() {
           getVisitId(v) === visitId
             ? {
                 ...v,
-                gallery: v.gallery.filter((g: any) => g._id !== galleryId),
+                gallery: v.gallery?.filter((g) => g._id !== galleryId),
               }
             : v,
         ),
@@ -467,6 +542,7 @@ export default function AdminVisitsPage() {
       thumbnail: { url: "", public_id: "" },
       status: "upcoming",
       participants: [],
+      location: { lat: "", long: "" },
       // ensure no _id on new entry
       _id: undefined,
     });
@@ -476,17 +552,29 @@ export default function AdminVisitsPage() {
   };
 
   const handleFormChange = (key: string, value: any) => {
-    setFormData((prev: any) => {
-      if (key === "locationLat") {
-        return { ...prev, location: { ...prev.location, lat: value } };
+    setFormData((prev) => {
+      const currentLocation = prev.location ?? { lat: "", long: "" };
+      const currentThumbnail = prev.thumbnail ?? { url: "", public_id: "" };
+
+      switch (key) {
+        case "locationLat":
+          return {
+            ...prev,
+            location: { ...currentLocation, lat: value },
+          };
+        case "locationLong":
+          return {
+            ...prev,
+            location: { ...currentLocation, long: value },
+          };
+        case "thumbnail":
+          return {
+            ...prev,
+            thumbnail: { ...currentThumbnail, url: value },
+          };
+        default:
+          return { ...prev, [key]: value };
       }
-      if (key === "locationLong") {
-        return { ...prev, location: { ...prev.location, long: value } };
-      }
-      if (key === "thumbnail") {
-        return { ...prev, thumbnail: { ...prev.thumbnail, url: value } };
-      }
-      return { ...prev, [key]: value };
     });
   };
 
@@ -525,7 +613,8 @@ export default function AdminVisitsPage() {
     }
   };
 
-  const handleFormSubmit = async (e: any) => {
+  // Handle form submission for creating or updating visits
+  const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSaving(true);
     try {
@@ -558,21 +647,22 @@ export default function AdminVisitsPage() {
 
       if (selectedVisit && selectedVisit?._id) {
         // update existing visit
-        const response = await apiRequest(
+        const res = await apiRequest(
           "PUT",
           `/visits/update/${selectedVisit?._id}`,
           payload,
         );
+        const data = await res.json();
         // merge server response if available
         setVisits((prev) =>
           prev.map((v) =>
             getVisitId(v) === getVisitId(selectedVisit)
-              ? { ...v, ...response, ...payload }
+              ? { ...v, ...data }
               : v,
           ),
         );
-        setSelectedVisit((prev: any) =>
-          prev ? { ...prev, ...response, ...payload } : prev,
+        setSelectedVisit((prev: Visit | null) =>
+          prev ? ({ ...prev, ...data } as Visit) : prev,
         );
         toast({
           title: "Visit updated",
@@ -580,8 +670,9 @@ export default function AdminVisitsPage() {
         });
       } else {
         // create new visit
-        const response = await apiRequest("POST", "/visits/create", payload);
-        setVisits((prev) => [response, ...prev]);
+        const res = await apiRequest("POST", "/visits/create", payload);
+        const data = await res.json();
+        setVisits((prev) => [data, ...prev]);
         toast({
           title: "Visit created",
           description: "New visit has been created successfully",
@@ -604,16 +695,17 @@ export default function AdminVisitsPage() {
     }
   };
 
-  const toggleFeatured = async (visit: any) => {
-    setProcessing(visit?._id);
+  // Toggle featured status of a visit
+  const toggleFeatured = async (visit: Visit) => {
+    setProcessing(visit?._id || null);
     try {
       await apiRequest("POST", `/visits/featured/${visit?._id}`);
       setVisits((prev) =>
-        prev.map((v) => ({ ...v, featured: v._id === visit?._id })),
+        prev.map((v) => ({ ...v, isFeatured: v._id === visit?._id ? !v.isFeatured : v.isFeatured })),
       );
       toast({
         title: "Featured status updated",
-        description: visit.featured
+        description: visit.isFeatured
           ? "Removed from featured"
           : "Added to featured",
       });
@@ -629,8 +721,9 @@ export default function AdminVisitsPage() {
     }
   };
 
-  const deleteVisit = async (visit: any) => {
-    setDeleting(visit?._id);
+  // Delete a visit
+  const deleteVisit = async (visit: Visit) => {
+    setDeleting(visit?._id || null);
     try {
       await apiRequest("DELETE", `/visits/delete/${visit?._id}`);
       setVisits((prev) => prev.filter((v) => v._id !== visit?._id));
@@ -650,31 +743,34 @@ export default function AdminVisitsPage() {
     }
   };
 
-  const filteredVisits = visits.filter((visit) => {
-    // Filter by status
-    if (statusFilter !== "all" && visit?.status !== statusFilter) {
-      return false;
-    }
+  // Filtered visits based on search and status filter
+  const filteredVisits = useMemo(() => {
+    return visits.filter((visit) => {
+      // Status filter
+      if (statusFilter !== "all" && visit?.status !== statusFilter) {
+        return false;
+      }
 
-    // Filter by search term (community, country, date)
-    if (searchTerm) {
+      if (!searchTerm) return true;
+
       const search = searchTerm.toLowerCase();
-      const matchCommunity = visit?.community.toLowerCase().includes(search);
-      const matchCountry = visit?.country.toLowerCase().includes(search);
-      const matchDate = new Date(visit?.date)
-        .toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        })
-        .toLowerCase()
-        .includes(search);
+      const matchCommunity = visit?.community?.toLowerCase().includes(search);
+      const matchCountry = visit?.country?.toLowerCase().includes(search);
 
-      return matchCommunity || matchCountry || matchDate;
-    }
+      const matchDate = visit?.date
+        ? new Date(visit.date)
+            .toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })
+            .toLowerCase()
+            .includes(search)
+        : false;
 
-    return true;
-  });
+      return !!(matchCommunity || matchCountry || matchDate);
+    });
+  }, [visits, searchTerm, statusFilter]);
 
   if (visitsLoading) {
     return (
@@ -822,11 +918,11 @@ export default function AdminVisitsPage() {
                           Date
                         </p>
                         <p className="text-sm">
-                          {new Date(visit?.date).toLocaleDateString("en-US", {
+                          {visit?.date ? new Date(visit.date).toLocaleDateString("en-US", {
                             year: "numeric",
                             month: "long",
                             day: "numeric",
-                          })}
+                          }) : "No date"}
                         </p>
                       </div>
 
@@ -840,7 +936,7 @@ export default function AdminVisitsPage() {
                             Participants
                           </p>
                           <p className="text-lg font-semibold">
-                            {visit?.participants.length}
+                            {visit?.participants?.length || 0}
                           </p>
                         </div>
                         <div>
@@ -848,7 +944,7 @@ export default function AdminVisitsPage() {
                             Likes
                           </p>
                           <p className="text-lg font-semibold">
-                            {visit?.likes.length || 0}
+                            {visit?.likes?.length || 0}
                           </p>
                         </div>
                         <div>
@@ -856,7 +952,7 @@ export default function AdminVisitsPage() {
                             Views
                           </p>
                           <p className="text-lg font-semibold">
-                            {visit?.views.length || 0}
+                            {visit?.views?.length || 0}
                           </p>
                         </div>
                         
@@ -929,7 +1025,7 @@ export default function AdminVisitsPage() {
                                   <Loader className="w-4 h-4 animate-spin text-primary " />
                                 </span>
                               </>
-                            ) : visit?.isFeatured?.includes(visit?._id) ? (
+                            ) : visit?.isFeatured ? (
                               <>
                                 <>
                                   <Star className="w-4 h-4 text-primary fill-primary" />{" "}
@@ -992,7 +1088,7 @@ export default function AdminVisitsPage() {
               <DialogTitle>{selectedVisit?.community}</DialogTitle>
               <DialogDescription>
                 {selectedVisit?.country} •{" "}
-                {new Date(selectedVisit?.date).toLocaleDateString("en-US")}
+                {selectedVisit?.date ? new Date(selectedVisit.date).toLocaleDateString("en-US") : "No date"}
               </DialogDescription>
             </DialogHeader>
 
@@ -1034,8 +1130,8 @@ export default function AdminVisitsPage() {
                   </h5>
                   <ul className="mt-2 text-sm  h-40 overflow-y-auto  space-y-1">
                     {selectedVisit?.participants &&
-                    selectedVisit?.participants.length > 0 ? (
-                      selectedVisit?.participants.map((p: any, idx: number) => (
+                    selectedVisit?.participants?.length > 0 ? (
+                      selectedVisit?.participants.map((p: VisitParticipant, idx: number) => (
                         <li
                           className="flex bg-white relative rounded-md p-2 shadow-md gap-2 items-center"
                           key={idx}
@@ -1050,7 +1146,7 @@ export default function AdminVisitsPage() {
                             <Loader className="w-4 h-4 font-bold animate-spin   absolute top-1 right-1 text-red-500" />
                           ) : (
                             <X
-                              onClick={() => removeParticipant(selectedVisit?._id, p?._id)}
+                              onClick={() => selectedVisit?._id && p?._id && removeParticipant(selectedVisit._id, p._id)}
                               className="w-4 h-4 text-red-600 absolute top-1 right-1 cursor-pointer"
                             />
                           )}
@@ -1068,8 +1164,8 @@ export default function AdminVisitsPage() {
                     Stats
                   </p>
                   <div className="mt-2 text-sm space-y-1">
-                    <div>Likes: {selectedVisit?.likes.length || 0}</div>
-                    <div>Views: {selectedVisit?.views.length || 0}</div>
+                    <div>Likes: {selectedVisit?.likes?.length || 0}</div>
+                    <div>Views: {selectedVisit?.views?.length || 0}</div>
                     <div>Video ID: {selectedVisit?.videoId || "—"}</div>
                     <div>
                       Location:{" "}
@@ -1087,9 +1183,8 @@ export default function AdminVisitsPage() {
                     Gallery
                   </p>
                   <div className="flex gap-2 overflow-x-auto">
-                    {selectedVisit?.gallery.map((g: any, i: number) => {
-                      const src =
-                        typeof g === "string" ? g : g.image || g.url || "";
+                    {selectedVisit?.gallery?.map((g: VisitGalleryItem, i: number) => {
+                      const src = typeof g === "string" ? g : g.image || g.url || "";
                       const title = typeof g === "string" ? "" : g.title || "";
                       return (
                         <div key={i} className="flex-shrink-0 relative">
@@ -1102,9 +1197,7 @@ export default function AdminVisitsPage() {
                             <Loader className="w-4 h-4 font-bold animate-spin   absolute top-1 right-1 text-red-500" />
                           ) : (
                             <X
-                              onClick={() => {
-                                removeGalleryImage(selectedVisit?._id, g._id);
-                              }}
+                              onClick={() => selectedVisit?._id && g._id && removeGalleryImage(selectedVisit._id!, g._id!)}
                               className="w-4 h-4 font-bold  cursor-pointer absolute top-1 right-1 text-red-500"
                             />
                           )}
@@ -1204,9 +1297,7 @@ export default function AdminVisitsPage() {
             <DialogFooter>
               <div className="flex gap-2">
                 <Button
-                  onClick={() => {
-                    handleGallerySubmit(selectedVisit?._id);
-                  }}
+                  onClick={() => selectedVisit?._id && handleGallerySubmit(selectedVisit._id)}
                   type="submit"
                   disabled={!selectedGalleryImage || saving}
                 >
@@ -1331,8 +1422,8 @@ export default function AdminVisitsPage() {
               <div className="flex items-center gap-2">
                 <Switch
                   checked={useCurrentLocation}
-                  onCheckedChange={(v: any) =>
-                    handleUseCurrentLocationChange(!!v)
+                  onCheckedChange={(v: boolean) =>
+                    handleUseCurrentLocationChange(v)
                   }
                 />
                 <span className="text-sm">Use current location</span>
@@ -1466,7 +1557,7 @@ export default function AdminVisitsPage() {
             <DialogFooter>
               <div className="flex gap-2">
                 <Button
-                  onClick={() => handleParticipantSubmit(selectedVisit?._id)}
+                  onClick={() => selectedVisit?._id && handleParticipantSubmit(selectedVisit._id)}
                   disabled={saving || !participantForm.name}
                 >
                   {saving ? "Saving..." : "Save"}
@@ -1502,7 +1593,7 @@ export default function AdminVisitsPage() {
           {selectedVisitForComments?.comments &&
             selectedVisitForComments?.comments.length > 0 ? (
             <div className="space-y-4">
-              {selectedVisitForComments?.comments.map((comment: any,i:number) => (
+              {selectedVisitForComments?.comments.map((comment: VisitComment, i: number) => (
                 <div
                   key={i}
                   className="p-3 relative border rounded-lg bg-gray-50"
@@ -1540,7 +1631,7 @@ export default function AdminVisitsPage() {
                     <div className="absolute top-2 right-2">
                       <Loader className="w-4 h-4 animate-spin text-red-500" />
                     </div>
-                      ) : <Trash2 onClick={() => deleteComment(comment._id)} className="w-4 h-4 absolute top-2 right-2 cursor-pointer text-red-600"/>}
+                      ) : comment._id ? <Trash2 onClick={() => deleteComment(comment._id!)} className="w-4 h-4 absolute top-2 right-2 cursor-pointer text-red-600"/> : null}
                 </div>
               ))}
             </div>

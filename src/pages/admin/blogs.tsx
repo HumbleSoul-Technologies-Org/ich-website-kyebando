@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -16,7 +16,6 @@ import {
   MoreVertical,
   Edit,
   Trash2,
-  Image as ImageIcon,
   Loader,
   Eye,
   CheckCircle,
@@ -38,25 +37,72 @@ import {
 import axios from "axios";
 
 import { apiRequest } from "@/lib/queryClient";
-import { set } from "date-fns";
+
+// --- Types --------------------------------------------------------------
+
+type BlogStatus = "draft" | "published";
+
+type BlogThumbnail =
+  | { url: string; public_id?: string }
+  | string
+  | null
+  | undefined;
+
+type BlogComment = {
+  _id?: string;
+  text?: string;
+  content?: string;
+  user?: { name?: string; avatar?: string };
+  name?: string;
+  createdAt?: string;
+};
+
+type Blog = {
+  _id?: string;
+  id?: string;
+  title?: string;
+  author?: string;
+  excerpt?: string;
+  content?: string;
+  thumbnail?: BlogThumbnail;
+  status?: BlogStatus | number | string;
+  publishDate?: string;
+  publishedOn?: string;
+  videoId?: string;
+  tags?: string[];
+  likes?: any[];
+  comments?: BlogComment[];
+  views?: any[];
+  shares?: any[];
+};
+
+type BlogFormValues = Partial<Blog> & {
+  thumbnail: { url: string; public_id: string };
+};
+
+const getBlogId = (blog: Blog): string => blog._id || blog.id || `blog-${Math.random()}`;
+
+const getThumbnailUrl = (thumbnail: BlogThumbnail) => {
+  if (!thumbnail) return "";
+  return typeof thumbnail === "string" ? thumbnail : thumbnail.url;
+};
 
 export default function AdminBlogsPage() {
-    const { data: blogsData, isLoading: blogsLoading } = useQuery<any>({
-      queryKey: ["blogs", "all"],
-    });
+  const { data: blogsData, isLoading: blogsLoading } = useQuery<Blog[]>({
+    queryKey: ["blogs", "all"],
+  });
 
+  // --- Local state --------------------------------------------------------
   const { toast } = useToast();
-  const [blogs, setBlogs] = useState<any[]>(blogsData || []);
+  const [blogs, setBlogs] = useState<Blog[]>(blogsData || []);
   const [saving, setSaving] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<
-    "all" | "draft" | "published"
-  >("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | "draft" | "published">("all");
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [selectedBlog, setSelectedBlog] = useState<any | null>(null);
+  const [selectedBlog, setSelectedBlog] = useState<Blog | null>(null);
   const [formOpen, setFormOpen] = useState(false);
-  const [formData, setFormData] = useState<any>({
+  const [formData, setFormData] = useState<BlogFormValues>({
     title: "",
     author: "",
     excerpt: "",
@@ -66,16 +112,12 @@ export default function AdminBlogsPage() {
     videoId: "",
   });
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const [selectedImagePreview, setSelectedImagePreview] = useState<
-    string | null
-  >(null);
+  const [selectedImagePreview, setSelectedImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [publishing, setPublishing] = useState<string | null>(null);
   const [commentsOpen, setCommentsOpen] = useState(false);
-  const [selectedBlogForComments, setSelectedBlogForComments] = useState<
-    any | null
-  >(null);
+  const [selectedBlogForComments, setSelectedBlogForComments] = useState<Blog | null>(null);
   const [deletingComment, setDeletingComment] = useState<string | null>(null);
   // const [blogsLoading, setblogsLoading] = useState<boolean | null>(false);
 
@@ -145,14 +187,19 @@ export default function AdminBlogsPage() {
   };
 
   const handleFormChange = (key: string, value: any) => {
-    setFormData((prev: any) => {
-      if (key === "featuredImage") {
-        return {
-          ...prev,
-          featuredImage: { ...prev.featuredImage, url: value },
-        };
+    setFormData((prev) => {
+      switch (key) {
+        case "thumbnailUrl":
+          return {
+            ...prev,
+            thumbnail: {
+              url: value,
+              public_id: prev.thumbnail?.public_id || "",
+            },
+          };
+        default:
+          return { ...prev, [key]: value };
       }
-      return { ...prev, [key]: value };
     });
   };
 
@@ -173,14 +220,25 @@ export default function AdminBlogsPage() {
     setFormOpen(true);
   };
 
-  const editBlog = (blog: any) => {
+  const editBlog = (blog: Blog) => {
     setSelectedBlog(blog);
+
+    const normalizedThumbnail =
+      typeof blog.thumbnail === "string"
+        ? { url: blog.thumbnail, public_id: "" }
+        : {
+            url: blog.thumbnail?.url || "",
+            public_id: blog.thumbnail?.public_id || "",
+          };
+
     setFormData({
       ...blog,
+      thumbnail: normalizedThumbnail,
       publishDate: blog.publishDate
         ? new Date(blog.publishDate).toISOString().split("T")[0]
         : "",
     });
+
     setSelectedImage(null);
     setSelectedImagePreview(null);
     setFormOpen(true);
@@ -225,15 +283,19 @@ export default function AdminBlogsPage() {
 
       if (formData._id) {
         // update
-        const response = await apiRequest("PUT", `/blogs/update/${formData._id}`, payload);
+        const response: any = await apiRequest(
+          "PUT",
+          `/blogs/update/${formData._id}`,
+          payload,
+        );
         setBlogs((prev) =>
           prev.map((b) =>
-            getBlogId(b) === formData._id ? { ...b, ...response, ...payload } : b,
+            getBlogId(b) === formData._id ? ({ ...b, ...response, ...payload } as Blog) : b,
           ),
         );
         // if we were viewing details, refresh that too
-        setSelectedBlog((prev: any) =>
-          prev ? { ...prev, ...response, ...payload } : prev,
+        setSelectedBlog((prev) =>
+          prev ? ({ ...prev, ...response, ...payload } as Blog) : prev,
         );
         toast({
           title: "Blog updated",
@@ -241,8 +303,8 @@ export default function AdminBlogsPage() {
         });
       } else {
         // create
-        const response = await apiRequest("POST", "/blogs/create", payload);
-        setBlogs((prev) => [response, ...prev]);
+        const response: any = await apiRequest("POST", "/blogs/create", payload);
+        setBlogs((prev) => [response as Blog, ...prev]);
         toast({
           title: "Blog created",
           description: "New blog post has been created successfully",
@@ -306,6 +368,11 @@ export default function AdminBlogsPage() {
       });
     } catch (error) {
       console.error(error);
+      toast({
+        title: "Failed to publish",
+        description: "Could not publish the blog post.",
+        variant: "destructive",
+      });
     } finally {
       setPublishing(null);
       setOpenMenu(null);
@@ -334,7 +401,7 @@ export default function AdminBlogsPage() {
           getBlogId(b) === blogId
             ? {
                 ...b,
-                comments: b.comments.filter((c: any) => c._id !== commentId),
+                comments: b.comments?.filter((c: any) => c._id !== commentId) || [],
               }
             : b,
         ),
@@ -356,24 +423,22 @@ export default function AdminBlogsPage() {
     }
   };
 
-  const filteredBlogs = blogs.filter((blog) => {
-    if (statusFilter !== "all" && blog.status !== statusFilter) {
-      return false;
-    }
+  const filteredBlogs = useMemo(() => {
+    return blogs.filter((blog) => {
+      if (statusFilter !== "all" && blog.status !== statusFilter) {
+        return false;
+      }
 
-    if (searchTerm) {
+      if (!searchTerm) return true;
+
       const search = searchTerm.toLowerCase();
-      const matchTitle = blog.title.toLowerCase().includes(search);
-      const matchAuthor = blog.author.toLowerCase().includes(search);
-      const matchTags = blog.tags?.some((t: string) =>
-        t.toLowerCase().includes(search),
-      );
+      const matchTitle = blog.title?.toLowerCase().includes(search);
+      const matchAuthor = blog.author?.toLowerCase().includes(search);
+      const matchTags = blog.tags?.some((t) => t.toLowerCase().includes(search));
 
-      return matchTitle || matchAuthor || matchTags;
-    }
-
-    return true;
-  });
+      return !!(matchTitle || matchAuthor || matchTags);
+    });
+  }, [blogs, searchTerm, statusFilter]);
 
   if (blogsLoading) {
     return (
@@ -484,7 +549,7 @@ export default function AdminBlogsPage() {
                     {/* Featured Image */}
                     <div className="absolute inset-0 z-0">
                       <img
-                        src={blog?.thumbnail?.url}
+                        src={getThumbnailUrl(blog?.thumbnail)}
                         alt={blog.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
@@ -684,14 +749,11 @@ export default function AdminBlogsPage() {
                   : "Not published"}
               </DialogDescription>
             </DialogHeader>
+            
 
             <div className="grid gap-4">
               <img
-                src={
-                  typeof selectedBlog.thumbnail === "string"
-                    ? selectedBlog.thumbnail
-                    : selectedBlog.thumbnail?.url
-                }
+                src={getThumbnailUrl(selectedBlog.thumbnail)}
                 alt={selectedBlog.title}
                 className="w-full h-48 object-cover rounded-md"
               />
@@ -785,9 +847,7 @@ export default function AdminBlogsPage() {
               <Input
                 placeholder="Featured Image URL or upload"
                 value={formData.thumbnail?.url}
-                onChange={(e) =>
-                  handleFormChange("featuredImage", e.target.value)
-                }
+                onChange={(e) => handleFormChange("thumbnailUrl", e.target.value)}
               />
               <input
                 ref={fileInputRef}
@@ -811,7 +871,7 @@ export default function AdminBlogsPage() {
                   Thumbnail Preview
                 </p>
                 <img
-                  src={selectedImagePreview || formData.featuredImage?.url}
+                  src={selectedImagePreview || formData.thumbnail?.url}
                   alt="featured-preview"
                   className="w-48 h-32 object-cover rounded-md"
                 />
@@ -892,9 +952,9 @@ export default function AdminBlogsPage() {
           {selectedBlogForComments?.comments &&
             selectedBlogForComments?.comments.length > 0 ? (
             <div className="space-y-4">
-              {selectedBlogForComments?.comments.map((comment: any) => (
+              {selectedBlogForComments?.comments.map((comment: any, idx: number) => (
                 <div
-                  key={comment._id || Math.random()}
+                  key={comment._id ?? idx}
                   className="p-3 border rounded-lg bg-gray-50"
                 >
                   <div className="flex items-start justify-between gap-2 mb-2">

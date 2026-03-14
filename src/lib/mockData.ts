@@ -44,6 +44,30 @@ export const testimonials = [
                 community: "OMR Community Center"
               }
 ]
+
+export const mockCommunities = [
+  {
+    id: "comm-1",
+    community: "Kamwocha",
+    location: { lat: 0.0, lng: 0.0 },
+    country: "Uganda",
+    excerpt: "Sample community overview",
+    date: "2026-03-01T00:00:00Z",
+    status: "active",
+    thumbnail: "https://via.placeholder.com/200",
+  },
+];
+
+export const messages = [
+  {
+    _id: "msg-1",
+    name: "Jane Doe",
+    isRead: false,
+    isArchived: false,
+    reply: { reply: "" },
+    createdAt: "2026-03-01T12:00:00Z",
+  },
+];
             
 export const patners = [
               { name: "BTM", logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQH7Xb_BNApPiBvR_GfckVuRLf-xl0qUF8l3w&s" },

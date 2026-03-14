@@ -9,6 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader, Loader2 } from "lucide-react";
 import { useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 const loginSchema = z.object({
   username: z.string().min(1, "Username is required"),
@@ -18,6 +19,7 @@ const loginSchema = z.object({
 export default function Login() {
   const { login, user, isInitializing, isLoading } = useAuth();
   const [_, setLocation] = useLocation();
+  const { toast } = useToast();
 
   useEffect(() => {
     if (user) {
@@ -37,7 +39,31 @@ export default function Login() {
     },
   });
 
-  const onSubmit = async (data: z.infer<typeof loginSchema>) => {
+  const validateForm = () => {
+    const errors = form.formState.errors;
+    if (errors.username) {
+      toast({
+        title: "Validation Error",
+        description: errors.username.message || "Username is required",
+        variant: "destructive",
+      });
+      return false;
+    }
+    if (errors.password) {
+      toast({
+        title: "Validation Error",
+        description: errors.password.message || "Password is required",
+        variant: "destructive",
+      });
+      return false;
+    }
+    return true;
+  };
+
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+    const data = form.getValues();
     await login(data);
   };
 
@@ -55,7 +81,7 @@ export default function Login() {
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={onSubmit} className="space-y-4">
               <FormField
                 control={form.control}
                 name="username"
