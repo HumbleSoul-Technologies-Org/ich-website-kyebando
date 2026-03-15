@@ -50,9 +50,7 @@ export function AdminLayout({ children, showNavbar = true }: AdminLayoutProps) {
     try {
       await apiRequest('POST', `/notifications/${notId}/seen`);
     } catch (error) {
-      console.log('====================================');
-      console.log(error);
-      console.log('====================================');
+      console.error("Error marking notification as read:", error);
     }
   }
 

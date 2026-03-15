@@ -40,7 +40,7 @@ export default function Home() {
     document.title = "Innovation Community Hub - Empowering Communities Through Innovation";
     if (visitsData && visitsData.length > 0) {
       const filteredVisits =
-        visitsData.filter((visit: any) => visit.status === "upcoming") || [];
+        visitsData?.filter((visit: any) => visit.status === "upcoming") || [];
       setVisits(filteredVisits);
       create_UUID();
     }

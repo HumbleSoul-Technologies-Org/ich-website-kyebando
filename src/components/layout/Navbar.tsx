@@ -23,12 +23,12 @@ export function Navbar() {
     
 
     if (blogData && blogData.length > 0) {
-      const filteredBlogs = blogData.filter((blog: any) => blog.status === "published");
+      const filteredBlogs = blogData?.filter((blog: any) => blog.status === "published");
       setBlogs(filteredBlogs);
     }
 
     if (visitsData && visitsData.length > 0) {
-      const filteredVisits = visitsData.filter((visit: any) => visit.status === "upcoming");
+      const filteredVisits = visitsData?.filter((visit: any) => visit.status === "upcoming");
       setVisits(filteredVisits);
     }
 
