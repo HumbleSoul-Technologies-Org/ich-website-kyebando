@@ -22,14 +22,14 @@ export function Navbar() {
     window.addEventListener("scroll", handleScroll);
     
 
-    if (blogData && blogData.length > 0) {
-      const filteredBlogs = blogData?.filter((blog: any) => blog.status === "published") || [];
+    if (blogData && Array.isArray(blogData) && blogData.length > 0) {
+      const filteredBlogs = blogData.filter((blog: any) => blog.status === "published");
       setBlogs(filteredBlogs);
       
     }
 
-    if (visitsData && visitsData.length > 0) {
-      const filteredVisits = visitsData?.filter((visit: any) => visit.status === "upcoming") || [];
+    if (visitsData && Array.isArray(visitsData) && visitsData.length > 0) {
+      const filteredVisits = visitsData.filter((visit: any) => visit.status === "upcoming");
       setVisits(filteredVisits);
        
     }

@@ -77,7 +77,7 @@ export default function Blog() {
   useEffect(() => {
       document.title = "News, Impact & Feedback - Innovation Community Hub";
       window.scrollTo(0, 0);
-      if (blogData) {
+      if (blogData && Array.isArray(blogData)) {
           const filteredBlogs = blogData.filter((blog: any) => blog.status === "published");
           setBlogs(filteredBlogs);
       }

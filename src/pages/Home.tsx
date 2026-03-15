@@ -38,14 +38,10 @@ export default function Home() {
 
   useEffect(() => {
     document.title = "Innovation Community Hub - Empowering Communities Through Innovation";
-    if (visitsData && visitsData.length > 0) {
-      const filteredVisits =
-        visitsData?.filter((visit: any) => visit.status === "upcoming") || [];
+    if (visitsData && Array.isArray(visitsData) && visitsData.length > 0) {
+      const filteredVisits = visitsData.filter((visit: any) => visit.status === "upcoming");
       setVisits(filteredVisits);
-
-      console.log('====================================');
-      console.log(filteredVisits);
-      console.log('====================================');
+ 
       create_UUID();
     }
   }, [visitsData]);
@@ -57,15 +53,16 @@ export default function Home() {
   const imagesPerPage = 6;
 
   // Extract all gallery images from communities
-  const allGalleryImages =
-    visitsData
-      ?.filter((visit: any) => visit.status === "visited")
-      .flatMap((community: any) =>
-        (community.gallery || []).map((img: any) => ({
-          img,
-          community: community.title,
-        })),
-      ) || [];
+  const allGalleryImages = Array.isArray(visitsData)
+    ? visitsData
+        .filter((visit: any) => visit.status === "visited")
+        .flatMap((community: any) =>
+          (community.gallery || []).map((img: any) => ({
+            img,
+            community: community.title,
+          })),
+        )
+    : [];
 
   const totalPages = Math.ceil(allGalleryImages.length / imagesPerPage);
   const startIdx = galleryPage * imagesPerPage;

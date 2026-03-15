@@ -61,7 +61,7 @@ export default function Communities() {
   useEffect(() => {
     document.title = "Community Impact - Innovation Community Hub";
      window.scrollTo({ top: 0, behavior: "smooth" });
-    if (visitsData) {
+    if (visitsData && Array.isArray(visitsData)) {
       const mapped = visitsData.map((v: any) => ({
         id: v._id,
         name: v.title,
