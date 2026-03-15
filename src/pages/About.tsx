@@ -15,13 +15,16 @@ import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 export default function About() {
-  const { data: staffData } = useQuery<any>({ queryKey: ["staff", 'all'] });
+  const { data: staffData } = useQuery<any>({ queryKey: ["staff", "all"] });
   
-  const [staff, setStaff] = useState([]);
-  useEffect(() => { 
+  const [staff, setStaff] = useState<any[]>([]);
+  useEffect(() => {
     window.scrollTo(0, 0);
-    if (staffData) {
+    // Guard against unexpected API responses (e.g., object instead of array)
+    if (Array.isArray(staffData)) {
       setStaff(staffData);
+    } else {
+      setStaff([]);
     }
   }, [staffData]);
   return (

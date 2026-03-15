@@ -7,7 +7,8 @@ import { ChevronDown } from "lucide-react";
 
 export function TeamGrid({staff}: {staff: any[]}) {
   const [showAll, setShowAll] = useState(false);
-  const displayedMembers = showAll ? staff : staff.slice(0, 6);
+  const members = Array.isArray(staff) ? staff : [];
+  const displayedMembers = showAll ? members : members.slice(0, 6);
 
   return (
     <section className="py-20 px-4">
@@ -22,7 +23,7 @@ export function TeamGrid({staff}: {staff: any[]}) {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {staff.map((member, index) => (
+          {members.map((member, index) => (
             <motion.div
               key={member.id}
               initial={{ opacity: 0, y: 20 }}
@@ -69,7 +70,7 @@ export function TeamGrid({staff}: {staff: any[]}) {
               size="lg"
               className="gap-2"
             >
-              View Full Team ({staff.length})
+              View Full Team ({members.length})
               <ChevronDown className="w-4 h-4" />
             </Button>
           </motion.div>
