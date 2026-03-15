@@ -42,6 +42,10 @@ export default function Home() {
       const filteredVisits =
         visitsData?.filter((visit: any) => visit.status === "upcoming") || [];
       setVisits(filteredVisits);
+
+      console.log('====================================');
+      console.log(filteredVisits);
+      console.log('====================================');
       create_UUID();
     }
   }, [visitsData]);

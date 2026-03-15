@@ -9,8 +9,8 @@ import { useQuery } from "@tanstack/react-query";
 export function Navbar() {
   const [location] = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
-  const [blogs, setBlogs] = useState([]);
-  const [visits, setVisits] = useState([]);
+  const [blogs, setBlogs] = useState<any[]>([]);
+  const [visits, setVisits] = useState<any[]>([]);
   const { user, logout } = useAuth();
   const { data: blogData } = useQuery<any>({ queryKey: ["blogs",'all'] });
   const { data: visitsData } = useQuery<any>({ queryKey: ["visits",'all'] });
@@ -23,13 +23,15 @@ export function Navbar() {
     
 
     if (blogData && blogData.length > 0) {
-      const filteredBlogs = blogData?.filter((blog: any) => blog.status === "published");
+      const filteredBlogs = blogData?.filter((blog: any) => blog.status === "published") || [];
       setBlogs(filteredBlogs);
+      
     }
 
     if (visitsData && visitsData.length > 0) {
-      const filteredVisits = visitsData?.filter((visit: any) => visit.status === "upcoming");
+      const filteredVisits = visitsData?.filter((visit: any) => visit.status === "upcoming") || [];
       setVisits(filteredVisits);
+       
     }
 
     return () => window.removeEventListener("scroll", handleScroll);
