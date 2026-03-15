@@ -54,7 +54,7 @@ export default function About() {
         <ValuesGrid />
         <ImpactStats />
         <Timeline />
-        <TeamGrid staff={staff} />
+       { staff.length > 0 && <TeamGrid staff={staff} /> }
         {/* <PartnersGrid /> */}
         <FAQAccordion />
         <ContactInfo />
