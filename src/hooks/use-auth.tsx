@@ -52,6 +52,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
     } catch (err: any) {
       setError(err);
+      console.log('====================================');
+      console.log(err);
+      console.log('====================================');
       toast({
         title: "Login failed",
         description: err.message || String(err),
